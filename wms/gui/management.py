@@ -444,10 +444,12 @@ class Management:
                             pass
                     st.dataframe(df)
                     if st.button("Remove item category"):
-                        if Item.search_all(self.connection) is not None:
-                            st.warning("This item category can't be removed. There is at least an item assigned to it!")
-                        else:
-                            for ICid in selected_ids:
+                        for ICid in selected_ids:
+                            if Item.search_all(self.connection) is not None:
+                                st.warning(f"""
+                                    Item category {ICid} can't be removed. There is at least an item assigned to it!
+                                """)
+                            else:
                                 removed = ItemCategory.delete_by_id(self.connection, ICid)
                                 st.experimental_rerun()
 
@@ -485,11 +487,13 @@ class Management:
                             pass
                     st.dataframe(df)
                     if st.button("Remove shop"):
-                        if Item.search_all(self.connection) is not None:
-                            st.warning("This shop can't be removed. There is at least an item assigned to it!")
-                        else:
-                            for Cid in selected_ids:
-                                removed = Shop.delete_by_id(self.connection, Cid)
+                        for Sid in selected_ids:
+                            if Item.search_by_shop_id(self.connection, Sid) is not None:
+                                st.warning(f"""
+                                    Shop {Sid} can't be removed. There is at least an item assigned to it!
+                            """)
+                            else:
+                                removed = Shop.delete_by_id(self.connection, Sid)
                                 st.experimental_rerun()
 
             elif self.current_option == "Item":
