@@ -32,7 +32,7 @@ def delete_by_id(connection, item_id):
 def search_by_id(connection, item_id=None, show_columns=None):
     cur = connection.cursor()
     columns = ", ".join(show_columns) if show_columns else "*"
-    if item_id is None:
+    if item_id is None or item_id < 0:
         return _get_none(connection, columns)
     return cur.execute(f'''SELECT {columns} FROM Item WHERE itemID = ?''', (item_id,)).fetchall()
 
@@ -50,7 +50,7 @@ def search_by_name(connection, item_name="", show_columns=None):
 def search_by_category_id(connection, category_id=None, show_columns=None):
     cur = connection.cursor()
     columns = ", ".join(show_columns) if show_columns else "*"
-    if category_id is None:
+    if category_id is None or category_id < 0:
         return _get_none(connection, columns)
     return cur.execute(f'''SELECT {columns} FROM Item WHERE categoryID = ?''', (category_id,)).fetchall()
 
@@ -58,7 +58,7 @@ def search_by_category_id(connection, category_id=None, show_columns=None):
 def search_by_shop_id(connection, shop_id=None, show_columns=None):
     cur = connection.cursor()
     columns = ", ".join(show_columns) if show_columns else "*"
-    if shop_id is None:
+    if shop_id is None or shop_id < 0:
         return _get_all(connection, columns)
     return cur.execute(f'''SELECT {columns} FROM Item WHERE shopID = ?''', (shop_id,)).fetchall()
 
@@ -88,12 +88,7 @@ def columns_names(connection):
 def _get_all(connection, columns):
     cur = connection.cursor()
     cur.execute(f'''SELECT {columns} FROM Item''')
-    get_all = None
-    try:
-        get_all = cur.fetchall()
-    except TypeError:
-        pass
-    return get_all
+    return cur.fetchall()
 
 
 def _get_none(connection, columns):

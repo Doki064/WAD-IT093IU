@@ -431,22 +431,23 @@ class Management:
                     st.dataframe(df)
                 with st.beta_expander("Remove item category(s)", expanded=True):
                     if choice == "id":
-                        selected_ids = [category_id]
                         data = ItemCategory.search_by_id(self.connection, category_id)
-                        # df = pd.DataFrame.from_records(data, columns=self.category_columns).loc[
-                        #     df["categoryID"] == category_id]
                     elif choice == "name":
                         selected_ids = st.multiselect("Select category id(s): ", df["categoryID"])
                         data = ItemCategory.search_by_name(self.connection, category_name)
+                    if len(df["categoryID"]) == 1:
+                        selected_ids = df["categoryID"].values
+
                     try:
                         df = pd.concat([pd.DataFrame.from_records(data, columns=self.category_columns).loc[
                                             df["categoryID"] == i] for i in selected_ids], ignore_index=True)
                     except ValueError:
                         pass
                     st.dataframe(df)
+
                     if st.button("Remove item category"):
                         for ICid in selected_ids:
-                            if Item.search_all(self.connection) is not None:
+                            if Item.search_all(self.connection):
                                 st.warning(f"""
                                     Item category {ICid} can't be removed. There is at least an item assigned to it!
                                 """)
@@ -475,22 +476,23 @@ class Management:
                     st.dataframe(df)
                 with st.beta_expander("Remove shop(s)"):
                     if choice == "id":
-                        selected_ids = [shop_id]
                         data = Shop.search_by_id(self.connection, shop_id)
-                        # df = pd.DataFrame.from_records(data, columns=self.shop_columns).loc[
-                        #     df["shopID"] == shop_id]
                     elif choice == "name":
                         selected_ids = st.multiselect("Select shop id(s): ", df["shopID"])
                         data = Shop.search_by_name(self.connection, shop_name)
+
+                    if len(df["shopID"]) == 1:
+                        selected_ids = df["shopID"].values
                     try:
                         df = pd.concat([pd.DataFrame.from_records(data, columns=self.shop_columns).loc[
                                             df["shopID"] == i] for i in selected_ids], ignore_index=True)
                     except ValueError:
                         pass
                     st.dataframe(df)
+
                     if st.button("Remove shop"):
                         for Sid in selected_ids:
-                            if Item.search_by_shop_id(self.connection, Sid) is not None:
+                            if Item.search_by_shop_id(self.connection, Sid):
                                 st.warning(f"""
                                     Shop {Sid} can't be removed. There is at least an item assigned to it!
                             """)

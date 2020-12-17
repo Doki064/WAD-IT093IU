@@ -69,12 +69,7 @@ def columns_names(connection):
 def _get_all(connection, columns):
     cur = connection.cursor()
     cur.execute(f'''SELECT {columns} FROM ItemCategory''')
-    get_all = None
-    try:
-        get_all = cur.fetchall()
-    except TypeError:
-        pass
-    return get_all
+    return cur.fetchall()
 
 
 def _get_none(connection, columns):

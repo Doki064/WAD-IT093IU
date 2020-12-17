@@ -14,16 +14,14 @@ def create_database(db_file, csv_zip=None):
             con = sqlite3.connect(db_file)
             cur = con.cursor()
 
-            cur.execute('''DROP TABLE IF EXISTS Customer''')
-            cur.execute('''CREATE TABLE Customer
+            cur.execute('''CREATE TABLE IF NOT EXISTS Customer
                     (
                       customerID MEDIUMINT NOT NULL CHECK (customerID >= 0),
                       customerName VARCHAR(500) NOT NULL,
                       PRIMARY KEY (customerID)
                     )''')
 
-            cur.execute('''DROP TABLE IF EXISTS ItemCategory''')
-            cur.execute('''CREATE TABLE ItemCategory
+            cur.execute('''CREATE TABLE IF NOT EXISTS ItemCategory
                     (
                       categoryID MEDIUMINT NOT NULL CHECK (categoryID >= 0),
                       categoryName VARCHAR(500) NOT NULL,
@@ -38,16 +36,14 @@ def create_database(db_file, csv_zip=None):
             #   PRIMARY KEY (buyerID)
             # )''')
 
-            cur.execute('''DROP TABLE IF EXISTS Shop''')
-            cur.execute('''CREATE TABLE Shop
+            cur.execute('''CREATE TABLE IF NOT EXISTS Shop
                     (
                       shopID MEDIUMINT NOT NULL CHECK (shopID >= 0),
                       shopName VARCHAR(500) NOT NULL,
                       PRIMARY KEY (shopID)
                     )''')
 
-            cur.execute('''DROP TABLE IF EXISTS Imports''')
-            cur.execute('''CREATE TABLE Imports
+            cur.execute('''CREATE TABLE IF NOT EXISTS Imports
                     (
                       importID MEDIUMINT NOT NULL CHECK (importID >= 0),
                       importDate DATETIME NOT NULL,
@@ -56,8 +52,7 @@ def create_database(db_file, csv_zip=None):
                       FOREIGN KEY (shopID) REFERENCES Shop(shopID)
                     )''')
 
-            cur.execute('''DROP TABLE IF EXISTS Transactions''')
-            cur.execute('''CREATE TABLE Transactions
+            cur.execute('''CREATE TABLE IF NOT EXISTS Transactions
                     (
                       transactionID MEDIUMINT NOT NULL CHECK (transactionID >= 0),
                       transactionDate DATETIME NOT NULL,
@@ -69,8 +64,7 @@ def create_database(db_file, csv_zip=None):
                       FOREIGN KEY (shopID) REFERENCES Shop(shopID)
                     )''')
 
-            cur.execute('''DROP TABLE IF EXISTS Item''')
-            cur.execute('''CREATE TABLE Item
+            cur.execute('''CREATE TABLE IF NOT EXISTS Item
                     (
                       itemID MEDIUMINT NOT NULL CHECK (itemID >= 0),
                       itemName VARCHAR(500) NOT NULL,
@@ -82,8 +76,7 @@ def create_database(db_file, csv_zip=None):
                       FOREIGN KEY (shopID) REFERENCES Shop(shopID)
                     )''')
 
-            cur.execute('''DROP TABLE IF EXISTS TransactionDetail''')
-            cur.execute('''CREATE TABLE TransactionDetail
+            cur.execute('''CREATE TABLE IF NOT EXISTS TransactionDetail
                     (
                       transactionID MEDIUMINT NOT NULL CHECK (transactionID >= 0),
                       itemID MEDIUMINT NOT NULL CHECK (itemID >= 0),
@@ -94,8 +87,7 @@ def create_database(db_file, csv_zip=None):
                       FOREIGN KEY (itemID) REFERENCES Item(itemID)
                     )''')
 
-            cur.execute('''DROP TABLE IF EXISTS ImportDetail''')
-            cur.execute('''CREATE TABLE ImportDetail
+            cur.execute('''CREATE TABLE IF NOT EXISTS ImportDetail
                     (
                       importID MEDIUMINT NOT NULL CHECK (importID >= 0),
                       itemID MEDIUMINT NOT NULL CHECK (itemID >= 0),

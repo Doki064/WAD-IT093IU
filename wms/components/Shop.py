@@ -28,7 +28,7 @@ def delete_by_id(connection, shop_id):
 def search_by_id(connection, shop_id=None, show_columns=None):
     cur = connection.cursor()
     columns = ", ".join(show_columns) if show_columns else "*"
-    if shop_id is None:
+    if shop_id is None or shop_id < 0:
         return _get_none(connection, columns)
     return cur.execute(f'''SELECT {columns} FROM Shop WHERE shopID = ?''', (shop_id,)).fetchall()
 
@@ -68,12 +68,7 @@ def columns_names(connection):
 def _get_all(connection, columns):
     cur = connection.cursor()
     cur.execute(f'''SELECT {columns} FROM Shop''')
-    get_all = None
-    try:
-        get_all = cur.fetchall()
-    except TypeError:
-        pass
-    return get_all
+    return cur.fetchall()
 
 
 def _get_none(connection, columns):
