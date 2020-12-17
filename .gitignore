@@ -3,3 +3,4 @@ WMS.egg-info
 *.png
 *.xml
 *.db
+wms/hello/dummy/.security_key
