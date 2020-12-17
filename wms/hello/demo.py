@@ -30,6 +30,7 @@ def run(**kwargs):
             csv_zip = None
 
         st.set_page_config(page_title="Wholesale Management System", layout="wide")
+        connection = database.create_connection(db_file=database_file, csv_zip=csv_zip)
 
         main_page = gui.MainPage()
         main_page.call()
@@ -82,8 +83,6 @@ def run(**kwargs):
                     st.experimental_rerun()
 
         else:
-            connection = database.create_connection(db_file=database_file, csv_zip=csv_zip)
-
             st.sidebar.header("LOGOUT SECTION")
             st.sidebar.write(f"*Current session ID: {state.get_id()}*")
             state.logout_key = st.sidebar.text_input("Enter the privileged password: ", type="password",
@@ -95,7 +94,6 @@ def run(**kwargs):
                         sleep(1)
                         st.experimental_rerun()
                 else:
-                    connection.close()
                     state.clear()
 
             menu = gui.Menu(connection)
