@@ -1,3 +1,10 @@
+"""
+Example:
+    >>> from wms.gui._plot import Plot
+    >>> plot = Plot()
+    >>> plot.plot()
+"""
+
 import sqlite3
 from datetime import datetime
 
@@ -5,17 +12,13 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from wms import SessionState
+from wms import sesson_state
 
-session_state = SessionState.get()
+state = sesson_state.get()
 
 
 class Plot:
     """Plot the profit
-
-    Example:
-        >>> plot = Plot()
-        >>> plot.plot()
 
     Attributes:
         df: pandas DataFrame. The sales DF.
@@ -26,9 +29,6 @@ class Plot:
         num_days_to_plot_week: int, default 90.
             If days between start_date and end_date <90, do weekly plot, else monthly plot
         template: string, default "ggplot2". Plotly.express template.
-
-    Arguments:
-        connection (sqlite3.Connection): connection to the database.
     """
 
     def __init__(self, connection):
@@ -66,18 +66,18 @@ class Plot:
                 Please choose the start date and end date. 
                 Please note that start day should be less than end date.
             """)
-            session_state.start_date = datetime.fromordinal(
+            state.start_date = datetime.fromordinal(
                 st.date_input("Start date", value=self.min_date,
                               min_value=self.min_date,
                               max_value=self.max_date,
                               key="start").toordinal())
-            session_state.end_date = datetime.fromordinal(
+            state.end_date = datetime.fromordinal(
                 st.date_input("End date", value=self.max_date,
                               min_value=self.min_date,
                               max_value=self.max_date,
                               key="end").toordinal())
-            session_state.shop_ids = st.multiselect("Select the SHOP ID: ", self.shop_ids,
-                                                    default=session_state.shop_ids)
+            state.shop_ids = st.multiselect("Select the SHOP ID: ", self.shop_ids,
+                                            default=state.shop_ids)
 
         col1, col2 = st.beta_columns(2)
         with col1:
@@ -86,22 +86,22 @@ class Plot:
 
         # Sanity check start_date and end_date
         try:
-            assert session_state.start_date <= session_state.end_date, "Start date must be before end date."
+            assert state.start_date <= state.end_date, "Start date must be before end date."
         except AssertionError as e:
             st.error(e)
         else:
             # Get days in between
-            days_in_between = session_state.end_date - session_state.start_date
+            days_in_between = state.end_date - state.start_date
 
-            selected_df = _select_df_in_between(self.df, session_state.start_date,
-                                                session_state.end_date,
-                                                session_state.shop_ids).copy()
-            plot_title = " profit of shop {} from {} to {}".format(session_state.shop_ids,
-                                                                   session_state.start_date.date(),
-                                                                   session_state.end_date.date())
+            selected_df = _select_df_in_between(self.df, state.start_date,
+                                                state.end_date,
+                                                state.shop_ids).copy()
+            plot_title = " profit of shop {} from {} to {}".format(state.shop_ids,
+                                                                   state.start_date.date(),
+                                                                   state.end_date.date())
             with col2:
                 with st.beta_expander("Show chart"):
-                    if not session_state.shop_ids:
+                    if not state.shop_ids:
                         st.warning("Please choose at least one shop id first.")
                         fig = px.line(title="A beautiful blank chart", template=self.template)
                     elif days_in_between.days <= self.num_days_to_plot_week:

@@ -1,3 +1,10 @@
+"""
+Example:
+    >>> from wms.gui._table import Table
+    >>> table = Table()
+    >>> table.show_dataframe() # Show options and the selected DataFrame
+"""
+
 import io
 import sqlite3
 
@@ -7,9 +14,9 @@ import pandas_profiling as pp
 import streamlit as st
 import streamlit.components.v1 as components
 
-from wms import SessionState
+from wms import sesson_state
 
-session_state = SessionState.get()
+state = sesson_state.get()
 
 
 class Table:
@@ -25,17 +32,12 @@ class Table:
         select_box: streamlit container. A select box to ask admin which DataFrame to display.
         dataframe: streamlit container. A container to display the DataFrame.
         text: string. The instruction for admin.
-        data_path: string (as path). The relative path to the data directory.
         profile_report: Pandas Profiling ProfileReport. The Pandas Profiling ProfileReport \
             that will be displayed as HTML.
-
-    Example usage:
-    table = Table()
-    table.show_dataframe() => Show options and the selected DataFrame.
-
     """
 
     def __init__(self, connection):
+        """Initializes Table instance."""
         self.connection = connection
         self.show_df = None
         self.profile_df = None
@@ -44,7 +46,6 @@ class Table:
         self.dataframe = st.empty()
         self.text = "Choose the DataFrame (table) you want to display. " \
                     "The viewer is limited to {} rows.".format(self.limit_rows)
-        self.data_path = "wms/data/dummy"
         self.profile_report = None
 
     def show_dataframe(self, minimal=True):
@@ -71,6 +72,7 @@ class Table:
                 # Show HiPlot
                 xp = hip.Experiment.from_dataframe(self.show_df)
                 xp.display_st(key="hip")
+
             with col2:
                 # Show Pandas Profile Report
                 self.profile_report = pp.ProfileReport(self.profile_df, minimal=minimal, progress_bar=False)
@@ -80,4 +82,5 @@ class Table:
 
 @st.cache(persist=True, show_spinner=False, max_entries=10, hash_funcs={sqlite3.Connection: id}, ttl=300)
 def _load_df(table, connection):
+    """Caches the pandas dataframe with Streamlit."""
     return pd.read_sql(f'''SELECT * FROM {table}''', connection)
