@@ -447,7 +447,7 @@ class Management:
 
                     if st.button("Remove item category"):
                         for ICid in selected_ids:
-                            if Item.search_all(self.connection):
+                            if Item.search_by_category_id(self.connection, ICid):
                                 st.warning(f"""
                                     Item category {ICid} can't be removed. There is at least an item assigned to it!
                                 """)
