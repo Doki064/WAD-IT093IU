@@ -1,1 +1,4 @@
-from wms.encryption.hash_password import hash_password
+from wms.encryption import encryption
+
+hash_password = encryption.hash_password
+check_password = encryption.check_password

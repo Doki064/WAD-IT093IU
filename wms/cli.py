@@ -10,7 +10,7 @@ from wms.hello import demo
 
 OUTPUT_DIR = os.path.expanduser(os.path.join("~", ".wms"))
 DATABASE_DIR = os.path.join(OUTPUT_DIR, "database")
-ENCRYPTION_KEY = os.path.join(OUTPUT_DIR, ".encryption")
+SECURITY_KEY = os.path.join(OUTPUT_DIR, ".encryption_key")
 DATABASE_FILE = os.path.join(DATABASE_DIR, "WMS.db")
 
 
@@ -26,8 +26,8 @@ def _create_output_dir():
         else:
             check = True
 
-    if not os.path.exists(ENCRYPTION_KEY):
-        encryption.hash_password(encryption_file=ENCRYPTION_KEY)
+    if not os.path.exists(SECURITY_KEY):
+        encryption.encryption(SECURITY_KEY)
         check = True
 
     return check
@@ -55,7 +55,7 @@ def main(ctx, set_password):
         if password == "python":
             if click.confirm("Continue with the default password?", default=True, abort=True):
                 pass
-        encryption.hash_password(password, encryption_file=ENCRYPTION_KEY)
+        encryption.encryption(password, SECURITY_KEY)
 
 
 @main.command("hello")
