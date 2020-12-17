@@ -431,7 +431,7 @@ class Management:
                     st.dataframe(df)
                 with st.beta_expander("Remove item category(s)", expanded=True):
                     if choice == "id":
-                        selected_ids = list(category_id)
+                        selected_ids = [category_id]
                         data = ItemCategory.search_by_id(self.connection, category_id)
                         # df = pd.DataFrame.from_records(data, columns=self.category_columns).loc[
                         #     df["categoryID"] == category_id]
@@ -475,7 +475,7 @@ class Management:
                     st.dataframe(df)
                 with st.beta_expander("Remove shop(s)"):
                     if choice == "id":
-                        selected_ids = list(shop_id)
+                        selected_ids = [shop_id]
                         data = Shop.search_by_id(self.connection, shop_id)
                         # df = pd.DataFrame.from_records(data, columns=self.shop_columns).loc[
                         #     df["shopID"] == shop_id]
