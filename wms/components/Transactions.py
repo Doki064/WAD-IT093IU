@@ -26,14 +26,6 @@ def insert(connection, transaction_id, transaction_date, transaction_status, cus
     return cur.lastrowid
 
 
-def delete_by_id(connection, transaction_id):
-    cur = connection.cursor()
-    removed = cur.execute('''SELECT * FROM Transactions WHERE transactionID = ?''', (transaction_id,))
-    cur.execute('''DELETE FROM Transactions WHERE transactionID = ?''', (transaction_id,))
-    connection.commit()
-    return removed.fetchall()
-
-
 def search_by_id(connection, transaction_id=None, show_columns=None):
     cur = connection.cursor()
     columns = ", ".join(show_columns) if show_columns else "*"

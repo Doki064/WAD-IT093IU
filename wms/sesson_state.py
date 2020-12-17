@@ -2,24 +2,21 @@
 
 Works for Streamlit >= v0.65
 
-Usage
------
+Example:
+    >>> from wms import sesson_state
+    >>>
+    >>> state = sesson_state.get(user_name='', favorite_color='black')
+    >>> state.user_name
+    ''
+    >>> state.user_name = 'Mary'
+    >>> state.favorite_color
+    'black'
 
->>> from wms import SessionState
->>>
->>> session_state = SessionState.get(user_name='', favorite_color='black')
->>> session_state.user_name
-''
->>> session_state.user_name = 'Mary'
->>> session_state.favorite_color
-'black'
+    # Since you set user_name above, next time your script runs this will be the result:
 
-Since you set user_name above, next time your script runs this will be the
-result:
->>> session_state = get(user_name='', favorite_color='black')
->>> session_state.user_name
-'Mary'
-
+    >>> state = sesson_state.get(user_name='', favorite_color='black')
+    >>> state.user_name
+    'Mary'
 """
 
 from streamlit.hashing import _CodeHasher
@@ -40,8 +37,7 @@ class _SessionState:
             "session": session,
             "session_id": id(session),
         }
-        for key, value in kwargs.items():
-            self.__setattr__(key, value)
+        self.__call__(**kwargs)
 
     def __call__(self, **kwargs):
         """Initialize state data once."""
@@ -66,7 +62,11 @@ class _SessionState:
         self._state["data"][key] = value
 
     def get_id(self):
+        """Return session id."""
         return self._state["session_id"]
+
+    def remove(self, key):
+        return self._state["data"].pop(key, None)
 
     def clear(self):
         """Clear session state and request a rerun."""
@@ -106,17 +106,17 @@ def get(hash_funcs=None, **kwargs):
 
     Example
     -------
-    >>> session_state = get(user_name="", favorite_color="black")
-    >>> session_state.user_name
+    >>> state = get(user_name="", favorite_color="black")
+    >>> state.user_name
     ''
-    >>> session_state.user_name = "Mary"
-    >>> session_state.favorite_color
+    >>> state.user_name = "Mary"
+    >>> state.favorite_color
     'black'
 
     Since you set user_name above, next time your script runs this will be the
     result:
-    >>> session_state = get(user_name='', favorite_color="black")
-    >>> session_state.user_name
+    >>> state = get(user_name='', favorite_color="black")
+    >>> state.user_name
     'Mary'
 
     """

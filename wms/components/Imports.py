@@ -19,19 +19,11 @@ def insert(connection, import_id, import_date, shop_id):
     return cur.lastrowid
 
 
-def delete_by_id(connection, import_id):
-    cur = connection.cursor()
-    removed = cur.execute('''SELECT * FROM Imports WHERE importID = ?''', (import_id,))
-    cur.execute('''DELETE FROM Imports WHERE importID = ?''', (import_id,))
-    connection.commit()
-    return removed.fetchall()
-
-
 def search_by_id(connection, import_id=None, show_columns=None):
     cur = connection.cursor()
     columns = ", ".join(show_columns) if show_columns else "*"
     if import_id is None:
-        return _get_all(connection, columns)
+        return _get_none(connection, columns)
     return cur.execute(f'''SELECT {columns} FROM Imports WHERE importID = ?''', (import_id,)).fetchall()
 
 

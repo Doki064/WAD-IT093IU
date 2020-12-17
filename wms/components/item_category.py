@@ -19,10 +19,8 @@ def insert(connection, category_id, category_name):
 
 def delete_by_id(connection, category_id):
     cur = connection.cursor()
-    removed = cur.execute('''SELECT * FROM ItemCategory WHERE categoryID = ?''', (category_id,))
     cur.execute('''DELETE FROM ItemCategory WHERE categoryID = ?''', (category_id,))
     connection.commit()
-    return removed.fetchall()
 
 
 def search_by_id(connection, category_id=None, show_columns=None):

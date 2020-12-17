@@ -1,9 +1,9 @@
 from wms.components import \
-    Customer, \
-    Item, \
-    ItemCategory, \
-    Imports, \
-    ImportDetail, \
-    Shop, \
-    Transactions, \
-    TransactionDetail
+    customer, \
+    item, \
+    item_category, \
+    imports, \
+    import_detail, \
+    shop, \
+    transactions, \
+    transaction_detail
