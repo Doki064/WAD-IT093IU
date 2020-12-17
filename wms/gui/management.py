@@ -19,7 +19,9 @@ class Management:
         try:
             self.tables.remove("ImportDetail")
             self.tables.remove("TransactionDetail")
-        except AttributeError:
+        except AttributeError as e:
+            print(e)
+        except ValueError:
             pass
         self.customer_columns = Customer.columns_names(self.connection)
         self.shop_columns = Shop.columns_names(self.connection)
@@ -365,8 +367,15 @@ class Management:
                         st.dataframe(pd.DataFrame.from_records(data, columns=self.item_columns))
 
     def show_remove(self):
+        tables_for_remove = self.tables.copy()
+        try:
+            tables_for_remove.remove("Imports")
+            tables_for_remove.remove("Transactions")
+        except ValueError:
+            pass
+
         with st.beta_container():
-            self.current_option = st.selectbox("Select table to remove: ", self.tables)
+            self.current_option = st.selectbox("Select table to remove: ", tables_for_remove)
 
             if self.current_option == "Customer":
                 st.info("""
@@ -402,7 +411,6 @@ class Management:
                     if st.button("Remove customer"):
                         for Cid in selected_ids:
                             removed = Customer.delete_by_id(self.connection, Cid)
-                            print(removed)
                             st.experimental_rerun()
 
             elif self.current_option == "ItemCategory":
@@ -435,11 +443,13 @@ class Management:
                         except ValueError:
                             pass
                     st.dataframe(df)
-                    if st.button("Remove customer"):
-                        for ICid in selected_ids:
-                            removed = ItemCategory.delete_by_id(self.connection, ICid)
-                            print(removed)
-                            st.experimental_rerun()
+                    if st.button("Remove item category"):
+                        if Item.search_all(self.connection) is not None:
+                            st.warning("This item category can't be removed. There is at least an item assigned to it!")
+                        else:
+                            for ICid in selected_ids:
+                                removed = ItemCategory.delete_by_id(self.connection, ICid)
+                                st.experimental_rerun()
 
             elif self.current_option == "Buyer":
                 pass
@@ -474,25 +484,19 @@ class Management:
                         except ValueError:
                             pass
                     st.dataframe(df)
-                    if st.button("Remove customer"):
-                        for Cid in selected_ids:
-                            removed = Shop.delete_by_id(self.connection, Cid)
-                            print(removed)
-                            st.experimental_rerun()
-
-            elif self.current_option == "Imports":
-                st.warning("Not yet implemented.")
-                st.stop()
-
-            elif self.current_option == "Transactions":
-                st.warning("Not yet implemented.")
-                st.stop()
+                    if st.button("Remove shop"):
+                        if Item.search_all(self.connection) is not None:
+                            st.warning("This shop can't be removed. There is at least an item assigned to it!")
+                        else:
+                            for Cid in selected_ids:
+                                removed = Shop.delete_by_id(self.connection, Cid)
+                                st.experimental_rerun()
 
             elif self.current_option == "Item":
                 st.warning("Not yet implemented.")
                 st.stop()
 
-    def export_data(self, export_path):
+    def _export_data(self, export_path):
         import os
         import csv
 

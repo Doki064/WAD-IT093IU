@@ -63,6 +63,10 @@ def search_by_shop_id(connection, shop_id=None, show_columns=None):
     return cur.execute(f'''SELECT {columns} FROM Item WHERE shopID = ?''', (shop_id,)).fetchall()
 
 
+def search_all(connection):
+    return _get_all(connection, "*")
+
+
 def max_id(connection):
     cur = connection.cursor()
     cur.execute('''SELECT MAX (itemID) FROM Item''')
@@ -84,7 +88,12 @@ def columns_names(connection):
 def _get_all(connection, columns):
     cur = connection.cursor()
     cur.execute(f'''SELECT {columns} FROM Item''')
-    return cur.fetchall()
+    get_all = None
+    try:
+        get_all = cur.fetchall()
+    except TypeError:
+        pass
+    return get_all
 
 
 def _get_none(connection, columns):
