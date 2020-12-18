@@ -4,7 +4,6 @@ import sys
 
 
 def create_database(db_file, csv_zip=None):
-
     if not os.path.exists(db_file):
         with open(db_file, 'x'):
             pass
@@ -133,6 +132,6 @@ def create_connection(db_file, csv_zip):
     connection = None
     try:
         connection = sqlite3.connect(db_file)
-    except sqlite3.Error as err:
-        print(err)
+    except sqlite3.Error as e:
+        print(e)
     return connection

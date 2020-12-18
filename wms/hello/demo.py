@@ -3,7 +3,6 @@ from time import sleep
 
 import streamlit as st
 
-import wms
 from wms import cli
 from wms import database
 from wms import encryption
@@ -20,9 +19,10 @@ def run(**kwargs):
     state = sesson_state.get()
 
     if kwargs.get("demo") is True:
-        security_key = os.path.join(os.path.dirname(wms.__file__), "hello/dummy/.security_key")
-        database_file = os.path.join(os.path.dirname(wms.__file__), "hello/dummy/wms.db")
-        csv_zip = os.path.join(os.path.dirname(wms.__file__), "hello/dummy/dummy_data.zip")
+        dirname = os.path.dirname(__file__)
+        security_key = os.path.join(dirname, "dummy", ".security_key")
+        database_file = os.path.join(dirname, "dummy" "wms.db")
+        csv_zip = os.path.join(dirname, "dummy", "dummy_data.zip")
     else:
         security_key = cli.SECURITY_KEY
         database_file = cli.DATABASE_FILE

@@ -8,9 +8,9 @@ Example:
 import streamlit as st
 
 from wms import sesson_state
-from wms.gui._management import Management
-from wms.gui._plot import Plot
-from wms.gui._table import Table
+from wms.gui._management import Management as _Management
+from wms.gui._plot import Plot as _Plot
+from wms.gui._table import Table as _Table
 
 state = sesson_state.get()
 
@@ -32,9 +32,9 @@ class Menu:
         """Initialize Menu instance."""
         self.container = st.sidebar.beta_container()
         self.options = ["Search", "Add", "Remove", "View table", "View profit plot"]
-        self.management = Management(connection)
-        self.plot = Plot(connection)
-        self.table = Table(connection)
+        self.management = _Management(connection)
+        self.plot = _Plot(connection)
+        self.table = _Table(connection)
 
     def display_option(self):
         """Display options as select box"""
