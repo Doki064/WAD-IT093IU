@@ -18,13 +18,14 @@ def hash_password(encryption_file: str, password):
         password: The password for the app, which will be hashed, defaults to "python".
 
     Returns:
-        None
+        str: Hashed password.
     """
     hashing = base64.b64encode(
         hmac.new(password.encode(), None, hashlib.sha3_256).digest()
     )
-    with open(encryption_file, "w+b") as f:
-        f.write(ph.hash(hashing).encode())
+    # with open(encryption_file, "w+b") as f:
+    # f.write(ph.hash(hashing).encode())
+    return ph.hash(hashing).encode()
 
 
 def check_password(encryption_file: str, password: str) -> bool:

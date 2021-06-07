@@ -13,6 +13,10 @@ pandas-profiling = ">=2.9.0"
 numpy = "*"
 requests = "*"
 fastapi = "*"
+uvicorn = "*"
+montydb = "*"
+databases = "*"
+sqlalchemy = "*"
 
 [dev-packages]
 black = "==21.5b2"

@@ -5,7 +5,7 @@ import sys
 
 def create_database(db_file, csv_zip=None):
     if not os.path.exists(db_file):
-        with open(db_file, 'x'):
+        with open(db_file, "x"):
             pass
 
         con = None
@@ -13,19 +13,33 @@ def create_database(db_file, csv_zip=None):
             con = sqlite3.connect(db_file)
             cur = con.cursor()
 
-            cur.execute('''CREATE TABLE IF NOT EXISTS Customer
+            cur.execute(
+                """CREATE TABLE IF NOT EXISTS User
+                    (
+                        userID VARCHAR(255) NOT NULL,
+                        username VARCHAR(255) NOT NULL,
+                        password VARCHAR(255) NOT NULL
+                    )
+            """
+            )
+
+            cur.execute(
+                """CREATE TABLE IF NOT EXISTS Customer
                     (
                       customerID MEDIUMINT NOT NULL CHECK (customerID >= 0),
                       customerName VARCHAR(500) NOT NULL,
                       PRIMARY KEY (customerID)
-                    )''')
+                    )"""
+            )
 
-            cur.execute('''CREATE TABLE IF NOT EXISTS ItemCategory
+            cur.execute(
+                """CREATE TABLE IF NOT EXISTS ItemCategory
                     (
                       categoryID MEDIUMINT NOT NULL CHECK (categoryID >= 0),
                       categoryName VARCHAR(500) NOT NULL,
                       PRIMARY KEY (categoryID)
-                    )''')
+                    )"""
+            )
 
             # cur.execute('''DROP TABLE IF EXISTS Buyer''')
             # cur.execute('''CREATE TABLE Buyer
@@ -35,23 +49,28 @@ def create_database(db_file, csv_zip=None):
             #   PRIMARY KEY (buyerID)
             # )''')
 
-            cur.execute('''CREATE TABLE IF NOT EXISTS Shop
+            cur.execute(
+                """CREATE TABLE IF NOT EXISTS Shop
                     (
                       shopID MEDIUMINT NOT NULL CHECK (shopID >= 0),
                       shopName VARCHAR(500) NOT NULL,
                       PRIMARY KEY (shopID)
-                    )''')
+                    )"""
+            )
 
-            cur.execute('''CREATE TABLE IF NOT EXISTS Imports
+            cur.execute(
+                """CREATE TABLE IF NOT EXISTS Imports
                     (
                       importID MEDIUMINT NOT NULL CHECK (importID >= 0),
                       importDate DATETIME NOT NULL,
                       shopID MEDIUMINT NOT NULL CHECK (shopID >= 0),
                       PRIMARY KEY (importID),
                       FOREIGN KEY (shopID) REFERENCES Shop(shopID)
-                    )''')
+                    )"""
+            )
 
-            cur.execute('''CREATE TABLE IF NOT EXISTS Transactions
+            cur.execute(
+                """CREATE TABLE IF NOT EXISTS Transactions
                     (
                       transactionID MEDIUMINT NOT NULL CHECK (transactionID >= 0),
                       transactionDate DATETIME NOT NULL,
@@ -61,9 +80,11 @@ def create_database(db_file, csv_zip=None):
                       PRIMARY KEY (transactionID),
                       FOREIGN KEY (customerID) REFERENCES Customer(customerID),
                       FOREIGN KEY (shopID) REFERENCES Shop(shopID)
-                    )''')
+                    )"""
+            )
 
-            cur.execute('''CREATE TABLE IF NOT EXISTS Item
+            cur.execute(
+                """CREATE TABLE IF NOT EXISTS Item
                     (
                       itemID MEDIUMINT NOT NULL CHECK (itemID >= 0),
                       itemName VARCHAR(500) NOT NULL,
@@ -73,9 +94,11 @@ def create_database(db_file, csv_zip=None):
                       PRIMARY KEY (itemID),
                       FOREIGN KEY (categoryID) REFERENCES ItemCategory(categoryID),
                       FOREIGN KEY (shopID) REFERENCES Shop(shopID)
-                    )''')
+                    )"""
+            )
 
-            cur.execute('''CREATE TABLE IF NOT EXISTS TransactionDetail
+            cur.execute(
+                """CREATE TABLE IF NOT EXISTS TransactionDetail
                     (
                       transactionID MEDIUMINT NOT NULL CHECK (transactionID >= 0),
                       itemID MEDIUMINT NOT NULL CHECK (itemID >= 0),
@@ -84,9 +107,11 @@ def create_database(db_file, csv_zip=None):
                       PRIMARY KEY (transactionID),
                       FOREIGN KEY (transactionID) REFERENCES Transactions(transactionID),
                       FOREIGN KEY (itemID) REFERENCES Item(itemID)
-                    )''')
+                    )"""
+            )
 
-            cur.execute('''CREATE TABLE IF NOT EXISTS ImportDetail
+            cur.execute(
+                """CREATE TABLE IF NOT EXISTS ImportDetail
                     (
                       importID MEDIUMINT NOT NULL CHECK (importID >= 0),
                       itemID MEDIUMINT NOT NULL CHECK (itemID >= 0),
@@ -94,7 +119,8 @@ def create_database(db_file, csv_zip=None):
                       PRIMARY KEY (itemID, importID),
                       FOREIGN KEY (importID) REFERENCES Imports(importID),
                       FOREIGN KEY (itemID) REFERENCES Item(itemID)
-                    )''')
+                    )"""
+            )
 
             con.commit()
             cur.close()
@@ -120,7 +146,9 @@ def _import_from_csv(connection, csv_zip_path):
             for file in csv_files:
                 table_name = os.path.splitext(file)[0]
                 df = pandas.read_csv(zf.open(file), sep=",", skipinitialspace=True)
-                df.to_sql(name=table_name, con=connection, if_exists="append", index=False)
+                df.to_sql(
+                    name=table_name, con=connection, if_exists="append", index=False
+                )
 
     except ValueError as e:
         sys.exit(e)
