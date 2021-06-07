@@ -10,11 +10,13 @@ argon2-cffi = ">=20.1.0"
 plotly = ">=4.13.0"
 hiplot = ">=0.1.20"
 pandas-profiling = ">=2.9.0"
-click= ">=7.1.2"
-numpy = "==1.19.3"
+numpy = "*"
+requests = "*"
+fastapi = "*"
 
 [dev-packages]
-setuptools = "*"
+black = "==21.5b2"
+flake8-bandit = "*"
 
 [requires]
 python_version = "3.8"

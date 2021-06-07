@@ -7,10 +7,11 @@ import argon2
 ph = argon2.PasswordHasher()
 
 
-def hash_password(encryption_file: str, password: str = "python"):
+def hash_password(encryption_file: str, password):
     """Hash password function.
 
-    The password is hashed with Argon2, after that it is stored in a file to verify in the login process.
+    The password is hashed with Argon2,
+    after that it is stored in a file to verify in the login process.
 
     Args:
         encryption_file: Path to the file storing the encrypted security key.
@@ -19,8 +20,9 @@ def hash_password(encryption_file: str, password: str = "python"):
     Returns:
         None
     """
-
-    hashing = base64.b64encode(hmac.new(password.encode(), None, hashlib.sha3_256).digest())
+    hashing = base64.b64encode(
+        hmac.new(password.encode(), None, hashlib.sha3_256).digest()
+    )
     with open(encryption_file, "w+b") as f:
         f.write(ph.hash(hashing).encode())
 
@@ -28,7 +30,8 @@ def hash_password(encryption_file: str, password: str = "python"):
 def check_password(encryption_file: str, password: str) -> bool:
     """Check password function, rehash password if needed.
 
-    Argon2 will verify whether the password matches the encrypted key, and rehash the password if necessary.
+    Argon2 will verify whether the password matches the encrypted key,
+    and rehash the password if necessary.
 
     Args:
         encryption_file: Path to the file storing the encrypted security key.
@@ -37,8 +40,9 @@ def check_password(encryption_file: str, password: str) -> bool:
     Returns:
         True if password matches, else False.
     """
-
-    hashing = base64.b64encode(hmac.new(password.encode(), None, hashlib.sha3_256).digest())
+    hashing = base64.b64encode(
+        hmac.new(password.encode(), None, hashlib.sha3_256).digest()
+    )
     try:
         with open(encryption_file, "r+b") as f:
             hashed = f.read().decode()
