@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from sqlalchemy.sql import functions
 from sqlalchemy.orm import Session
 
 from models import Importation
@@ -16,17 +15,18 @@ def create(db: Session, importation: ImportationCreate, shop_uid: int):
 
 
 def get_by_uid(db: Session, importation_uid: int):
-    return db.query(Importation).filter(Importation.uid == importation_uid).first()
+    return db.query(Importation).filter(
+        Importation.uid == importation_uid).first()
 
 
 def get_by_date(db: Session, date: datetime):
-    return db.query(Importation).filter(Importation.date == date).limit(100).all()
+    return db.query(Importation).filter(
+        Importation.date == datetime.strftime(date)).limit(100).all()
 
 
 def get_by_shop(db: Session, shop_uid: int):
-    return (
-        db.query(Importation).filter(Importation.shop_uid == shop_uid).limit(100).all()
-    )
+    return db.query(Importation).filter(
+        Importation.shop_uid == shop_uid).limit(100).all()
 
 
 def get_all(db: Session, skip: int = 0, limit: int = 100):
@@ -34,11 +34,19 @@ def get_all(db: Session, skip: int = 0, limit: int = 100):
 
 
 def get_min_date(db: Session):
-    return db.query(Importation).filter(functions.min(Importation.date)).first().date
+    date = db.query(Importation.date).order_by(Importation.date.asc()).scalar()
+    if date is None:
+        return None
+    date = datetime.strptime(str(date), "%Y-%m-%d")
+    return date
 
 
 def get_max_date(db: Session):
-    return db.query(Importation).filter(functions.max(Importation.date)).first().date
+    date = db.query(Importation.date).order_by(Importation.date.desc()).scalar()
+    if date is None:
+        return None
+    date = datetime.strptime(str(date), "%Y-%m-%d")
+    return date
 
 
 # def max_id(connection):
