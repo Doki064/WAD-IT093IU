@@ -1,11 +1,10 @@
-from database.config import SessionLocal
+# from database.config import SessionLocal as _SessionLocal
 
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    except Exception:
-        db.rollback()
-    finally:
-        db.close()
+# def get_db():
+#     db = _SessionLocal()
+#     try:
+#         yield db
+#     except Exception:
+#         db.rollback()
+#     finally:
+#         db.close()
