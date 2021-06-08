@@ -21,7 +21,8 @@ def get_by_name(db: Session, name: str):
 
 
 def get_by_category(db: Session, category_uid: int):
-    return db.query(Item).filter(Item.category_uid == category_uid).limit(100).all()
+    return db.query(Item).filter(
+        Item.category_uid == category_uid).limit(100).all()
 
 
 def get_by_shop(db: Session, shop_uid: int):
@@ -36,7 +37,6 @@ def get_all(db: Session, skip: int = 0, limit: int = 100):
 #     cur = connection.cursor()
 #     cur.execute("""DELETE FROM Item WHERE itemID = ?""", (item_id,))
 #     connection.commit()
-
 
 # def max_id(connection):
 #     cur = connection.cursor()

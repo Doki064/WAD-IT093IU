@@ -29,7 +29,6 @@ def get_all(db: Session, skip: int = 0, limit: int = 100):
 #     cur.execute('''DELETE FROM Shop WHERE shopID = ?''', (shop_id,))
 #     connection.commit()
 
-
 # def max_id(connection):
 #     cur = connection.cursor()
 #     cur.execute('''SELECT MAX (shopID) FROM Shop''')

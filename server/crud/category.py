@@ -26,9 +26,9 @@ def get_all(db: Session, skip: int = 0, limit: int = 100):
 
 # def delete_by_id(connection, category_id):
 #     cur = connection.cursor()
-#     cur.execute('''DELETE FROM ItemCategory WHERE categoryID = ?''', (category_id,))
+#     cur.execute('''DELETE FROM ItemCategory WHERE categoryID = ?''',
+#                 (category_id,))
 #     connection.commit()
-
 
 # def max_id(connection):
 #     cur = connection.cursor()
