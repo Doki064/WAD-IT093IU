@@ -176,11 +176,11 @@ class UserBase(_BaseModel):
 
 class UserCreate(UserBase):
     password: str
-    salt: str
 
 
 class User(UserBase):
     uid: int
+    salt: str
 
     class Config:
         orm_mode = True

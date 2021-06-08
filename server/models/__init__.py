@@ -22,7 +22,7 @@ class User(Base):
     uid = Column(Integer, primary_key=True, index=True)
     username = Column(String(100), unique=True, index=True, nullable=False)
     hashed_password = Column(String(100), nullable=False)
-    salt: Column(String(100), nullable=False)
+    salt = Column(String(100), nullable=False)
 
 
 class Customer(Base):
@@ -32,6 +32,7 @@ class Customer(Base):
     name = Column(String(100), unique=True, index=True, nullable=False)
 
     transactions = relationship("Transaction", back_populates="customer")
+    # primaryjoin="Customer.uid==Transaction.customer_uid")
 
 
 class Category(Base):
@@ -40,7 +41,8 @@ class Category(Base):
     uid = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), unique=True, index=True, nullable=False)
 
-    items = relationship("Category", back_populates="category")
+    items = relationship("Item", back_populates="category")
+    #                      primaryjoin="Category.uid==Item.category_uid")
 
 
 class Item(Base):
@@ -100,7 +102,7 @@ class ImportDetail(Base):
     item_amount = Column(Integer, CheckConstraint("item_amount > 0"))
 
     importation = relationship("Importation", back_populates="importation_details")
-    item = relationship("Item")
+    item = relationship("Item", foreign_keys=item_uid)
 
 
 class TransactDetail(Base):
@@ -112,4 +114,4 @@ class TransactDetail(Base):
     item_amount = Column(Integer, CheckConstraint("item_amount > 0"))
 
     transaction = relationship("Transaction", back_populates="transaction_details")
-    item = relationship("Item")
+    item = relationship("Item", foreign_keys=item_uid)
