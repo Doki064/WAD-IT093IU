@@ -15,25 +15,15 @@ def create(db: Session, user: UserCreate):
 
 
 def get_by_uid(db: Session, user_uid: int):
-<<<<<<< HEAD
-    return db.query(User).filter(User.id == user_uid).first()
-
-
-def get_by_username(db: Session, username: str):
-    return db.query(User).filter(User.email == username).first()
-=======
     return db.query(User).filter(User.uid == user_uid).first()
 
 
 def get_by_username(db: Session, username: str):
     return db.query(User).filter(User.username == username).first()
->>>>>>> Add CRUD methods
 
 
 def get_all(db: Session, skip: int = 0, limit: int = 100):
     return db.query(User).offset(skip).limit(limit).all()
-<<<<<<< HEAD
-=======
 
 
 def update_password(db: Session, user_uid: int, hashed_password: str):
@@ -42,4 +32,3 @@ def update_password(db: Session, user_uid: int, hashed_password: str):
     db.commit()
     db.refresh(db_user)
     return db_user
->>>>>>> Add CRUD methods
