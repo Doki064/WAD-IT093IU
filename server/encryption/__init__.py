@@ -7,6 +7,10 @@ import argon2
 ph = argon2.PasswordHasher()
 
 
+class NeedRehashException(Exception):
+    pass
+
+
 def hash_password(password: str) -> str:
     """Hash password function.
 
@@ -43,6 +47,8 @@ def check_password(hashed_password: str, password: str) -> bool:
     )
     try:
         ph.verify(hashed_password, hashing)
+        if ph.check_needs_rehash(hashed_password):
+            raise NeedRehashException
     except argon2.exceptions.VerifyMismatchError:
         return False
     return True
