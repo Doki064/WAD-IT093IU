@@ -42,6 +42,9 @@ def check_password(hashed_password: str, password: str, salt: bytes) -> bool:
 
     Returns:
         True if password matches, else False.
+
+    Raises:
+        NeedRehashException: Exception raised when password needs to be rehashed.
     """
     signature = base64.b64encode(
         hmac.new(password.encode(), salt, hashlib.sha3_256).digest())
