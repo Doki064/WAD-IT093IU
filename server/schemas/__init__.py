@@ -177,6 +177,7 @@ class UserBase(_BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    salt: str
 
 
 class User(UserBase):
