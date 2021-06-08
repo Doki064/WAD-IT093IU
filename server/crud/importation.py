@@ -15,8 +15,7 @@ def create(db: Session, importation: ImportationCreate, shop_uid: int):
 
 
 def get_by_uid(db: Session, importation_uid: int):
-    return db.query(Importation).filter(
-        Importation.uid == importation_uid).first()
+    return db.query(Importation).filter(Importation.uid == importation_uid).first()
 
 
 def get_by_date(db: Session, date: datetime):
@@ -25,8 +24,7 @@ def get_by_date(db: Session, date: datetime):
 
 
 def get_by_shop(db: Session, shop_uid: int):
-    return db.query(Importation).filter(
-        Importation.shop_uid == shop_uid).limit(100).all()
+    return db.query(Importation).filter(Importation.shop_uid == shop_uid).limit(100).all()
 
 
 def get_all(db: Session, skip: int = 0, limit: int = 100):

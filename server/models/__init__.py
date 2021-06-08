@@ -10,8 +10,7 @@ __all__ = [
     "TransactDetail",
 ]
 
-from sqlalchemy import (Column, ForeignKey, CheckConstraint, Integer, Float,
-                        String)
+from sqlalchemy import (Column, ForeignKey, CheckConstraint, Integer, Float, String)
 from sqlalchemy.orm import relationship
 
 from database.config import Base
@@ -75,8 +74,7 @@ class Importation(Base):
     date = Column(String(100), index=True, nullable=False)
     shop_uid = Column(Integer, ForeignKey("shops.uid"))
 
-    importation_details = relationship("ImportDetail",
-                                       back_populates="importation")
+    importation_details = relationship("ImportDetail", back_populates="importation")
     shop = relationship("Shop", back_populates="importations")
 
 
@@ -89,8 +87,7 @@ class Transaction(Base):
     customer_uid = Column(Integer, ForeignKey("customers.uid"))
     shop_uid = Column(Integer, ForeignKey("shops.uid"))
 
-    transaction_details = relationship("TransactDetail",
-                                       back_populates="transaction")
+    transaction_details = relationship("TransactDetail", back_populates="transaction")
     customer = relationship("Customer", back_populates="transactions")
     shop = relationship("Shop", back_populates="transactions")
 
@@ -98,27 +95,21 @@ class Transaction(Base):
 class ImportDetail(Base):
     __tablename__ = "importation_details"
 
-    importation_uid = Column(Integer,
-                             ForeignKey("importations.uid"),
-                             primary_key=True)
+    importation_uid = Column(Integer, ForeignKey("importations.uid"), primary_key=True)
     item_uid = Column(Integer, ForeignKey("items.uid"), primary_key=True)
     item_amount = Column(Integer, CheckConstraint("item_amount > 0"))
 
-    importation = relationship("Importation",
-                               back_populates="importation_details")
+    importation = relationship("Importation", back_populates="importation_details")
     item = relationship("Item")
 
 
 class TransactDetail(Base):
     __tablename__ = "transaction_details"
 
-    transaction_uid = Column(Integer,
-                             ForeignKey("transactions.uid"),
-                             primary_key=True)
+    transaction_uid = Column(Integer, ForeignKey("transactions.uid"), primary_key=True)
     item_uid = Column(Integer, ForeignKey("items.uid"), primary_key=True)
     item_price = Column(Float, nullable=False)
     item_amount = Column(Integer, CheckConstraint("item_amount > 0"))
 
-    transaction = relationship("Transaction",
-                               back_populates="transaction_details")
+    transaction = relationship("Transaction", back_populates="transaction_details")
     item = relationship("Item")

@@ -21,8 +21,7 @@ def get_by_name(db: Session, name: str):
 
 
 def get_by_category(db: Session, category_uid: int):
-    return db.query(Item).filter(
-        Item.category_uid == category_uid).limit(100).all()
+    return db.query(Item).filter(Item.category_uid == category_uid).limit(100).all()
 
 
 def get_by_shop(db: Session, shop_uid: int):
