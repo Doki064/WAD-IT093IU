@@ -1,5 +1,5 @@
 """All customer API methods."""
-from typing import List, Optional
+from typing import List
 
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
@@ -25,20 +25,22 @@ def create_customer(customer: CustomerCreate, db: Session = Depends(get_database
     return crud.create(db, customer=customer)
 
 
-@router.get("/", response_model=Customer)
-def read_customer(customer_uid: Optional[int] = None,
-                  customer_name: Optional[str] = None,
-                  db: Session = Depends(get_database)):
-    db_customer = None
-    if customer_uid is not None:
-        db_customer = crud.get_by_uid()(db, customer_uid=customer_uid)
-    elif customer_name is not None:
-        db_customer = crud.get_by_name(db, name=customer_name)
+@router.get("/{customer_uid}", response_model=Customer)
+def read_customer_by_uid(customer_uid: int, db: Session = Depends(get_database)):
+    db_customer = crud.get_by_uid()(db, customer_uid=customer_uid)
     if db_customer is None:
         raise HTTPException(status_code=404, detail="Customer not found")
     return db_customer
 
 
-@router.get("/all/", response_model=List[Customer])
+@router.get("/{customer_name}", response_model=Customer)
+def read_customer_by_name(customer_name: str, db: Session = Depends(get_database)):
+    db_customer = crud.get_by_name(db, name=customer_name)
+    if db_customer is None:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    return db_customer
+
+
+@router.get("/", response_model=List[Customer])
 def read_customers(skip: int = 0, limit: int = 100, db: Session = Depends(get_database)):
     return crud.get_all(db, skip=skip, limit=limit)
