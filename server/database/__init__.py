@@ -1,3 +1,11 @@
-import database.sql as _sql
+from database.config import SessionLocal
 
-create_connection = _sql.create_connection
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    except Exception:
+        db.rollback()
+    finally:
+        db.close()

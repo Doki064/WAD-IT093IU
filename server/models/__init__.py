@@ -22,7 +22,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 
 
-from database import Base
+from database.config import Base
 
 
 class User(Base):
