@@ -3,12 +3,13 @@ from fastapi import FastAPI
 from starlette.responses import RedirectResponse
 
 from database import config
-from routers import users
+import routers
 
 config.create_database()
 
 app = FastAPI(debug=True)
-app.include_router(users.router)
+app.include_router(routers.users.router)
+app.include_router(routers.customers.router)
 
 
 @app.get("/")
