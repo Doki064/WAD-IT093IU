@@ -1,13 +1,18 @@
+import secrets
+
 from sqlalchemy.orm import Session
 
+import encryption
 from models import User
 from schemas import UserCreate
-import encryption
 
 
 def create(db: Session, user: UserCreate):
-    hashed_password = encryption.hashed_password(user.password)
-    db_user = User(username=user.username, hashed_password=hashed_password)
+    salt = secrets.token_bytes(16)
+    hashed_password = encryption.hash_password(user.password, salt)
+    db_user = User(username=user.username,
+                   hashed_password=hashed_password,
+                   salt=salt.hex())
     db.add(db_user)
     db.commit()
     db.refresh(db_user)

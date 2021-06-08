@@ -11,7 +11,7 @@ class NeedRehashException(Exception):
     pass
 
 
-def hash_password(password: str) -> str:
+def hash_password(password: str, salt: bytes) -> str:
     """Hash password function.
 
     The password is hashed with Argon2,
@@ -19,17 +19,17 @@ def hash_password(password: str) -> str:
 
     Args:
         password: The password to be hashed.
+        salt: The salt to strengthen hash.
 
     Returns:
         Hashed password.
     """
-    hashing = base64.b64encode(
-        hmac.new(password.encode(), None, hashlib.sha3_256).digest()
-    )
-    return ph.hash(hashing).encode()
+    signature = base64.b64encode(
+        hmac.new(password.encode(), salt, hashlib.sha3_256).digest())
+    return ph.hash(signature).encode()
 
 
-def check_password(hashed_password: str, password: str) -> bool:
+def check_password(hashed_password: str, password: str, salt: bytes) -> bool:
     """Check password function, rehash password if needed.
 
     Argon2 will verify whether the password matches the encrypted key,
@@ -38,15 +38,15 @@ def check_password(hashed_password: str, password: str) -> bool:
     Args:
         hashed_password: The hashed password stored in the database.
         password: The input password to be checked.
+        salt: The salt stored in the database.
 
     Returns:
         True if password matches, else False.
     """
-    hashing = base64.b64encode(
-        hmac.new(password.encode(), None, hashlib.sha3_256).digest()
-    )
+    signature = base64.b64encode(
+        hmac.new(password.encode(), salt, hashlib.sha3_256).digest())
     try:
-        ph.verify(hashed_password, hashing)
+        ph.verify(hashed_password, signature)
         if ph.check_needs_rehash(hashed_password):
             raise NeedRehashException
     except argon2.exceptions.VerifyMismatchError:

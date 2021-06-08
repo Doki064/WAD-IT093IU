@@ -6,11 +6,12 @@ import database
 import crud.user as crud
 from schemas import User, UserCreate
 
-
 router = APIRouter(
     prefix="/api/users",
     tags=["users"],
-    responses={404: {"description": "Not found"}},
+    responses={404: {
+        "description": "Not found"
+    }},
 )
 
 
@@ -21,7 +22,8 @@ def check_user(username: str, password: str):
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
     try:
-        if not encryption.check_password(db_user.hashed_password, password):
+        salt = bytes.fromhex(db_user.salt)
+        if not encryption.check_password(db_user.hashed_password, password, salt):
             return None
     except encryption.NeedRehashException:
         crud.update_password(db, user_uid=db_user.uid, password=password)
