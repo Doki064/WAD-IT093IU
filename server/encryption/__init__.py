@@ -26,7 +26,7 @@ def hash_password(password: str, salt: bytes) -> str:
     """
     signature = base64.b64encode(
         hmac.new(password.encode(), salt, hashlib.sha3_256).digest())
-    return ph.hash(signature).encode()
+    return ph.hash(signature)
 
 
 def check_password(hashed_password: str, password: str, salt: bytes) -> bool:
