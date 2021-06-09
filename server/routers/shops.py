@@ -1,5 +1,5 @@
 """All shop API methods."""
-from typing import List
+from typing import List, Union, Optional
 
 from fastapi import APIRouter, HTTPException, Depends, Body
 from sqlalchemy.orm import Session
@@ -36,25 +36,25 @@ def create_shop(shop: ShopCreate, db: Session = Depends(get_database)):
     return _shop.create(db, shop=shop)
 
 
+@router.get("/", response_model=Union[Shop, List[Shop]])
+def read_shops(shop_name: Optional[str] = None,
+               skip: int = 0,
+               limit: int = 100,
+               db: Session = Depends(get_database)):
+    if shop_name is not None:
+        db_shop = _shop.get_by_name(db, name=shop_name)
+        if db_shop is None:
+            raise HTTPException(status_code=404, detail="Shop not found")
+        return db_shop
+    return _shop.get_all(db, skip=skip, limit=limit)
+
+
 @router.get("/{shop_uid}", response_model=Shop)
 def read_shop(shop_uid: int, db: Session = Depends(get_database)):
     db_shop = _shop.get_by_uid(db, shop_uid=shop_uid)
     if db_shop is None:
         raise HTTPException(status_code=404, detail="Shop not found")
     return db_shop
-
-
-@router.get("/{shop_name}", response_model=Shop)
-def read_shop_by_name(shop_name: str, db: Session = Depends(get_database)):
-    db_shop = _shop.get_by_name(db, name=shop_name)
-    if db_shop is None:
-        raise HTTPException(status_code=404, detail="Shop not found")
-    return db_shop
-
-
-@router.get("/", response_model=List[Shop])
-def read_shops(skip: int = 0, limit: int = 100, db: Session = Depends(get_database)):
-    return _shop.get_all(db, skip=skip, limit=limit)
 
 
 @router.post("/{shop_uid}/importations/", response_model=Importation)
