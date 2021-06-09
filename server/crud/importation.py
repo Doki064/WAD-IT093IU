@@ -18,9 +18,9 @@ def get_by_uid(db: Session, importation_uid: int):
     return db.query(Importation).filter(Importation.uid == importation_uid).first()
 
 
-def get_by_date(db: Session, date: datetime):
+def get_by_date(db: Session, date: datetime, limit: int = 100):
     return db.query(Importation).filter(
-        Importation.date == datetime.strftime(date)).limit(100).all()
+        Importation.date == datetime.strftime(date)).limit(limit).all()
 
 
 def get_all(db: Session, skip: int = 0, limit: int = 100):
