@@ -32,7 +32,6 @@ class Customer(Base):
     name = Column(String(100), unique=True, index=True, nullable=False)
 
     transactions = relationship("Transaction", back_populates="customer")
-    # primaryjoin="Customer.uid==Transaction.customer_uid")
 
 
 class Category(Base):
@@ -42,7 +41,6 @@ class Category(Base):
     name = Column(String(100), unique=True, index=True, nullable=False)
 
     items = relationship("Item", back_populates="category")
-    #                      primaryjoin="Category.uid==Item.category_uid")
 
 
 class Item(Base):
