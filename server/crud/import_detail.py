@@ -13,8 +13,3 @@ def create(db: Session, importation_detail: ImportationCreate, importation_uid: 
     db.commit()
     db.refresh(db_importation_detail)
     return db_importation_detail
-
-
-def get_by_importation(db: Session, importation_uid: int):
-    return db.query(ImportDetail).filter(
-        ImportDetail.importation_uid == importation_uid).all()

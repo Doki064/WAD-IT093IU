@@ -13,8 +13,3 @@ def create(db: Session, transaction_detail: TransactDetailCreate, transaction_ui
     db.commit()
     db.refresh(db_transaction_detail)
     return db_transaction_detail
-
-
-def get_by_transaction(db: Session, transaction_uid: int):
-    return db.query(TransactDetail).filter(
-        TransactDetail.transaction_uid == transaction_uid).all()
