@@ -31,9 +31,12 @@ def get_all(db: Session, skip: int = 0, limit: int = 100):
     return db.query(User).offset(skip).limit(limit).all()
 
 
-def update_password(db: Session, user_uid: int, hashed_password: str):
+def update_password(db: Session, user_uid: int, password: str):
     db_user = get_by_uid(db, user_uid)
+    salt = secrets.token_bytes(16)
+    hashed_password = encryption.hash_password(password, salt)
     db_user.hashed_password = hashed_password
+    db_user.salt = salt.hex()
     db.commit()
     db.refresh(db_user)
     return db_user

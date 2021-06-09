@@ -180,7 +180,6 @@ class UserCreate(UserBase):
 
 class User(UserBase):
     uid: int
-    salt: str
 
     class Config:
         orm_mode = True
