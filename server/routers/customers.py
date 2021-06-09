@@ -26,7 +26,7 @@ def create_customer(customer: CustomerCreate, db: Session = Depends(get_database
 
 
 @router.get("/{customer_uid}", response_model=Customer)
-def read_customer_by_uid(customer_uid: int, db: Session = Depends(get_database)):
+def read_customer(customer_uid: int, db: Session = Depends(get_database)):
     db_customer = crud.get_by_uid()(db, customer_uid=customer_uid)
     if db_customer is None:
         raise HTTPException(status_code=404, detail="Customer not found")

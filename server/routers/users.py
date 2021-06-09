@@ -41,7 +41,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_database)):
 
 
 @router.get("/{user_uid}", response_model=User)
-def read_user_by_uid(user_uid: int, db: Session = Depends(get_database)):
+def read_user(user_uid: int, db: Session = Depends(get_database)):
     db_user = crud.get_by_uid()(db, user_uid=user_uid)
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
