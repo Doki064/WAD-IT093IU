@@ -29,15 +29,6 @@ def get_by_status(db: Session, status: str):
     return db.query(Transaction).filter(Transaction.status == status).limit(100).all()
 
 
-def get_by_customer(db: Session, customer_uid: int):
-    return db.query(Transaction).filter(
-        Transaction.customer_uid == customer_uid).limit(100).all()
-
-
-def get_by_shop(db: Session, shop_uid: int):
-    return db.query(Transaction).filter(Transaction.shop_uid == shop_uid).limit(100).all()
-
-
 def get_all(db: Session, skip: int = 0, limit: int = 100):
     return db.query(Transaction).offset(skip).limit(limit).all()
 

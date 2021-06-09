@@ -23,10 +23,6 @@ def get_by_date(db: Session, date: datetime):
         Importation.date == datetime.strftime(date)).limit(100).all()
 
 
-def get_by_shop(db: Session, shop_uid: int):
-    return db.query(Importation).filter(Importation.shop_uid == shop_uid).limit(100).all()
-
-
 def get_all(db: Session, skip: int = 0, limit: int = 100):
     return db.query(Importation).offset(skip).limit(limit).all()
 
@@ -45,14 +41,3 @@ def get_max_date(db: Session):
         return None
     date = datetime.strptime(str(date), "%Y-%m-%d")
     return date
-
-
-# def max_id(connection):
-#     cur = connection.cursor()
-#     cur.execute("""SELECT MAX (importID) FROM Imports""")
-#     _id = None
-#     try:
-#         _id = cur.fetchone()[0]
-#     except TypeError:
-#         pass
-#     return _id

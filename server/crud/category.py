@@ -22,20 +22,3 @@ def get_by_name(db: Session, name: str):
 
 def get_all(db: Session, skip: int = 0, limit: int = 100):
     return db.query(Category).offset(skip).limit(limit).all()
-
-
-# def delete_by_id(connection, category_id):
-#     cur = connection.cursor()
-#     cur.execute('''DELETE FROM ItemCategory WHERE categoryID = ?''',
-#                 (category_id,))
-#     connection.commit()
-
-# def max_id(connection):
-#     cur = connection.cursor()
-#     cur.execute('''SELECT MAX (categoryID) FROM ItemCategory''')
-#     _id = None
-#     try:
-#         _id = cur.fetchone()[0]
-#     except TypeError:
-#         pass
-#     return _id
