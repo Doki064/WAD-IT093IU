@@ -20,13 +20,13 @@ def get_by_uid(db: Session, transaction_uid: int):
     return db.query(Transaction).filter(Transaction.uid == transaction_uid).first()
 
 
-def get_by_date(db: Session, date: datetime):
+def get_by_date(db: Session, date: datetime, limit: int = 100):
     return db.query(Transaction).filter(
-        Transaction.date == datetime.strftime(date)).limit(100).all()
+        Transaction.date == datetime.strftime(date)).limit(limit).all()
 
 
-def get_by_status(db: Session, status: str):
-    return db.query(Transaction).filter(Transaction.status == status).limit(100).all()
+def get_by_status(db: Session, status: str, limit: int = 100):
+    return db.query(Transaction).filter(Transaction.status == status).limit(limit).all()
 
 
 def get_all(db: Session, skip: int = 0, limit: int = 100):
@@ -47,14 +47,3 @@ def get_max_date(db: Session):
         return None
     date = datetime.strptime(str(date), "%Y-%m-%d")
     return date
-
-
-# def max_id(connection):
-#     cur = connection.cursor()
-#     cur.execute("""SELECT MAX (transactionID) FROM Transactions""")
-#     _id = None
-#     try:
-#         _id = cur.fetchone()[0]
-#     except TypeError:
-#         pass
-#     return _id
