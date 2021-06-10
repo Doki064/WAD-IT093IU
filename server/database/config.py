@@ -1,12 +1,18 @@
+import os
 import logging
+from pathlib import Path
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
+from dotenv import load_dotenv
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./streamlit_app.db"
+BASE_DIR = Path(__file__).absolute().parents[1]
+load_dotenv(BASE_DIR.joinpath(".env"))
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
+SQLALCHEMY_DATABASE_URL = os.environ["DATABASE_URL"]
+
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 logger = logging.getLogger(__name__)
