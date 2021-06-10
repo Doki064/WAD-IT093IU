@@ -11,14 +11,16 @@ services:
             - POSTGRES_DB=test_db
 
     backend:
-        build:
-            context: .
-            dockerfile: Dockerfile.server
+        container_name: FastAPI
+        build: ./server
         image: backend:test
-        working_dir: /app/backend
-        command: bash -c "alembic upgrade head && uvicorn server.main:app --host 0.0.0.0 --port 8080 --reload"
+        stdin_open: true
+        tty: true
+        working_dir: /app/server
+        command: bash -c "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8080 --reload"
         volumes:
             - .:/app
+            - ./dummy:/var/lib/pgadmin/storage/pgadmin4_pgadmin.org
         ports:
             - "8080:8080"
         depends_on:
