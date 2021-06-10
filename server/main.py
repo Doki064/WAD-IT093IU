@@ -2,12 +2,13 @@ import uvicorn
 from fastapi import FastAPI
 from starlette.responses import RedirectResponse
 
-from database import config
+import database
 import routers
 
-config.create_database()
+database.create_database()
 
-app = FastAPI(debug=True)
+app = FastAPI()
+
 app.include_router(routers.users_router)
 app.include_router(routers.customers_router)
 app.include_router(routers.categories_router)
@@ -28,4 +29,4 @@ def main():
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", reload=True, host="0.0.0.0", port=8000)
+    uvicorn.run("main:app", reload=True, host="0.0.0.0", port=8080)

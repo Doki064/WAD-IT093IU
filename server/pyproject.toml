@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "wad-it093iu-backend"
+version = "0.1.0"
+description = "A simple backend with FastAPI"
+authors = ["Your Name <you@example.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "3.8.*"
+requests = "^2.25.1"
+SQLAlchemy = "^1.4.17"
+argon2-cffi = "^20.1.0"
+fastapi = "^0.65.1"
+uvicorn = "^0.14.0"
+psycopg2 = "^2.8.6"
+alembic = "^1.6.5"
+python-dotenv = "^0.17.1"
+
+[tool.poetry.dev-dependencies]
+yapf = "^0.31.0"
+flake8-bandit = "^2.1.2"
+isort = "^5.8.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
