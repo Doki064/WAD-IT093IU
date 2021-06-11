@@ -2,10 +2,9 @@
 from typing import List
 from datetime import datetime
 
-from fastapi import APIRouter, HTTPException, Depends
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException
 
-from database import get_database
+from database.config import async_session
 from schemas import Importation, ImportDetail
 from crud import importation as _importation
 
@@ -19,29 +18,34 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[Importation])
-def read_importations(skip: int = 0,
-                      limit: int = 100,
-                      db: Session = Depends(get_database)):
-    return _importation.get_all(db, skip=skip, limit=limit)
+async def read_importations(skip: int = 0, limit: int = 100):
+    async with async_session() as session:
+        async with session.begin():
+            return await _importation.get_all(session, skip=skip, limit=limit)
 
 
 @router.get("/date/{date}", response_model=List[Importation])
-def read_importations_by_date(date: datetime,
-                              limit: int = 100,
-                              db: Session = Depends(get_database)):
-    db_importation = _importation.get_by_date(db, date=date, limit=limit)
-    return db_importation
+async def read_importations_by_date(date: datetime, limit: int = 100):
+    async with async_session() as session:
+        async with session.begin():
+            return await _importation.get_by_date(session, date=date, limit=limit)
 
 
 @router.get("/{importation_uid}", response_model=Importation)
-def read_importation(importation_uid: int, db: Session = Depends(get_database)):
-    db_importation = _importation.get_by_uid(db, importation_uid=importation_uid)
-    if db_importation is None:
-        raise HTTPException(status_code=404, detail="Importation not found")
-    return db_importation
+async def read_importation(importation_uid: int):
+    async with async_session() as session:
+        async with session.begin():
+            db_importation = await _importation.get_by_uid(
+                session, importation_uid=importation_uid)
+            if db_importation is None:
+                raise HTTPException(status_code=404, detail="Importation not found")
+            return db_importation
 
 
 @router.get("/{importation_uid}/details/", response_model=List[ImportDetail])
-def read_importation_details(importation_uid: int, db: Session = Depends(get_database)):
-    db_importation = _importation.get_by_uid(db, importation_uid=importation_uid)
-    return db_importation.importation_details
+async def read_importation_details(importation_uid: int):
+    async with async_session() as session:
+        async with session.begin():
+            db_importation = await _importation.get_by_uid(
+                session, importation_uid=importation_uid)
+            return db_importation.importation_details

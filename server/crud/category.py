@@ -1,24 +1,32 @@
+from typing import List
+
+from sqlalchemy.future import select
 from sqlalchemy.orm import Session
 
 from models import Category
 from schemas import CategoryCreate
 
 
-def create(db: Session, category: CategoryCreate):
-    db_category = Category(name=category.name)
+async def create(db: Session, category: CategoryCreate) -> Category:
+    db_category = Category(**category.dict())
     db.add(db_category)
-    db.commit()
-    db.refresh(db_category)
+    await db.commit()
     return db_category
 
 
-def get_by_uid(db: Session, category_uid: int):
-    return db.query(Category).filter(Category.uid == category_uid).first()
+async def get_by_uid(db: Session, category_uid: int) -> Category:
+    q = select(Category).where(Category.uid == category_uid)
+    result = await db.execute(q)
+    return result.scalars().first()
 
 
-def get_by_name(db: Session, name: str):
-    return db.query(Category).filter(Category.name.like(f"%{name}%")).first()
+async def get_by_name(db: Session, name: str) -> Category:
+    q = select(Category).where(Category.name == name)
+    result = await db.execute(q)
+    return result.scalars().first()
 
 
-def get_all(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(Category).offset(skip).limit(limit).all()
+async def get_all(db: Session, skip: int = 0, limit: int = 100) -> List[Category]:
+    q = select(Category).offset(skip).limit(limit)
+    result = await db.execute(q)
+    return result.scalars().all()

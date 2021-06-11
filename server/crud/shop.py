@@ -1,24 +1,32 @@
+from typing import List
+
+from sqlalchemy.future import select
 from sqlalchemy.orm import Session
 
 from models import Shop
 from schemas import ShopCreate
 
 
-def create(db: Session, shop: ShopCreate):
-    db_shop = Shop(name=shop.name)
+async def create(db: Session, shop: ShopCreate) -> Shop:
+    db_shop = Shop(**shop.dict())
     db.add(db_shop)
-    db.commit()
-    db.refresh(db_shop)
+    await db.commit()
     return db_shop
 
 
-def get_by_uid(db: Session, shop_uid: int):
-    return db.query(Shop).filter(Shop.uid == shop_uid).first()
+async def get_by_uid(db: Session, shop_uid: int) -> Shop:
+    q = select(Shop).where(Shop.uid == shop_uid)
+    result = await db.execute(q)
+    return result.scalars().first()
 
 
-def get_by_name(db: Session, name: str):
-    return db.query(Shop).filter(Shop.name.like(f"%{name}%")).first()
+async def get_by_name(db: Session, name: str) -> Shop:
+    q = select(Shop).where(Shop.name == name)
+    result = await db.execute(q)
+    return result.scalars().first()
 
 
-def get_all(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(Shop).offset(skip).limit(limit).all()
+async def get_all(db: Session, skip: int = 0, limit: int = 100) -> List[Shop]:
+    q = select(Shop).offset(skip).limit(limit)
+    result = await db.execute(q)
+    return result.scalars().all()
