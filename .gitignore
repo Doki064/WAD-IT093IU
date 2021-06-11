@@ -140,4 +140,8 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+# Create by Python Development Master
+.pdm.toml
+
+# In-folder database
 *.db
