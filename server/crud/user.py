@@ -13,7 +13,9 @@ from schemas import UserCreate
 async def create(db: Session, user: UserCreate) -> User:
     salt = secrets.token_bytes(16)
     hashed_password = encryption.hash_password(user.password, salt)
-    db_user = User(**user.dict(), hashed_password=hashed_password, salt=salt.hex())
+    db_user = User(username=user.username,
+                   hashed_password=hashed_password,
+                   salt=salt.hex())
     db.add(db_user)
     await db.commit()
     return db_user
