@@ -8,13 +8,10 @@ Example:
 import sqlite3
 from datetime import datetime
 
+import requests
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-
-from wms import sesson_state
-
-state = sesson_state.get()
 
 
 class Plot:
@@ -63,26 +60,29 @@ class Plot:
         with st.beta_container():
             # Options
             st.info("""
-                Please choose the start date and end date. 
+                Please choose the start date and end date.
                 Please note that start day should be less than end date.
             """)
             state.start_date = datetime.fromordinal(
-                st.date_input("Start date", value=self.min_date,
+                st.date_input("Start date",
+                              value=self.min_date,
                               min_value=self.min_date,
                               max_value=self.max_date,
                               key="start").toordinal())
             state.end_date = datetime.fromordinal(
-                st.date_input("End date", value=self.max_date,
+                st.date_input("End date",
+                              value=self.max_date,
                               min_value=self.min_date,
                               max_value=self.max_date,
                               key="end").toordinal())
-            state.shop_ids = st.multiselect("Select the SHOP ID: ", self.shop_ids,
+            state.shop_ids = st.multiselect("Select the SHOP ID: ",
+                                            self.shop_ids,
                                             default=state.shop_ids)
 
         col1, col2 = st.beta_columns(2)
         with col1:
             with st.beta_expander("Show shop"):
-                st.dataframe(self.shop_df)  # Show the sample DF
+                st.dataframe(self.shop_df)    # Show the sample DF
 
         # Sanity check start_date and end_date
         try:
@@ -93,28 +93,34 @@ class Plot:
             # Get days in between
             days_in_between = state.end_date - state.start_date
 
-            selected_df = _select_df_in_between(self.df, state.start_date,
-                                                state.end_date,
+            selected_df = _select_df_in_between(self.df, state.start_date, state.end_date,
                                                 state.shop_ids).copy()
-            plot_title = " profit of shop {} from {} to {}".format(state.shop_ids,
-                                                                   state.start_date.date(),
-                                                                   state.end_date.date())
+            plot_title = " profit of shop {} from {} to {}".format(
+                state.shop_ids, state.start_date.date(), state.end_date.date())
             with col2:
                 with st.beta_expander("Show chart"):
                     if not state.shop_ids:
                         st.warning("Please choose at least one shop id first.")
-                        fig = px.line(title="A beautiful blank chart", template=self.template)
+                        fig = px.line(title="A beautiful blank chart",
+                                      template=self.template)
                     elif days_in_between.days <= self.num_days_to_plot_week:
                         st.info("Plotting profit by week")
                         profit_df = _group_by(selected_df, "W-MON")
                         st.dataframe(profit_df)
-                        fig = px.line(profit_df, x="date", y="profit",
-                                      title="Weekly" + plot_title, template=self.template)  # Plotly line chart
+                        fig = px.line(profit_df,
+                                      x="date",
+                                      y="profit",
+                                      title="Weekly" + plot_title,
+                                      template=self.template)    # Plotly line chart
                     else:
                         st.info("Plotting profit by month")
                         profit_df = _group_by(selected_df, "M")
-                        fig = px.line(profit_df, x="date", y="profit", title="Monthly" + plot_title,
-                                      template=self.template, color="shopID")  # Plotly
+                        fig = px.line(profit_df,
+                                      x="date",
+                                      y="profit",
+                                      title="Monthly" + plot_title,
+                                      template=self.template,
+                                      color="shopID")    # Plotly
                     fig.update_layout(title_x=0.5)
                     st.plotly_chart(fig, use_container_width=True)
 
@@ -122,9 +128,9 @@ class Plot:
 @st.cache(persist=True, show_spinner=False, hash_funcs={sqlite3.Connection: id}, ttl=500)
 def _load_df(connection):
     query = '''
-            SELECT t.transactionDate, t.shopID, td.itemID, td.itemPrice, td.transactionAmount 
-            FROM Transactions t INNER JOIN TransactionDetail td 
-            ON t.transactionID = td.transactionID 
+            SELECT t.transactionDate, t.shopID, td.itemID, td.itemPrice, td.transactionAmount
+            FROM Transactions t INNER JOIN TransactionDetail td
+            ON t.transactionID = td.transactionID
             '''
     df = pd.read_sql_query(query, connection).rename(columns={"transactionDate": "date"})
     df["date"] = pd.to_datetime(df["date"])
@@ -150,11 +156,11 @@ def _select_df_in_between(df, start_date, end_date, shop_ids):
         selected_df: pandas DataFrame. Subset of the DF with the given condition
     """
 
-    selected_df = df[(df["date"].between(start_date, end_date))
-                     & (df["shopID"].isin(shop_ids))]
+    selected_df = df[(df["date"].between(start_date, end_date)) &
+                     (df["shopID"].isin(shop_ids))]
     # selected_df["profit"] = selected_df["itemPrice"] * selected_df["transactionAmount"]
-    selected_df.loc[:, "profit"] = selected_df.loc[:, "itemPrice"].multiply(selected_df.loc[:, "transactionAmount"],
-                                                                            axis="index")
+    selected_df.loc[:, "profit"] = selected_df.loc[:, "itemPrice"].multiply(
+        selected_df.loc[:, "transactionAmount"], axis="index")
     return selected_df
 
 

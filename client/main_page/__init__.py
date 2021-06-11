@@ -17,7 +17,8 @@ class MainPage:
     Attributes:
         title: A Streamlit title of the web.
         header: A Streamlit header of the web.
-        info_field: A Streamlit reserved field, which contains short description of the web.
+        info_field: A Streamlit reserved field,
+            which contains short description of the web.
     """
 
     def __init__(self):
@@ -40,7 +41,7 @@ def intro():
     """Shows intro section."""
     st.markdown("""
         ---\n
-        This is a wholesale management system project for Software Engineering course in 
+        This is a wholesale management system project for Software Engineering course in
         [International University - VNU-HCM](https://hcmiu.edu.vn/en/).\n
         The web application is built with [Streamlit](https://www.streamlit.io/).\n
         Source code is available at [GitHub](https://github.com/minhlong94/SWE_IT076IU).\n

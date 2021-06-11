@@ -7,12 +7,9 @@ Example:
 
 import streamlit as st
 
-from wms import sesson_state
-from wms.gui._management import Management as _Management
-from wms.gui._plot import Plot as _Plot
-from wms.gui._table import Table as _Table
-
-state = sesson_state.get()
+from management import Management as _Management
+from plot import Plot as _Plot
+from table import Table as _Table
 
 
 class Menu:
