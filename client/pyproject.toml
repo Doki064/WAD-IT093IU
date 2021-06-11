@@ -1,0 +1,21 @@
+[project]
+name = ""
+version = ""
+description = ""
+authors = [
+    {name = "Nguyen Nhat Minh", email = "52833936+Doki064@users.noreply.github.com"},
+]
+dependencies = ["streamlit~=0.82", "requests~=2.25", "plotly~=4.14", "hiplot~=0.1", "pandas~=1.2", "pandas-profiling~=3.0"]
+requires-python = ">=3.8,<3.9"
+dynamic = ["classifiers"]
+license = {text = "MIT"}
+
+[project.urls]
+homepage = ""
+
+[build-system]
+requires = ["pdm-pep517"]
+build-backend = "pdm.pep517.api"
+
+[tool]
+[tool.pdm]
