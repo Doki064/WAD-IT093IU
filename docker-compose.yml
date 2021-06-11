@@ -1,38 +1,76 @@
 version: "3"
 
 services:
-    db:
-        image: postgres:latest
-        ports:
-            - "5432:5432"
-        environment:
-            - POSTGRES_USER=postgres
-            - POSTGRES_PASSWORD=postgres
-            - POSTGRES_DB=test_db
+    # frontend:
+    #     container_name: Streamlit
+    #     build: ./client
+    #     image: frontend:test
+    #     stdin_open: true
+    #     tty: true
+    #     working_dir: /app/client
+    #     volumes:
+    #         - .:/app
+    #     ports:
+    #         - "8501:8501"
+    #     networks:
+    #         - frontend
+    #     depends_on:
+    #         - backend
 
     backend:
         container_name: FastAPI
         build: ./server
-        image: backend:test
-        stdin_open: true
-        tty: true
+        image: backend:beta
         working_dir: /app/server
-        command: bash -c "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8080 --reload"
+        command: bash /app/server/start-reload.sh
         volumes:
             - .:/app
-            - ./dummy:/var/lib/pgadmin/storage/pgadmin4_pgadmin.org
         ports:
             - "8080:8080"
+        networks:
+            - frontend
+            - backend
         depends_on:
             - db
 
     pgadmin:
-        container_name: pgadmin
+        container_name: pgAdmin
         image: dpage/pgadmin4
+        tty: true
         environment:
             - PGADMIN_DEFAULT_EMAIL=pgadmin4@pgadmin.org
             - PGADMIN_DEFAULT_PASSWORD=admin
+        volumes:
+            - pgadmin:/var/lib/pgadmin4/storage
         ports:
             - "5050:80"
+        networks:
+            - backend
         depends_on:
             - db
+
+    db:
+        container_name: PostgreSQL
+        image: postgres:latest
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+        ports:
+            - "5432:5432"
+        networks:
+            - backend
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_DB=postgres
+
+volumes:
+    pgadmin:
+    pgdata:
+
+networks:
+    frontend:
+        name: frontend
+        driver: bridge
+    backend:
+        name: backend
+        driver: bridge
