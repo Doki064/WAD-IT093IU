@@ -1,25 +1,21 @@
-[tool.poetry]
-name = "wad-it093iu-backend"
-version = "0.1.0"
-description = "A simple backend with FastAPI"
-authors = ["Your Name <you@example.com>"]
-license = "MIT"
+[project]
+name = ""
+version = ""
+description = ""
+authors = [
+    {name = "Nguyen Nhat Minh", email = "52833936+Doki064@users.noreply.github.com"},
+]
+dependencies = ["fastapi~=0.65", "uvicorn~=0.14", "sqlalchemy~=1.4", "asyncpg~=0.23", "alembic~=1.6", "argon2-cffi~=20.1", "python-dotenv~=0.17"]
+requires-python = ">=3.8, <3.9"
+dynamic = ["classifiers"]
+license = {text = "MIT"}
 
-[tool.poetry.dependencies]
-python = "3.8.*"
-SQLAlchemy = "^1.4.17"
-argon2-cffi = "^20.1.0"
-fastapi = "^0.65.1"
-uvicorn = "^0.14.0"
-asyncpg = "^0.23.0"
-alembic = "^1.6.5"
-python-dotenv = "^0.17.1"
-
-[tool.poetry.dev-dependencies]
-yapf = "^0.31.0"
-flake8-bandit = "^2.1.2"
-isort = "^5.8.0"
+[project.urls]
+homepage = ""
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["pdm-pep517"]
+build-backend = "pdm.pep517.api"
+
+[tool]
+[tool.pdm]
