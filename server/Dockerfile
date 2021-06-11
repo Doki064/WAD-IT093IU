@@ -1,14 +1,16 @@
 ###############################################
 # Base Image
 ###############################################
-FROM python:3.8-slim as python-base
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8-slim as python-base
 
 # Set environment variables
+## For python and pip
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV PIP_NO_CACHE_DIR=off
 ENV PIP_DISABLE_PIP_VERSION_CHECK=on
 ENV PIP_DEFAULT_TIMEOUT=100
+## For poetry
 ENV POETRY_VERSION=1.1.6
 ENV POETRY_HOME="/opt/poetry"
 ENV POETRY_VIRTUALENVS_IN_PROJECT=true
@@ -19,17 +21,16 @@ ENV VENV_PATH="/opt/pysetup/.venv"
 # prepend poetry and venv to path
 ENV PATH="$POETRY_HOME/bin:$VENV_PATH/bin:$PATH"
 
-# Install dependencies
-RUN apt-get update && \
-    apt-get install --no-install-recommends -y \
-    curl \
-    build-essential \
-    libpq-dev
-
 ###############################################
 # Builder Image
 ###############################################
 FROM python-base as builder-base
+
+# Install dependencies
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y \
+    curl \
+    build-essential
 
 # Install poetry - respects $POETRY_VERSION & $POETRY_HOME
 RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python -
@@ -46,7 +47,11 @@ RUN poetry install --no-root --no-dev
 ###############################################
 FROM python-base as production
 
-COPY --from=builder-base $PYSETUP_PATH $PYSETUP_PATH
-COPY . /app
+## For image
+ENV PORT="8080"
+ENV PRE_START_PATH="/app/server/prestart.sh"
 
-EXPOSE 8080
+COPY --from=builder-base $PYSETUP_PATH $PYSETUP_PATH
+COPY . /app/server/backend
+
+CMD [ "/app/server/start-reload.sh" ]
