@@ -1,6 +1,7 @@
 from typing import List, Optional
 import secrets
 
+# from jose import JWTError, jwt
 from sqlalchemy import update
 from sqlalchemy.future import select
 from sqlalchemy.orm import Session
@@ -46,10 +47,11 @@ async def get_all(db: Session,
     return result.scalars().all()
 
 
-async def update_password(db: Session, user_uid: int, password: str):
+async def rehash_password(db: Session, user_uid: int, password: str):
     salt = secrets.token_bytes(16)
     hashed_password = encryption.hash_password(password, salt)
     q = update(User).where(User.uid == user_uid)
     q.values(hashed_password=hashed_password)
     q.values(salt=salt.hex())
     await db.execute(q)
+    await db.commit()

@@ -1,14 +1,19 @@
 import base64
 import hashlib
 import hmac
+import os
+from pathlib import Path
 
-import argon2
+from dotenv import load_dotenv
+from passlib.context import CryptContext
 
-ph = argon2.PasswordHasher()
+BASE_DIR = Path(__file__).absolute().parents[1]
+load_dotenv(BASE_DIR.joinpath(".env"))
 
-
-class NeedRehashException(Exception):
-    pass
+pwd_context = CryptContext(
+    schemes=os.environ["HASH_METHOD"],
+    deprecated="auto",
+)
 
 
 def hash_password(password: str, salt: bytes) -> str:
@@ -24,20 +29,20 @@ def hash_password(password: str, salt: bytes) -> str:
     Returns:
         Hashed password.
     """
-    signature = base64.b64encode(
+    secret = base64.b64encode(
         hmac.new(password.encode(), salt, hashlib.sha3_256).digest())
-    return ph.hash(signature)
+    return pwd_context.hash(secret)
 
 
-def check_password(hashed_password: str, password: str, salt: bytes) -> bool:
+def check_password(password: str, hashed_password: str, salt: bytes):
     """Check password function, rehash password if needed.
 
     Argon2 will verify whether the password matches the encrypted key,
     and rehash the password if necessary.
 
     Args:
-        hashed_password: The hashed password stored in the database.
         password: The input password to be checked.
+        hashed_password: The hashed password stored in the database.
         salt: The salt stored in the database.
 
     Returns:
@@ -46,12 +51,10 @@ def check_password(hashed_password: str, password: str, salt: bytes) -> bool:
     Raises:
         NeedRehashException: Exception raised when password needs to be rehashed.
     """
-    signature = base64.b64encode(
+    secret = base64.b64encode(
         hmac.new(password.encode(), salt, hashlib.sha3_256).digest())
-    try:
-        ph.verify(hashed_password, signature)
-        if ph.check_needs_rehash(hashed_password):
-            raise NeedRehashException
-    except argon2.exceptions.VerifyMismatchError:
-        return False
-    return True
+    return pwd_context.verify(secret, hashed_password)
+
+
+def needs_rehash(hashed_password: str):
+    return pwd_context.needs_update(hashed_password)
