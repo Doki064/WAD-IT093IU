@@ -8,6 +8,8 @@ Example:
 
 import streamlit as st
 
+from session_state import SessionState
+
 
 class MainPage:
     """Main Page of the Web App
@@ -21,8 +23,9 @@ class MainPage:
             which contains short description of the web.
     """
 
-    def __init__(self):
+    def __init__(self, state: SessionState):
         """Initializes MainPage instance."""
+        self.state = state
         self.title = st.empty()
         self.header = st.empty()
         self.info_field = st.empty()

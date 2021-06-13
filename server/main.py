@@ -22,17 +22,16 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup():
-    # create db tables
     async with engine.begin() as conn:
         await conn.run_sync(models.Base.metadata.create_all)
 
 
-@app.get("/")
+@app.get("/", tags=["root"])
 def root():
     return RedirectResponse(url="/docs")
 
 
-@app.get("/api/")
+@app.get("/api/", tags=["root"])
 def main():
     return {"message": "Hello, Docker!"}
 

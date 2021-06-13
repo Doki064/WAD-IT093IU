@@ -3,7 +3,7 @@ version: "3"
 services:
     # frontend:
     #     container_name: Streamlit
-    #     build: ./client
+    #     build: client/
     #     image: frontend:test
     #     stdin_open: true
     #     tty: true
@@ -19,7 +19,7 @@ services:
 
     backend:
         container_name: FastAPI
-        build: ./server
+        build: server/
         image: backend:beta
         working_dir: /app/server
         command: bash /app/server/start-reload.sh
@@ -52,16 +52,16 @@ services:
     db:
         container_name: PostgreSQL
         image: postgres:latest
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_DB=postgres
         volumes:
             - pgdata:/var/lib/postgresql/data
         ports:
             - "5432:5432"
         networks:
             - backend
-        environment:
-            - POSTGRES_USER=postgres
-            - POSTGRES_PASSWORD=postgres
-            - POSTGRES_DB=postgres
 
 volumes:
     pgadmin:
