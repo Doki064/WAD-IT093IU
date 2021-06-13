@@ -1,6 +1,6 @@
 """
 Example:
-    >>> from wms import gui
+    >>> import main_page
     >>> main_page = gui.MainPage()
     >>> gui.intro() # Display the intro section
     >>> gui.info() # Display the info on the sidebar
@@ -36,23 +36,23 @@ class MainPage:
         self.title.title("Wholesale Management System")
         self.header.header("Welcome to the WMS of company That Boring Company.")
 
+    @staticmethod
+    def intro():
+        """Shows intro section."""
+        st.markdown("""
+            ---\n
+            This is a project for Web Application Development course in
+            [International University - VNU-HCM](https://hcmiu.edu.vn/en/).\n
+            The web application is built with [Streamlit](https://www.streamlit.io/).\n
+            Source code is available at [GitHub](https://github.com/Doki064/WAD_IT093IU).
+        """)
 
-def intro():
-    """Shows intro section."""
-    st.markdown("""
-        ---\n
-        This is a wholesale management system project for Software Engineering course in
-        [International University - VNU-HCM](https://hcmiu.edu.vn/en/).\n
-        The web application is built with [Streamlit](https://www.streamlit.io/).\n
-        Source code is available at [GitHub](https://github.com/minhlong94/SWE_IT076IU).\n
-    """)
-
-
-def info():
-    """Shows info, a short summary of intro section."""
-    st.sidebar.markdown("""
-        ---\n
-        [International University - VNU-HCM](https://hcmiu.edu.vn/en/)\n
-        [Streamlit](https://www.streamlit.io/)\n
-        [GitHub](https://github.com/minhlong94/SWE_IT076IU)\n
-    """)
+    @staticmethod
+    def info():
+        """Shows info, a short summary of intro section."""
+        st.sidebar.markdown("""
+            ---\n
+            [International University - VNU-HCM](https://hcmiu.edu.vn/en/)\n
+            [Streamlit](https://www.streamlit.io/)\n
+            [GitHub](https://github.com/Doki064/WAD-IT093IU)
+        """)
