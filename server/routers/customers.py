@@ -91,7 +91,7 @@ async def create_transaction_for_customer(customer_uid: int,
 
 
 @router.get("/{customer_uid}/transactions/", response_model=List[Transaction])
-async def read_customer_transactions(customer_uid: int):
+async def read_transactions_of_customer(customer_uid: int):
     async with async_session() as session:
         async with session.begin():
             db_customer = await _customer.get_by_uid(session, customer_uid=customer_uid)

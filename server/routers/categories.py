@@ -71,7 +71,7 @@ async def create_item_for_category(category_uid: int,
 
 
 @router.get("/{category_uid}/items/", response_model=List[Item])
-async def read_category_items(category_uid: int):
+async def read_items_of_category(category_uid: int):
     async with async_session() as session:
         async with session.begin():
             db_category = await _category.get_by_uid(session, category_uid=category_uid)

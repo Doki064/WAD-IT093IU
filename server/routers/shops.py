@@ -87,7 +87,7 @@ async def create_importation_for_shop(shop_uid: int,
 
 
 @router.get("/{shop_uid}/importations/", response_model=List[Importation])
-async def read_shop_importations(shop_uid: int):
+async def read_importations_of_shop(shop_uid: int):
     async with async_session() as session:
         async with session.begin():
             db_shop = await _shop.get_by_uid(session, shop_uid=shop_uid)
@@ -97,7 +97,7 @@ async def read_shop_importations(shop_uid: int):
 
 
 @router.get("/{shop_uid}/transactions/", response_model=List[Transaction])
-async def read_shop_transactions(shop_uid: int):
+async def read_transactions_of_shop(shop_uid: int):
     async with async_session() as session:
         async with session.begin():
             db_shop = await _shop.get_by_uid(session, shop_uid=shop_uid)
@@ -107,7 +107,7 @@ async def read_shop_transactions(shop_uid: int):
 
 
 @router.get("/{shop_uid}/items/", response_model=List[Item])
-async def read_shop_items(shop_uid: int):
+async def read_items_of_shop(shop_uid: int):
     async with async_session() as session:
         async with session.begin():
             db_shop = await _shop.get_by_uid(session, shop_uid=shop_uid)
