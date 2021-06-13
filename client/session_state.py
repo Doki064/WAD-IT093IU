@@ -24,7 +24,7 @@ from streamlit.report_thread import get_report_ctx
 from streamlit.server.server import Server
 
 
-class _SessionState:
+class SessionState:
     """SessionState: Add per-session state to Streamlit."""
 
     def __init__(self, session, hash_funcs, **kwargs):
@@ -74,7 +74,9 @@ class _SessionState:
         self._state["session"].request_rerun()
 
     def sync(self):
-        """Rerun the app with all state values up to date from the beginning to fix rollbacks."""
+        """Rerun the app with all state values up to date
+            from the beginning to fix rollbacks.
+        """
 
         # Ensure to rerun only once to avoid infinite loops
         # caused by a constantly changing state value at each run.
@@ -84,7 +86,8 @@ class _SessionState:
             self._state["is_rerun"] = False
 
         elif self._state["hash"] is not None:
-            if self._state["hash"] != self._state["hasher"].to_bytes(self._state["data"], None):
+            if self._state["hash"] != self._state["hasher"].to_bytes(
+                    self._state["data"], None):
                 self._state["is_rerun"] = True
                 self._state["session"].request_rerun()
 
@@ -126,6 +129,7 @@ def get(hash_funcs=None, **kwargs):
 
     # Got the session object! Now let's attach some state into it.
     if not hasattr(this_session, "_custom_session_state"):
-        this_session._custom_session_state = _SessionState(this_session, hash_funcs, **kwargs)
+        this_session._custom_session_state = SessionState(this_session, hash_funcs,
+                                                          **kwargs)
 
     return this_session._custom_session_state
