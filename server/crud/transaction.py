@@ -1,5 +1,5 @@
 from typing import List, Union, Optional
-from datetime import datetime
+from datetime import date
 
 from sqlalchemy.future import select
 from sqlalchemy.orm import Session
@@ -26,12 +26,11 @@ async def get_by_uid(db: Session, transaction_uid: int) -> Transaction:
 
 
 async def get_by_date(db: Session,
-                      date: datetime,
+                      date: date,
                       limit: Optional[int] = None) -> List[Transaction]:
-    q = select(Transaction)
+    q = select(Transaction).where(Transaction.date == date.isoformat(date))
     if limit is not None:
         q.limit(limit)
-    q.where(Transaction.date == datetime.strftime(date))
     result = await db.execute(q)
     return result.scalars().all()
 
@@ -58,21 +57,21 @@ async def get_all(db: Session,
     return result.scalars().all()
 
 
-async def get_min_date(db: Session) -> Union[datetime, None]:
+async def get_min_date(db: Session) -> Union[date, None]:
     q = select(Transaction.date).order_by(Transaction.date.asc())
     result = await db.execute(q)
-    date = result.scalar()
-    if date is None:
+    min_date = result.scalar()
+    if min_date is None:
         return None
-    date = datetime.strptime(str(date), "%Y-%m-%d")
-    return date
+    min_date = date.fromisoformat(min_date)
+    return min_date
 
 
-async def get_max_date(db: Session) -> Union[datetime, None]:
+async def get_max_date(db: Session) -> Union[date, None]:
     q = select(Transaction.date).order_by(Transaction.date.desc())
     result = await db.execute(q)
-    date = result.scalar()
-    if date is None:
+    max_date = result.scalar()
+    if max_date is None:
         return None
-    date = datetime.strptime(str(date), "%Y-%m-%d")
-    return date
+    max_date = date.fromisoformat(date)
+    return max_date

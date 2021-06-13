@@ -1,5 +1,5 @@
 from typing import Optional
-from datetime import datetime
+from datetime import date
 
 from aiohttp import ClientSession
 
@@ -13,7 +13,7 @@ async def get_by_uid(session: ClientSession, importation_uid: int):
         return Response(status, data)
 
 
-async def get_by_date(session: ClientSession, date: datetime):
+async def get_by_date(session: ClientSession, date: date):
     async with session.get(f"{BASE_URL}/importations/date/{date}") as response:
         status = response.status,
         data = await response.json()
