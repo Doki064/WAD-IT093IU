@@ -38,7 +38,9 @@ async def create_shop(shop: ShopCreate):
 
 
 @router.get("/", response_model=Union[Shop, List[Shop]])
-async def read_shops(shop_name: Optional[str] = None, skip: int = 0, limit: int = 100):
+async def read_shops(shop_name: Optional[str] = None,
+                     skip: Optional[int] = None,
+                     limit: Optional[int] = None):
     async with async_session() as session:
         async with session.begin():
             if shop_name is not None:

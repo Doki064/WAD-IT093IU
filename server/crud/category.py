@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from sqlalchemy.future import select
 from sqlalchemy.orm import Session
@@ -11,6 +11,7 @@ async def create(db: Session, category: CategoryCreate) -> Category:
     db_category = Category(**category.dict())
     db.add(db_category)
     await db.commit()
+    await db.refresh(db_category)
     return db_category
 
 
@@ -26,7 +27,13 @@ async def get_by_name(db: Session, name: str) -> Category:
     return result.scalars().first()
 
 
-async def get_all(db: Session, skip: int = 0, limit: int = 100) -> List[Category]:
-    q = select(Category).offset(skip).limit(limit)
+async def get_all(db: Session,
+                  skip: Optional[int] = None,
+                  limit: Optional[int] = None) -> List[Category]:
+    q = select(Category)
+    if skip is not None:
+        q.offset(skip)
+    if limit is not None:
+        q.limit(limit)
     result = await db.execute(q)
     return result.scalars().all()

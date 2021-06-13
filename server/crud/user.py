@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 import secrets
 
 from sqlalchemy import update
@@ -18,6 +18,7 @@ async def create(db: Session, user: UserCreate) -> User:
                    salt=salt.hex())
     db.add(db_user)
     await db.commit()
+    await db.refresh(db_user)
     return db_user
 
 
@@ -33,8 +34,14 @@ async def get_by_username(db: Session, username: str) -> User:
     return result.scalars().first()
 
 
-async def get_all(db: Session, skip: int = 0, limit: int = 100) -> List[User]:
-    q = select(User).offset(skip).limit(limit)
+async def get_all(db: Session,
+                  skip: Optional[int] = None,
+                  limit: Optional[int] = None) -> List[User]:
+    q = select(User)
+    if skip is not None:
+        q.offset(skip)
+    if limit is not None:
+        q.limit(limit)
     result = await db.execute(q)
     return result.scalars().all()
 

@@ -28,7 +28,7 @@ async def check_user(user: UserCreate):
                 salt = bytes.fromhex(db_user.salt)
                 if not encryption.check_password(db_user.hashed_password, user.password,
                                                  salt):
-                    return None
+                    raise HTTPException(status_code=401, detail="Login failed")
             except encryption.NeedRehashException:
                 await _user.update_password(session,
                                             user_uid=db_user.uid,
@@ -47,7 +47,9 @@ async def create_user(user: UserCreate):
 
 
 @router.get("/", response_model=Union[User, List[User]])
-async def read_users(username: Optional[str] = None, skip: int = 0, limit: int = 100):
+async def read_users(username: Optional[str] = None,
+                     skip: Optional[int] = None,
+                     limit: Optional[int] = None):
     async with async_session() as session:
         async with session.begin():
             if username is not None:

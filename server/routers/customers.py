@@ -38,8 +38,8 @@ async def create_customer(customer: CustomerCreate):
 
 @router.get("/", response_model=Union[Customer, List[Customer]])
 async def read_customers(customer_name: Optional[str] = None,
-                         skip: int = 0,
-                         limit: int = 100):
+                         skip: Optional[int] = None,
+                         limit: Optional[int] = None):
     async with async_session() as session:
         async with session.begin():
             if customer_name is not None:

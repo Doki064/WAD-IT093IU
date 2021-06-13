@@ -1,6 +1,6 @@
 """All transaction API methods."""
+from typing import List, Optional
 from datetime import datetime
-from typing import List
 
 from fastapi import APIRouter, HTTPException
 
@@ -18,14 +18,14 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[Transaction])
-async def read_transactions(skip: int = 0, limit: int = 100):
+async def read_transactions(skip: Optional[int] = None, limit: Optional[int] = None):
     async with async_session() as session:
         async with session.begin():
             return await _transaction.get_all(session, skip=skip, limit=limit)
 
 
 @router.get("/date/{date}", response_model=List[Transaction])
-async def read_transactions_by_date(date: datetime, limit: int = 100):
+async def read_transactions_by_date(date: datetime, limit: Optional[int] = None):
     async with async_session() as session:
         async with session.begin():
             return await _transaction.get_by_date(session, date=date, limit=limit)

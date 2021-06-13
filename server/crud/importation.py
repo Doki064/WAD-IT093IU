@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Union, Optional
 from datetime import datetime
 
 from sqlalchemy.future import select
@@ -13,6 +13,7 @@ async def create(db: Session, importation: ImportationCreate,
     db_importation = Importation(**importation.dict(), shop_uid=shop_uid)
     db.add(db_importation)
     await db.commit()
+    await db.refresh(db_importation)
     return db_importation
 
 
@@ -22,15 +23,24 @@ async def get_by_uid(db: Session, importation_uid: int) -> Importation:
     return result.scalars().first()
 
 
-async def get_by_date(db: Session, date: datetime, limit: int = 100) -> List[Importation]:
-    q = select(Importation).limit(limit).where(
-        Importation.date == datetime.strftime(date))
+async def get_by_date(db: Session,
+                      date: datetime,
+                      limit: Optional[int] = None) -> List[Importation]:
+    q = select(Importation).where(Importation.date == datetime.strftime(date))
+    if limit is not None:
+        q.limit(limit)
     result = await db.execute(q)
     return result.scalars().all()
 
 
-async def get_all(db: Session, skip: int = 0, limit: int = 100) -> List[Importation]:
-    q = select(Importation).offset(skip).limit(limit)
+async def get_all(db: Session,
+                  skip: Optional[int] = None,
+                  limit: Optional[int] = None) -> List[Importation]:
+    q = select(Importation)
+    if skip is not None:
+        q.offset(skip)
+    if limit is not None:
+        q.limit(limit)
     result = await db.execute(q)
     return result.scalars().all()
 
