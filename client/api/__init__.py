@@ -13,6 +13,6 @@ BASE_URL = f"http://{REQUEST_HOST}:{REQUEST_PORT}/api"
 
 class Response:
 
-    def __init__(self, status, data):
+    def __init__(self, status: int, data):
         self.status = status
         self.data = data

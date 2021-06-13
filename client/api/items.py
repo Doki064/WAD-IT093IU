@@ -13,7 +13,9 @@ async def get_by_uid(session: ClientSession, item_uid: int):
 
 
 async def get_by_name(session: ClientSession, item_name: str):
-    params = {"item_name": item_name}
+    params = {
+        "item_name": item_name,
+    }
     async with session.get(f"{BASE_URL}/items/", params=params) as response:
         status = response.status,
         data = await response.json()

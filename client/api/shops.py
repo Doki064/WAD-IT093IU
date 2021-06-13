@@ -1,8 +1,37 @@
-from typing import Optional
+from typing import List, Optional
+from datetime import date
 
 from aiohttp import ClientSession
 
 from api import BASE_URL, Response
+
+
+class ShopCreate:
+
+    def __init__(self, name: str):
+        self.shop_name = name
+
+
+class ImportationCreate:
+
+    def __init__(self, date: date):
+        self.date = date
+
+
+class ImportDetailCreate:
+
+    def __init__(self, item_amount: int):
+        self.item_amount = item_amount
+
+
+async def create(session: ClientSession, shop: ShopCreate):
+    json = {
+        "shop_name": vars(shop),
+    }
+    async with session.post(f"{BASE_URL}/shops/", json=json) as response:
+        status = response.status,
+        data = await response.json()
+        return Response(status, data)
 
 
 async def get_by_uid(session: ClientSession, shop_uid: int):
@@ -13,7 +42,9 @@ async def get_by_uid(session: ClientSession, shop_uid: int):
 
 
 async def get_by_name(session: ClientSession, shop_name: str):
-    params = {"shop_name": shop_name}
+    params = {
+        "shop_name": shop_name,
+    }
     async with session.get(f"{BASE_URL}/shops/", params=params) as response:
         status = response.status,
         data = await response.json()
@@ -34,21 +65,37 @@ async def get_all(session: ClientSession,
         return Response(status, data)
 
 
-async def get_importations_of_shop(session: ClientSession, shop_uid: int):
+async def create_shop_importation(session: ClientSession, shop_uid: int,
+                                  importation: ImportationCreate,
+                                  importation_details: List[ImportDetailCreate],
+                                  item_name: str):
+    json = {
+        "importation": vars(importation),
+        "importation_details": [vars(detail) for detail in importation_details],
+        "item_name": item_name,
+    }
+    async with session.post(f"{BASE_URL}/{shop_uid}/importations/",
+                            json=json) as response:
+        status = response.status,
+        data = await response.json()
+        return Response(status, data)
+
+
+async def get_shop_importations(session: ClientSession, shop_uid: int):
     async with session.get(f"{BASE_URL}/{shop_uid}/importations/") as response:
         status = response.status,
         data = await response.json()
         return Response(status, data)
 
 
-async def get_transactions_of_shop(session: ClientSession, shop_uid: int):
+async def get_shop_transactions(session: ClientSession, shop_uid: int):
     async with session.get(f"{BASE_URL}/{shop_uid}/transactions/") as response:
         status = response.status,
         data = await response.json()
         return Response(status, data)
 
 
-async def get_items_of_shop(session: ClientSession, shop_uid: int):
+async def get_shop_items(session: ClientSession, shop_uid: int):
     async with session.get(f"{BASE_URL}/{shop_uid}/items/") as response:
         status = response.status,
         data = await response.json()

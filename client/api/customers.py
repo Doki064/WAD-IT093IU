@@ -1,8 +1,39 @@
-from typing import Optional
+from typing import List, Optional
+from datetime import date
 
 from aiohttp import ClientSession
 
 from api import BASE_URL, Response
+
+
+class CustomerCreate:
+
+    def __init__(self, name: str):
+        self.customer_name = name
+
+
+class TransactionCreate:
+
+    def __init__(self, date: date, status: str):
+        self.date = date
+        self.status = status
+
+
+class TransactDetailCreate:
+
+    def __init__(self, item_price: float, item_amount: int):
+        self.item_price = item_price
+        self.item_amount = item_amount
+
+
+async def create(session: ClientSession, customer: CustomerCreate):
+    json = {
+        "customer_name": vars(customer),
+    }
+    async with session.post(f"{BASE_URL}/customers/", json=json) as response:
+        status = response.status,
+        data = await response.json()
+        return Response(status, data)
 
 
 async def get_by_uid(session: ClientSession, customer_uid: int):
@@ -13,7 +44,9 @@ async def get_by_uid(session: ClientSession, customer_uid: int):
 
 
 async def get_by_name(session: ClientSession, customer_name: str):
-    params = {"customer_name": customer_name}
+    params = {
+        "customer_name": customer_name,
+    }
     async with session.get(f"{BASE_URL}/customers/", params=params) as response:
         status = response.status,
         data = await response.json()
@@ -34,7 +67,24 @@ async def get_all(session: ClientSession,
         return Response(status, data)
 
 
-async def get_transactions_of_customer(session: ClientSession, customer_uid: int):
+async def create_customer_transaction(session: ClientSession, customer_uid: int,
+                                      transaction: TransactionCreate,
+                                      transaction_details: List[TransactDetailCreate],
+                                      item_name: str, shop_name: str):
+    json = {
+        "transaction": vars(transaction),
+        "transaction_details": [vars(detail) for detail in transaction_details],
+        "item_name": item_name,
+        "shop_name": shop_name,
+    }
+    async with session.post(f"{BASE_URL}/{customer_uid}/transactions/",
+                            json=json) as response:
+        status = response.status,
+        data = await response.json()
+        return Response(status, data)
+
+
+async def get_customer_transactions(session: ClientSession, customer_uid: int):
     async with session.get(f"{BASE_URL}/{customer_uid}/transactions/") as response:
         status = response.status,
         data = await response.json()
