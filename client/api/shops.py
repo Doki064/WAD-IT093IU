@@ -60,7 +60,7 @@ async def get_all(session: ClientSession,
     if limit is not None:
         params["limit"] = limit
     async with session.get(f"{BASE_URL}/shops/", params=params) as response:
-        status = response.status,
+        status = response.status
         data = await response.json()
         return Response(status, data)
 
@@ -76,27 +76,27 @@ async def create_shop_importation(session: ClientSession, shop_uid: int,
     }
     async with session.post(f"{BASE_URL}/{shop_uid}/importations/",
                             json=json) as response:
-        status = response.status,
+        status = response.status
         data = await response.json()
         return Response(status, data)
 
 
 async def get_shop_importations(session: ClientSession, shop_uid: int):
     async with session.get(f"{BASE_URL}/{shop_uid}/importations/") as response:
-        status = response.status,
+        status = response.status
         data = await response.json()
         return Response(status, data)
 
 
 async def get_shop_transactions(session: ClientSession, shop_uid: int):
     async with session.get(f"{BASE_URL}/{shop_uid}/transactions/") as response:
-        status = response.status,
+        status = response.status
         data = await response.json()
         return Response(status, data)
 
 
 async def get_shop_items(session: ClientSession, shop_uid: int):
     async with session.get(f"{BASE_URL}/{shop_uid}/items/") as response:
-        status = response.status,
+        status = response.status
         data = await response.json()
         return Response(status, data)

@@ -38,7 +38,7 @@ async def create(session: ClientSession, customer: CustomerCreate):
 
 async def get_by_uid(session: ClientSession, customer_uid: int):
     async with session.get(f"{BASE_URL}/customers/{customer_uid}") as response:
-        status = response.status,
+        status = response.status
         data = await response.json()
         return Response(status, data)
 
@@ -48,7 +48,7 @@ async def get_by_name(session: ClientSession, customer_name: str):
         "customer_name": customer_name,
     }
     async with session.get(f"{BASE_URL}/customers/", params=params) as response:
-        status = response.status,
+        status = response.status
         data = await response.json()
         return Response(status, data)
 
@@ -62,7 +62,7 @@ async def get_all(session: ClientSession,
     if limit is not None:
         params["limit"] = limit
     async with session.get(f"{BASE_URL}/customers/", params=params) as response:
-        status = response.status,
+        status = response.status
         data = await response.json()
         return Response(status, data)
 
@@ -79,13 +79,13 @@ async def create_customer_transaction(session: ClientSession, customer_uid: int,
     }
     async with session.post(f"{BASE_URL}/{customer_uid}/transactions/",
                             json=json) as response:
-        status = response.status,
+        status = response.status
         data = await response.json()
         return Response(status, data)
 
 
 async def get_customer_transactions(session: ClientSession, customer_uid: int):
     async with session.get(f"{BASE_URL}/{customer_uid}/transactions/") as response:
-        status = response.status,
+        status = response.status
         data = await response.json()
         return Response(status, data)

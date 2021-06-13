@@ -23,7 +23,7 @@ async def create(session: ClientSession, category: CategoryCreate):
         "category_name": vars(category),
     }
     async with session.post(f"{BASE_URL}/categories/", json=json) as response:
-        status = response.status,
+        status = response.status
         data = await response.json()
         return Response(status, data)
 
@@ -40,7 +40,7 @@ async def get_by_name(session: ClientSession, category_name: str):
         "category_name": category_name,
     }
     async with session.get(f"{BASE_URL}/categories/", params=params) as response:
-        status = response.status,
+        status = response.status
         data = await response.json()
         return Response(status, data)
 
@@ -54,7 +54,7 @@ async def get_all(session: ClientSession,
     if limit is not None:
         params["limit"] = limit
     async with session.get(f"{BASE_URL}/categories/", params=params) as response:
-        status = response.status,
+        status = response.status
         data = await response.json()
         return Response(status, data)
 
@@ -66,13 +66,13 @@ async def create_category_item(session: ClientSession, category_uid: int,
         "shop_name": shop_name,
     }
     async with session.post(f"{BASE_URL}/{category_uid}/items/", json=json) as response:
-        status = response.status,
+        status = response.status
         data = await response.json()
         return Response(status, data)
 
 
 async def get_category_items(session: ClientSession, category_uid: int):
     async with session.get(f"{BASE_URL}/{category_uid}/items/") as response:
-        status = response.status,
+        status = response.status
         data = await response.json()
         return Response(status, data)
