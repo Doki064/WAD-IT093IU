@@ -1,4 +1,4 @@
-"""All shop API methods."""
+"""All shop route methods."""
 from typing import List, Union, Optional
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Body

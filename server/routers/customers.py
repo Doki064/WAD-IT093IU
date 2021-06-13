@@ -1,4 +1,4 @@
-"""All customer API methods."""
+"""All customer route methods."""
 from typing import List, Union, Optional
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Body

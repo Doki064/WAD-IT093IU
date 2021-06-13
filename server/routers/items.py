@@ -1,4 +1,4 @@
-"""All item API methods."""
+"""All item route methods."""
 from typing import List, Union, Optional
 
 from fastapi import APIRouter, HTTPException

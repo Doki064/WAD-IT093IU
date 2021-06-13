@@ -1,4 +1,4 @@
-"""All transaction API methods."""
+"""All transaction route methods."""
 from typing import List, Optional
 from datetime import datetime
 
