@@ -18,13 +18,13 @@ router = APIRouter(
 )
 
 
-@router.post("/", response_model=Category)
+@router.post("/", response_model=Category, status_code=201)
 async def create_category(category: CategoryCreate):
     async with async_session() as session:
         async with session.begin():
             db_category = await _category.get_by_name(session, name=category.name)
             if db_category is not None:
-                raise HTTPException(status_code=400, detail="Category already exists")
+                raise HTTPException(status_code=409, detail="Category already exists")
             return await _category.create(session, category=category)
 
 
@@ -52,7 +52,7 @@ async def read_category(category_uid: int):
             return db_category
 
 
-@router.post("/{category_uid}/items/", response_model=Item)
+@router.post("/{category_uid}/items/", response_model=Item, status_code=201)
 async def create_item_for_category(category_uid: int,
                                    item: ItemCreate,
                                    shop_name: str = Body(...)):
@@ -60,7 +60,7 @@ async def create_item_for_category(category_uid: int,
         async with session.begin():
             db_item = await _item.get_by_name(session, name=item.name)
             if db_item is not None:
-                raise HTTPException(status_code=400, detail="Item already exists")
+                raise HTTPException(status_code=409, detail="Item already exists")
             db_shop = await _shop.get_by_name(session, name=shop_name)
             if db_shop is None:
                 raise HTTPException(status_code=404, detail="Shop not found")

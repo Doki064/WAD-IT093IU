@@ -1,7 +1,7 @@
 """All customer route methods."""
 from typing import List, Union, Optional
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException, Body
+from fastapi import APIRouter, HTTPException, Body
 
 from database.config import async_session
 from schemas import (
@@ -26,13 +26,13 @@ router = APIRouter(
 )
 
 
-@router.post("/", response_model=Customer)
+@router.post("/", response_model=Customer, status_code=201)
 async def create_customer(customer: CustomerCreate):
     async with async_session() as session:
         async with session.begin():
             db_customer = await _customer.get_by_name(session, name=customer.name)
             if db_customer is not None:
-                raise HTTPException(status_code=400, detail="Customer already exists")
+                raise HTTPException(status_code=409, detail="Customer already exists")
             return await _customer.create(session, customer=customer)
 
 
@@ -60,11 +60,10 @@ async def read_customer(customer_uid: int):
             return db_customer
 
 
-@router.post("/{customer_uid}/transactions/", response_model=Transaction)
+@router.post("/{customer_uid}/transactions/", response_model=Transaction, status_code=201)
 async def create_transaction_for_customer(customer_uid: int,
                                           transaction: TransactionCreate,
                                           transaction_details: List[TransactDetailCreate],
-                                          background_tasks: BackgroundTasks,
                                           item_name: str = Body(...),
                                           shop_name: str = Body(...)):
     async with async_session() as session:
@@ -79,14 +78,11 @@ async def create_transaction_for_customer(customer_uid: int,
                                                        transaction=transaction,
                                                        customer_uid=customer_uid,
                                                        shop_uid=db_shop.uid)
-            # for detail in transaction_details:
-            #     await _transact_detail.create(session,
-            #                                   transaction_detail=detail,
-            #                                   transaction_uid=db_transaction.uid,
-            #                                   item_uid=db_item.uid)
-            background_tasks.add_task(_create_transaction_details, session,
-                                      transaction_details, db_transaction.uid,
-                                      db_item.uid)
+            for detail in transaction_details:
+                await _transact_detail.create(session,
+                                              transaction_detail=detail,
+                                              transaction_uid=db_transaction.uid,
+                                              item_uid=db_item.uid)
             return db_transaction
 
 
@@ -98,13 +94,3 @@ async def read_transactions_of_customer(customer_uid: int):
             if db_customer is None:
                 raise HTTPException(status_code=404, detail="Customer not found")
             return db_customer.transactions
-
-
-async def _create_transaction_details(session,
-                                      transaction_details: List[TransactDetailCreate],
-                                      transaction_uid: int, item_uid: int):
-    for detail in transaction_details:
-        await _transact_detail.create(session,
-                                      transaction_detail=detail,
-                                      transaction_uid=transaction_uid,
-                                      item_uid=item_uid)

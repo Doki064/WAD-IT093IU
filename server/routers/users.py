@@ -18,7 +18,7 @@ router = APIRouter(
 
 
 @router.post("/login/", response_model=User)
-async def check_user(user: UserCreate):
+async def login(user: UserCreate):
     async with async_session() as session:
         async with session.begin():
             db_user = await _user.get_by_username(session, username=user.username)
@@ -36,13 +36,13 @@ async def check_user(user: UserCreate):
             return db_user
 
 
-@router.post("/register/", response_model=User)
-async def create_user(user: UserCreate):
+@router.post("/register/", response_model=User, status_code=201)
+async def register(user: UserCreate):
     async with async_session() as session:
         async with session.begin():
             db_user = await _user.get_by_username(session, username=user.username)
             if db_user is not None:
-                raise HTTPException(status_code=400, detail="Username already exists")
+                raise HTTPException(status_code=409, detail="Username already exists")
             return await _user.create(session, user=user)
 
 

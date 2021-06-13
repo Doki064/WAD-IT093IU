@@ -1,7 +1,7 @@
 """All shop route methods."""
 from typing import List, Union, Optional
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException, Body
+from fastapi import APIRouter, HTTPException, Body
 
 from database.config import async_session
 from schemas import (
@@ -28,12 +28,12 @@ router = APIRouter(
 
 
 @router.post("/", response_model=Shop)
-async def create_shop(shop: ShopCreate):
+async def create_shop(shop: ShopCreate, status_code=201):
     async with async_session() as session:
         async with session.begin():
             db_shop = await _shop.get_by_name(session, name=shop.name)
             if db_shop is not None:
-                raise HTTPException(status_code=400, detail="Shop already exists")
+                raise HTTPException(status_code=409, detail="Shop already exists")
             return await _shop.create(session, shop=shop)
 
 
@@ -61,10 +61,9 @@ async def read_shop(shop_uid: int):
             return db_shop
 
 
-@router.post("/{shop_uid}/importations/", response_model=Importation)
+@router.post("/{shop_uid}/importations/", response_model=Importation, status_code=201)
 async def create_importation_for_shop(shop_uid: int,
                                       importation: ImportationCreate,
-                                      background_tasks: BackgroundTasks,
                                       importation_details: List[ImportDetailCreate],
                                       item_name: str = Body(...)):
     async with async_session() as session:
@@ -75,14 +74,12 @@ async def create_importation_for_shop(shop_uid: int,
             db_importation = await _importation.create(session,
                                                        importation=importation,
                                                        shop_uid=shop_uid)
-            # for detail in importation_details:
-            #     await _import_detail.create(session,
-            #                                 importation_detail=detail,
-            #                                 importation_uid=db_importation.uid,
-            #                                 item_uid=db_item.uid)
-            background_tasks.add_task(_create_importation_details, session,
-                                      importation_details, db_importation.uid,
-                                      db_item.uid)
+            for detail in importation_details:
+                await _import_detail.create(session,
+                                            importation_detail=detail,
+                                            importation_uid=db_importation.uid,
+                                            item_uid=db_item.uid)
+
             return db_importation
 
 
@@ -114,13 +111,3 @@ async def read_items_of_shop(shop_uid: int):
             if db_shop is None:
                 raise HTTPException(status_code=404, detail="Shop not found")
             return db_shop.items
-
-
-async def _create_importation_details(session,
-                                      importation_details: List[ImportDetailCreate],
-                                      importation_uid: int, item_uid: int):
-    for detail in importation_details:
-        await _import_detail.create(session,
-                                    importation_details=detail,
-                                    importation_uid=importation_uid,
-                                    item_uid=item_uid)
