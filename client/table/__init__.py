@@ -1,19 +1,29 @@
 """
 Example:
-    >>> from wms.gui._table import Table
+    >>> from table import Table
     >>> table = Table()
     >>> table.show_dataframe() # Show options and the selected DataFrame
 """
 
 import io
-import sqlite3
+import os
+from pathlib import Path
 
-import requests
 import hiplot as hip
 import pandas as pd
 import pandas_profiling as pp
 import streamlit as st
 import streamlit.components.v1 as components
+from aiohttp import ClientSession
+from dotenv import load_dotenv
+
+from session_state import SessionState
+
+BASE_DIR = Path(__file__).absolute().parents[1]
+load_dotenv(BASE_DIR.joinpath(".env"))
+
+REQUEST_HOST = os.environ["REQUEST_HOST"]
+REQUEST_PORT = os.environ["REQUEST_PORT"]
 
 
 class Table:
@@ -36,8 +46,10 @@ class Table:
             The Pandas Profiling ProfileReport that will be displayed as HTML.
     """
 
-    def __init__(self):
+    def __init__(self, state: SessionState, session: ClientSession):
         """Initializes Table instance."""
+        self.state = state
+        self.session = session
         self.show_df = None
         self.profile_df = None
         self.limit_rows = 100000
@@ -47,13 +59,19 @@ class Table:
                      "The viewer is limited to {} rows.".format(self.limit_rows))
         self.profile_report = None
 
-    def show_dataframe(self, minimal=True):
+    async def show_dataframe(self, minimal=True):
         with st.beta_container():
             # Options
-            options = [
-                table[0] for table in self.connection.cursor().execute(
-                    "SELECT name FROM sqlite_master WHERE type='table';").fetchall()
-            ]
+            url = f"http://{REQUEST_HOST}:{REQUEST_PORT}/api/internal/admin/"
+            async with self.session.get(url) as response:
+                if response.status == 200:
+                    data = await response.json()
+                else:
+                    st.error(response.status)
+                    err = await response.json()
+                    st.error(err["detail"])
+                    st.stop()
+            options = tuple(data.keys())
             table = st.selectbox(self.text, options, index=3)
             st.info(f"Note: due to limited output size, the displayed DataFrame is "
                     f"limited to the first {self.limit_rows} rows only.\n\n"
@@ -62,7 +80,16 @@ class Table:
 
             col1, col2 = st.beta_columns(2)
             with col1:
-                df = _load_df(table, self.connection)
+                url = f"http://{REQUEST_HOST}:{REQUEST_PORT}/api/{table}/"
+                async with self.session.get(url) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                    else:
+                        st.error(response.status)
+                        err = await response.json()
+                        st.error(err["detail"])
+                        st.stop()
+                df = pd.json_normalize(data)
                 self.show_df = df.head(self.limit_rows)    # Only shows limited rows
                 self.profile_df = df
 
@@ -84,13 +111,3 @@ class Table:
                     components.html(self.profile_report.to_html(),
                                     height=1500,
                                     scrolling=True)
-
-
-@st.cache(persist=True,
-          show_spinner=False,
-          max_entries=10,
-          hash_funcs={sqlite3.Connection: id},
-          ttl=300)
-def _load_df(table, connection):
-    """Caches the pandas dataframe with Streamlit."""
-    return pd.read_sql(f'''SELECT * FROM {table}''', connection)
