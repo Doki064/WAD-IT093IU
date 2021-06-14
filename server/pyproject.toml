@@ -13,6 +13,7 @@ asyncpg = "^0.23.0"
 alembic = "^1.6.5"
 python-dotenv = "^0.17.1"
 orjson = "^3.5.3"
+uvicorn = {extras = ["standard"], version = "^0.14.0"}
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 passlib = {extras = ["argon2"], version = "^1.7.4"}
 python-multipart = "^0.0.5"
