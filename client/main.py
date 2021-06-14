@@ -1,44 +1,63 @@
 import asyncio
+import os
+from pathlib import Path
 
+import orjson
 import aiohttp
-import pandas as pd
 import streamlit as st
+from dotenv import load_dotenv
+
+import session_state
+from menu import Menu
+from main_page import MainPage
+# from management import Management
+# from plot import Plot
+# from table import Table
+
+BASE_DIR = Path(__file__).absolute().parent
+load_dotenv(BASE_DIR.joinpath(".env"))
+
+REQUEST_HOST = os.environ["REQUEST_HOST"]
+REQUEST_PORT = os.environ["REQUEST_PORT"]
 
 
 async def main():
-    async with aiohttp.ClientSession() as session:
-        async with session.get("http://localhost:8080/api/") as response:
-            data = await response.json()
-            st.header(data["message"])
+    async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
+        state = session_state.get(token={}, form="register")
 
-        username = st.text_input("Username: ", value="")
-        password = st.text_input("Password: ", value="")
-        user = {"username": username, "password": password}
+        st.set_page_config(page_title="Wholesale Management System", layout="wide")
 
-        resp = st.empty()
-        if st.button("Register") and username and password:
-            async with session.post("http://localhost:8080/api/users/register/",
-                                    json=user) as response:
-                if response.status == 200:
-                    resp.write(response.status)
-                    resp.write(await response.json())
-                else:
-                    resp.exception(response.status)
-                    resp.exception(await response.json())
+        MainPage.welcome()
 
-        if st.button("Get table"):
-            async with session.get(
-                    "http://localhost:8080/api/internal/admin/") as response:
-                if response.status == 200:
-                    st.write(response.status)
-                    df = pd.json_normalize(await response.json())
-                    st.write(df.transpose())
-                else:
-                    st.exception(response.status)
-                    st.exception(await response.json())
+        if not state.token:
+            MainPage.intro()
+
+            if state.form == "register":
+                st.sidebar.write("Already have an account?")
+                if st.sidebar.button("Sign in"):
+                    state.form = "login"
+            if state.form == "login":
+                st.sidebar.write("Don't have an account yet?")
+                if st.sidebar.button("Register"):
+                    state.form = "register"
+
+            await MainPage.form(state, session)
+
+        else:
+            st.sidebar.header("LOGOUT SECTION")
+            st.sidebar.write(f"*Current session ID: {state.get_id()}*")
+            if st.sidebar.button("Sign out"):
+                state.clear()
+
+            menu = Menu(state=state, session=session)
+            menu.display_option()
+
+            MainPage.info()
+
+        state.sync()
 
 
-def get_or_create_eventloop():
+def get_or_create_event_loop():
     try:
         return asyncio.get_event_loop()
     except RuntimeError as e:
@@ -49,5 +68,5 @@ def get_or_create_eventloop():
 
 
 if __name__ == "__main__":
-    loop = get_or_create_eventloop()
+    loop = get_or_create_event_loop()
     loop.run_until_complete(main())
