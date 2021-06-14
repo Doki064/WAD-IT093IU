@@ -6,9 +6,12 @@ Example:
     >>> gui.info() # Display the info on the sidebar
 """
 
+import re
+
 import streamlit as st
 
 from session_state import SessionState
+from api import user
 
 
 class MainPage:
@@ -23,21 +26,11 @@ class MainPage:
             which contains short description of the web.
     """
 
-    def __init__(self, state: SessionState):
-        """Initializes MainPage instance."""
-        self.state = state
-        self.title = st.empty()
-        self.header = st.empty()
-        self.info_field = st.empty()
-
-    def call(self):
-        """Calls the welcome screen."""
-        self._welcome()
-
-    def _welcome(self):
+    @staticmethod
+    def welcome():
         """Sets up the welcome screen."""
-        self.title.title("Wholesale Management System")
-        self.header.header("Welcome to the WMS of company That Boring Company.")
+        st.title("Wholesale Management System")
+        st.header("Welcome to the WMS of company That Boring Company.")
 
     @staticmethod
     def intro():
@@ -46,7 +39,6 @@ class MainPage:
             ---\n
             This is a project for Web Application Development course in
             [International University - VNU-HCM](https://hcmiu.edu.vn/en/).\n
-            The web application is built with [Streamlit](https://www.streamlit.io/).\n
             Source code is available at [GitHub](https://github.com/Doki064/WAD_IT093IU).
         """)
 
@@ -59,3 +51,59 @@ class MainPage:
             [Streamlit](https://www.streamlit.io/)\n
             [GitHub](https://github.com/Doki064/WAD-IT093IU)
         """)
+
+    @staticmethod
+    async def form(state, session):
+        if state.form == "login":
+            with st.form("login_form"):
+                username = st.text_input("Username: ", value="", key="login_username")
+                password = st.text_input("Password: ",
+                                         type="password",
+                                         value="",
+                                         key="login_password")
+                warn_msg = st.empty()
+                submitted = st.form_submit_button("Sign in")
+                if submitted and username and password:
+                    response = await user.login(session, username, password)
+                    if response.status != 200:
+                        if response.status == 401:
+                            warn_msg.warning("The username or password was not correct")
+                        else:
+                            st.error(response.status)
+                            st.error(response.data["detail"])
+                            st.stop()
+                    # self.state.token = response.data["token"]
+                    st.experimental_rerun()
+
+        else:
+            with st.form("register_form"):
+                username = st.text_input("Username: ", value="", key="register_username")
+                uname_warn = st.empty()
+                password = st.text_input("Password: ",
+                                         type="password",
+                                         value="",
+                                         key="register_password")
+                password_confirm = st.text_input("Confirm password: ",
+                                                 type="password",
+                                                 value="",
+                                                 key="password_confirm")
+                pwd_warn = st.empty()
+                submitted = st.form_submit_button("Sign up")
+                if submitted and username and password:
+                    pattern = "^(?=.{8,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$"
+                    if re.match(pattern, username) is None:
+                        uname_warn.warning("Username must be between 8 and 20 characters")
+                        st.stop()
+                    elif len(password) < 8 or len(password) > 30:
+                        pwd_warn.warning("Password must be between 8 and 30 characters")
+                        st.stop()
+                    elif password_confirm != password:
+                        pwd_warn.warning("The password confirmation does not match")
+                        st.stop()
+                    response = await user.register(session, username, password)
+                    if response.status != 201:
+                        st.error(response.status)
+                        st.error(response.data["detail"])
+                        st.stop()
+                    # self.state.token = response.data["token"]
+                    st.experimental_rerun()
