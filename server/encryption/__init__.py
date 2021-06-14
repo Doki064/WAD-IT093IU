@@ -2,25 +2,34 @@ import base64
 import hashlib
 import hmac
 import os
-from pathlib import Path
+# from pathlib import Path
+from datetime import datetime, timedelta
+from typing import Optional
 
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
+from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
+from jose import jwt
 
-BASE_DIR = Path(__file__).absolute().parents[1]
-load_dotenv(BASE_DIR.joinpath(".env"))
+# BASE_DIR = Path(__file__).absolute().parents[1]
+# load_dotenv(BASE_DIR.joinpath(".env"))
+
+HASH_SCHEME = os.environ["HASH_SCHEME"]
+SECRET_KEY = os.environ["SECRET_KEY"]
+ALGORITHM = os.environ["ALGORITHM"]
+ACCESS_TOKEN_EXPIRE_DAYS = 7
 
 pwd_context = CryptContext(
-    schemes=os.environ["HASH_METHOD"],
+    schemes=HASH_SCHEME,
     deprecated="auto",
 )
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 def hash_password(password: str, salt: bytes) -> str:
     """Hash password function.
 
-    The password is hashed with Argon2,
-    after that it is stored in a file to verify in the login process.
+    Hash is generate from password and salt, after that it will be stored in the database.
 
     Args:
         password: The password to be hashed.
@@ -34,11 +43,10 @@ def hash_password(password: str, salt: bytes) -> str:
     return pwd_context.hash(secret)
 
 
-def check_password(password: str, hashed_password: str, salt: bytes):
-    """Check password function, rehash password if needed.
+def verify_password(password: str, hashed_password: str, salt: bytes):
+    """Verify password function, rehash password if needed.
 
-    Argon2 will verify whether the password matches the encrypted key,
-    and rehash the password if necessary.
+    Verify whether password matches the hash in the database.
 
     Args:
         password: The input password to be checked.
@@ -46,7 +54,7 @@ def check_password(password: str, hashed_password: str, salt: bytes):
         salt: The salt stored in the database.
 
     Returns:
-        True if password matches, else False.
+        True if password matches, False otherwise.
 
     Raises:
         NeedRehashException: Exception raised when password needs to be rehashed.
@@ -57,4 +65,23 @@ def check_password(password: str, hashed_password: str, salt: bytes):
 
 
 def needs_rehash(hashed_password: str):
+    """Check if old hashed password needs to be rehashed.
+
+    Args:
+        hashed_password: The hashed password stored in the database.
+
+    Returns:
+        True if needs to be rehashed, False otherwise.
+    """
     return pwd_context.needs_update(hashed_password)
+
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(hours=1)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt

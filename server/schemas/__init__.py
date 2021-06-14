@@ -167,19 +167,3 @@ class Customer(CustomerBase):
 
     class Config:
         orm_mode = True
-
-
-# Schema for users
-class UserBase(_BaseModel):
-    username: str
-
-
-class UserCreate(UserBase):
-    password: str
-
-
-class User(UserBase):
-    uid: int
-
-    class Config:
-        orm_mode = True
