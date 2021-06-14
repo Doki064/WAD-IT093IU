@@ -1,23 +1,14 @@
 import base64
 import hashlib
 import hmac
-import os
-# from pathlib import Path
 from datetime import datetime, timedelta
 from typing import Optional
 
-# from dotenv import load_dotenv
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from jose import jwt
 
-# BASE_DIR = Path(__file__).absolute().parents[1]
-# load_dotenv(BASE_DIR.joinpath(".env"))
-
-HASH_SCHEME = os.environ["HASH_SCHEME"]
-SECRET_KEY = os.environ["SECRET_KEY"]
-ALGORITHM = os.environ["ALGORITHM"]
-ACCESS_TOKEN_EXPIRE_DAYS = 7
+from settings import HASH_SCHEME, SECRET_KEY, ALGORITHM
 
 pwd_context = CryptContext(
     schemes=HASH_SCHEME,

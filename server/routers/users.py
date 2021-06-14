@@ -9,6 +9,7 @@ import encryption
 from database.config import async_session
 from schemas.secure import User, Token, TokenData
 from crud import user as _user
+from settings import ACCESS_TOKEN_EXPIRE_DAYS
 
 router = APIRouter(
     prefix="/api/users",
@@ -59,7 +60,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
                     detail="Incorrect username or password",
                     headers={"WWW-Authenticate": "Bearer"},
                 )
-            access_token_expires = timedelta(days=encryption.ACCESS_TOKEN_EXPIRE_DAYS)
+            access_token_expires = timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
             access_token = encryption.create_access_token(
                 data={"sub": f"user_uid:{db_user.user_uid}"},
                 expires_delta=access_token_expires)
@@ -76,7 +77,7 @@ async def register(form_data: OAuth2PasswordRequestForm = Depends()):
             db_user = await _user.create(session,
                                          username=form_data.username,
                                          password=form_data.password)
-            access_token_expires = timedelta(days=encryption.ACCESS_TOKEN_EXPIRE_DAYS)
+            access_token_expires = timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
             access_token = encryption.create_access_token(
                 data={"sub": f"user_uid:{db_user.user_uid}"},
                 expires_delta=access_token_expires)
