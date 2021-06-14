@@ -8,17 +8,16 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = ">=3.8,<3.9"
 streamlit = "^0.82.0"
-requests = "^2.25.1"
 aiohttp = {extras = ["speedups"], version = "^3.7.4"}
 cchardet = "^2.1.7"
 aiodns = "^3.0.0"
 brotlipy = "^0.7.0"
+orjson = "^3.5.3"
 pandas = "^1.2.4"
 pandas-profiling = "^3.0.0"
 hiplot = "^0.1.25"
 plotly = "^4.14.3"
 python-dotenv = "^0.17.1"
-orjson = "^3.5.3"
 
 [tool.poetry.dev-dependencies]
 
