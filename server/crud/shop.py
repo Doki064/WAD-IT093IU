@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Union, Optional
 
 from sqlalchemy.future import select
 from sqlalchemy.orm import Session
@@ -15,13 +15,13 @@ async def create(db: Session, shop: ShopCreate) -> Shop:
     return db_shop
 
 
-async def get_by_uid(db: Session, shop_uid: int) -> Shop:
+async def get_by_uid(db: Session, shop_uid: int) -> Union[Shop, None]:
     q = select(Shop).where(Shop.uid == shop_uid)
     result = await db.execute(q)
     return result.scalars().first()
 
 
-async def get_by_name(db: Session, name: str) -> Shop:
+async def get_by_name(db: Session, name: str) -> Union[Shop, None]:
     q = select(Shop).where(Shop.name == name)
     result = await db.execute(q)
     return result.scalars().first()

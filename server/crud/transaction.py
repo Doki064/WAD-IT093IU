@@ -19,7 +19,7 @@ async def create(db: Session, transaction: TransactionCreate, customer_uid: int,
     return db_transaction
 
 
-async def get_by_uid(db: Session, transaction_uid: int) -> Transaction:
+async def get_by_uid(db: Session, transaction_uid: int) -> Union[Transaction, None]:
     q = select(Transaction).where(Transaction.uid == transaction_uid)
     result = await db.execute(q)
     return result.scalars().first()

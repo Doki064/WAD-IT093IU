@@ -17,7 +17,7 @@ async def create(db: Session, importation: ImportationCreate,
     return db_importation
 
 
-async def get_by_uid(db: Session, importation_uid: int) -> Importation:
+async def get_by_uid(db: Session, importation_uid: int) -> Union[Importation, None]:
     q = select(Importation).where(Importation.uid == importation_uid)
     result = await db.execute(q)
     return result.scalars().first()
