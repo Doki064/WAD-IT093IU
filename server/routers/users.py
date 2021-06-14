@@ -9,7 +9,7 @@ import encryption
 from database.config import async_session
 from schemas.secure import User, Token, TokenData
 from crud import user as _user
-from settings import ACCESS_TOKEN_EXPIRE_DAYS
+from settings import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_DAYS
 
 router = APIRouter(
     prefix="/api/users",
@@ -27,9 +27,7 @@ async def _get_current_user(session, token: str = Depends(encryption.oauth2_sche
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token,
-                             encryption.SECRET_KEY,
-                             algorithms=[encryption.ALGORITHM])
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_uid: int = payload.get("sub")
         if user_uid is None:
             raise credentials_exception
