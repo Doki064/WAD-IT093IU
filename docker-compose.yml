@@ -1,30 +1,28 @@
 version: "3"
 
 services:
-    # frontend:
-    #     container_name: Streamlit
-    #     build: client/
-    #     image: frontend:test
-    #     stdin_open: true
-    #     tty: true
-    #     working_dir: /app/client
-    #     volumes:
-    #         - .:/app
-    #     ports:
-    #         - "8501:8501"
-    #     networks:
-    #         - frontend
-    #     depends_on:
-    #         - backend
+    frontend:
+        container_name: Streamlit
+        build: client/
+        image: frontend:beta
+        env_file:
+            - client/.env.prod
+        working_dir: /app
+        ports:
+            - "80:8501"
+        networks:
+            - frontend
+        depends_on:
+            - backend
 
     backend:
         container_name: FastAPI
         build: server/
         image: backend:beta
-        working_dir: /app/server
-        command: bash /app/server/start-reload.sh
-        volumes:
-            - .:/app
+        env_file:
+            - server/.env.prod
+        working_dir: /app
+        command: bash /app/start-reload.sh
         ports:
             - "8080:8080"
         networks:
