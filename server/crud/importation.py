@@ -13,7 +13,6 @@ async def create(db: Session, importation: ImportationCreate,
     db_importation = Importation(**importation.dict(), shop_uid=shop_uid)
     db.add(db_importation)
     await db.commit()
-    await db.refresh(db_importation)
     return db_importation
 
 
@@ -26,7 +25,7 @@ async def get_by_uid(db: Session, importation_uid: int) -> Union[Importation, No
 async def get_by_date(db: Session,
                       date: date,
                       limit: Optional[int] = None) -> List[Importation]:
-    q = select(Importation).where(Importation.date == date.isoformat(date))
+    q = select(Importation).where(Importation.date == date)
     if limit is not None:
         q.limit(limit)
     result = await db.execute(q)
@@ -51,7 +50,6 @@ async def get_min_date(db: Session) -> Union[date, None]:
     min_date = result.scalar()
     if min_date is None:
         return None
-    min_date = date.fromisoformat(min_date)
     return min_date
 
 
@@ -61,5 +59,4 @@ async def get_max_date(db: Session) -> Union[date, None]:
     max_date = result.scalar()
     if max_date is None:
         return None
-    max_date = date.fromisoformat(max_date)
     return max_date

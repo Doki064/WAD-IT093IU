@@ -15,7 +15,6 @@ async def create(db: Session, transaction: TransactionCreate, customer_uid: int,
                                  shop_uid=shop_uid)
     db.add(db_transaction)
     await db.commit()
-    await db.refresh(db_transaction)
     return db_transaction
 
 
@@ -28,7 +27,7 @@ async def get_by_uid(db: Session, transaction_uid: int) -> Union[Transaction, No
 async def get_by_date(db: Session,
                       date: date,
                       limit: Optional[int] = None) -> List[Transaction]:
-    q = select(Transaction).where(Transaction.date == date.isoformat(date))
+    q = select(Transaction).where(Transaction.date == date)
     if limit is not None:
         q.limit(limit)
     result = await db.execute(q)
@@ -63,7 +62,6 @@ async def get_min_date(db: Session) -> Union[date, None]:
     min_date = result.scalar()
     if min_date is None:
         return None
-    min_date = date.fromisoformat(min_date)
     return min_date
 
 
@@ -73,5 +71,4 @@ async def get_max_date(db: Session) -> Union[date, None]:
     max_date = result.scalar()
     if max_date is None:
         return None
-    max_date = date.fromisoformat(date)
     return max_date

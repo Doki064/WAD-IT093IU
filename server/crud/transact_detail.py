@@ -14,7 +14,6 @@ async def create(db: Session, transaction_detail: TransactDetailCreate,
                                            item_uid=item_uid)
     db.add(db_transaction_detail)
     await db.commit()
-    await db.refresh(db_transaction_detail)
     return db_transaction_detail
 
 

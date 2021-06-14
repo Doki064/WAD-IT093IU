@@ -11,7 +11,6 @@ async def create(db: Session, item: ItemCreate, category_uid: int, shop_uid: int
     db_item = Item(**item.dict(), category_uid=category_uid, shop_uid=shop_uid)
     db.add(db_item)
     await db.commit()
-    await db.refresh(db_item)
     return db_item
 
 

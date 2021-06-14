@@ -10,7 +10,16 @@ __all__ = [
     "TransactDetail",
 ]
 
-from sqlalchemy import (Column, ForeignKey, CheckConstraint, Integer, Float, String)
+from sqlalchemy import (
+    Column,
+    ForeignKey,
+    CheckConstraint,
+    Integer,
+    Float,
+    String,
+    Date,
+)
+from sqlalchemy.sql import functions
 from sqlalchemy.orm import relationship
 
 from database.config import Base
@@ -40,7 +49,7 @@ class Category(Base):
     uid = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), unique=True, index=True, nullable=False)
 
-    items = relationship("Item", back_populates="category")
+    items = relationship("Item", back_populates="category", lazy="joined", innerjoin=True)
 
 
 class Item(Base):
@@ -55,6 +64,8 @@ class Item(Base):
     category = relationship("Category", back_populates="items")
     shop = relationship("Shop", back_populates="items")
 
+    __mapper_args__ = {"eager_defaults": True}
+
 
 class Shop(Base):
     __tablename__ = "shops"
@@ -64,32 +75,48 @@ class Shop(Base):
 
     importations = relationship("Importation", back_populates="shop")
     transactions = relationship("Transaction", back_populates="shop")
-    items = relationship("Item", back_populates="shop")
+    items = relationship("Item", back_populates="shop", lazy="joined", innerjoin=True)
 
 
 class Importation(Base):
     __tablename__ = "importations"
 
     uid = Column(Integer, primary_key=True, index=True)
-    date = Column(String(100), index=True, nullable=False)
+    date = Column(Date,
+                  index=True,
+                  nullable=False,
+                  server_default=functions.current_date())
     shop_uid = Column(Integer, ForeignKey("shops.uid"))
 
-    importation_details = relationship("ImportDetail", back_populates="importation")
+    importation_details = relationship("ImportDetail",
+                                       back_populates="importation",
+                                       lazy="joined",
+                                       innerjoin=True)
     shop = relationship("Shop", back_populates="importations")
+
+    __mapper_args__ = {"eager_defaults": True}
 
 
 class Transaction(Base):
     __tablename__ = "transactions"
 
     uid = Column(Integer, primary_key=True, index=True)
-    date = Column(String(100), index=True, nullable=False)
+    date = Column(Date,
+                  index=True,
+                  nullable=False,
+                  server_default=functions.current_date())
     status = Column(String(100), default="PENDING")
     customer_uid = Column(Integer, ForeignKey("customers.uid"))
     shop_uid = Column(Integer, ForeignKey("shops.uid"))
 
-    transaction_details = relationship("TransactDetail", back_populates="transaction")
+    transaction_details = relationship("TransactDetail",
+                                       back_populates="transaction",
+                                       lazy="joined",
+                                       innerjoin=True)
     customer = relationship("Customer", back_populates="transactions")
     shop = relationship("Shop", back_populates="transactions")
+
+    __mapper_args__ = {"eager_defaults": True}
 
 
 class ImportDetail(Base):

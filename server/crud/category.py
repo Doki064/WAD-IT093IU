@@ -11,7 +11,6 @@ async def create(db: Session, category: CategoryCreate) -> Category:
     db_category = Category(**category.dict())
     db.add(db_category)
     await db.commit()
-    await db.refresh(db_category)
     return db_category
 
 

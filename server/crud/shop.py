@@ -11,7 +11,6 @@ async def create(db: Session, shop: ShopCreate) -> Shop:
     db_shop = Shop(**shop.dict())
     db.add(db_shop)
     await db.commit()
-    await db.refresh(db_shop)
     return db_shop
 
 

@@ -14,7 +14,6 @@ async def create(db: Session, importation_detail: ImportationCreate, importation
                                          item_uid=item_uid)
     db.add(db_importation_detail)
     await db.commit()
-    await db.refresh(db_importation_detail)
     return db_importation_detail
 
 

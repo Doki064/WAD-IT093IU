@@ -11,7 +11,6 @@ async def create(db: Session, customer: CustomerCreate) -> Customer:
     db_customer = Customer(**customer.dict())
     db.add(db_customer)
     await db.commit()
-    await db.refresh(db_customer)
     return db_customer
 
 

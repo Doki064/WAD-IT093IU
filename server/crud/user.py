@@ -15,7 +15,6 @@ async def create(db: Session, username: str, password: str) -> User:
     db_user = User(username=username, hashed_password=hashed_password, salt=salt.hex())
     db.add(db_user)
     await db.commit()
-    await db.refresh(db_user)
     return db_user
 
 
