@@ -6,8 +6,6 @@ Example:
 """
 
 import io
-import os
-from pathlib import Path
 
 import hiplot as hip
 import pandas as pd
@@ -15,15 +13,9 @@ import pandas_profiling as pp
 import streamlit as st
 import streamlit.components.v1 as components
 from aiohttp import ClientSession
-from dotenv import load_dotenv
 
 from session_state import SessionState
-
-BASE_DIR = Path(__file__).absolute().parents[1]
-load_dotenv(BASE_DIR.joinpath(".env"))
-
-REQUEST_HOST = os.environ["REQUEST_HOST"]
-REQUEST_PORT = os.environ["REQUEST_PORT"]
+from api import BASE_URL
 
 
 class Table:
@@ -62,8 +54,7 @@ class Table:
     async def show_dataframe(self, minimal=True):
         with st.beta_container():
             # Options
-            url = f"http://{REQUEST_HOST}:{REQUEST_PORT}/api/internal/admin/"
-            async with self.session.get(url) as response:
+            async with self.session.get(f"{BASE_URL}/internal/admin/") as response:
                 if response.status == 200:
                     data = await response.json()
                 else:
@@ -80,8 +71,7 @@ class Table:
 
             col1, col2 = st.beta_columns(2)
             with col1:
-                url = f"http://{REQUEST_HOST}:{REQUEST_PORT}/api/{table}/"
-                async with self.session.get(url) as response:
+                async with self.session.get(f"{BASE_URL}/{table}/") as response:
                     if response.status == 200:
                         data = await response.json()
                     else:

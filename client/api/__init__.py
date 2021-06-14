@@ -1,14 +1,6 @@
-import os
-from pathlib import Path
+from settings import SERVER_HOST, SERVER_PORT
 
-from dotenv import load_dotenv
-
-BASE_DIR = Path(__file__).absolute().parents[1]
-load_dotenv(BASE_DIR.joinpath(".env"))
-
-REQUEST_HOST = os.environ["REQUEST_HOST"]
-REQUEST_PORT = os.environ["REQUEST_PORT"]
-BASE_URL = f"http://{REQUEST_HOST}:{REQUEST_PORT}/api"
+BASE_URL = f"http://{SERVER_HOST}:{SERVER_PORT}/api"
 
 
 class Response:

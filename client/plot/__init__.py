@@ -5,23 +5,15 @@ Example:
     >>> plot.plot()
 """
 
-import os
-from pathlib import Path
 from datetime import datetime
 
 import pandas as pd
 import plotly.express as px
 import streamlit as st
 from aiohttp import ClientSession
-from dotenv import load_dotenv
 
 from session_state import SessionState
-
-BASE_DIR = Path(__file__).absolute().parents[1]
-load_dotenv(BASE_DIR.joinpath(".env"))
-
-REQUEST_HOST = os.environ["REQUEST_HOST"]
-REQUEST_PORT = os.environ["REQUEST_PORT"]
+from api import BASE_URL
 
 
 class Plot:
@@ -162,8 +154,7 @@ async def _load_df(session: ClientSession):
 
 
 async def _load_shop(session: ClientSession):
-    url = f"http://{REQUEST_HOST}:{REQUEST_PORT}/api/shops/"
-    async with session.get(url) as response:
+    async with session.get(f"{BASE_URL}/shops/") as response:
         if response.status == 200:
             data = await response.json()
         else:

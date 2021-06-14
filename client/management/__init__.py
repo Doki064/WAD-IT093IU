@@ -1,18 +1,8 @@
-import os
-from pathlib import Path
-
 import streamlit as st
 from aiohttp import ClientSession
-from dotenv import load_dotenv
 
 from session_state import SessionState
-
-BASE_DIR = Path(__file__).absolute().parents[1]
-load_dotenv(BASE_DIR.joinpath(".env"))
-
-REQUEST_HOST = os.environ["REQUEST_HOST"]
-REQUEST_PORT = os.environ["REQUEST_PORT"]
-BASE_URL = f"http://{REQUEST_HOST}:{REQUEST_PORT}/api"
+from api import BASE_URL
 
 
 class Management:
