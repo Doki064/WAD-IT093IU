@@ -1,25 +1,26 @@
-[project]
-name = ""
-version = ""
+[tool.poetry]
+name = "backend"
+version = "0.1.0"
 description = ""
-authors = [
-    {name = "Nguyen Nhat Minh", email = "52833936+Doki064@users.noreply.github.com"},
-]
-dependencies = ["fastapi~=0.65", "uvicorn~=0.14", "sqlalchemy~=1.4", "asyncpg~=0.23", "alembic~=1.6", "python-dotenv~=0.17", "orjson~=3.5", "python-jose[cryptography]~=3.3", "passlib[argon2]~=1.7"]
-requires-python = ">=3.8, <3.9"
-dynamic = ["classifiers"]
-license = {text = "MIT"}
+authors = ["Nguyen Nhat Minh <52833936+Doki064@users.noreply.github.com>"]
+license = "MIT"
 
-[project.urls]
-homepage = ""
+[tool.poetry.dependencies]
+python = "^3.8"
+fastapi = "^0.65.2"
+SQLAlchemy = "^1.4.18"
+asyncpg = "^0.23.0"
+alembic = "^1.6.5"
+python-dotenv = "^0.17.1"
+orjson = "^3.5.3"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+passlib = {extras = ["argon2"], version = "^1.7.4"}
+python-multipart = "^0.0.5"
 
+[tool.poetry.dev-dependencies]
+requests = "^2.25.1"
+aiosqlite = "^0.17.0"
 
-[project.optional-dependencies]
 [build-system]
-requires = ["pdm-pep517"]
-build-backend = "pdm.pep517.api"
-
-[tool]
-[tool.pdm]
-[tool.pdm.dev-dependencies]
-dev = ["aiosqlite~=0.17", "requests~=2.25"]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

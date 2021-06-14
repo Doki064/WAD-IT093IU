@@ -1,48 +1,51 @@
+# syntax=docker/dockerfile:1.2
 ###############################################
 # Base Image
 ###############################################
 FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8-slim as python-base
 
 # Set environment variables
-## For python and pip
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-ENV PIP_NO_CACHE_DIR=off
-ENV PIP_DISABLE_PIP_VERSION_CHECK=on
-ENV PIP_DEFAULT_TIMEOUT=100
-
-## For pdm
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONFAULTHANDLER=1
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONHASHSEED=random
 ENV PYSETUP_PATH="/opt/pysetup"
-ENV PACKAGE_PATH="/opt/pysetup/__pypackages__/3.8"
-
-# prepend package to path
-ENV PATH="$PACKAGE_PATH/bin:$PATH"
-ENV PYTHONPATH="$PACKAGE_PATH/lib:$PYTHONPATH"
+ENV VENV_PATH="/opt/pysetup/.venv"
 
 ###############################################
 # Builder Image
 ###############################################
 FROM python-base as builder-base
 
-# Install pdm
-RUN pip install pdm
+ENV PIP_NO_CACHE_DIR=off
+ENV PIP_DISABLE_PIP_VERSION_CHECK=on
+ENV PIP_DEFAULT_TIMEOUT=100
+ENV POETRY_VERSION=1.1.6
+ENV POETRY_VIRTUALENVS_IN_PROJECT=true
 
-# Copy project requirement files here to ensure they will be cached.
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    build-essential
+
+# install poetry - respects $POETRY_VERSION
+RUN pip install "poetry==$POETRY_VERSION"
+
+# Copy project requirement files here to ensure they will be cached
 WORKDIR $PYSETUP_PATH
-COPY pyproject.toml pdm.lock ./
+COPY pyproject.toml poetry.lock ./
 
 # Install runtime dependencies
-RUN pdm sync --clean
+RUN poetry install --no-root --no-dev --no-ansi
 
 ###############################################
 # Production Image
 ###############################################
 FROM python-base as production
 
-## For image
-ENV MODULE_NAME="server.main"
+# prepend virtualenv to path
+ENV PATH="$VENV_PATH/bin:$PATH"
+ENV PYTHONPATH="$VENV_PATH/lib/python3.8/site-packages:$PYTHONPATH"
+## For deploy
 ENV PORT="8080"
-ENV PRE_START_PATH="/app/server/prestart.sh"
 
 COPY --from=builder-base $PYSETUP_PATH $PYSETUP_PATH
-COPY . /app/server
+COPY . /app
