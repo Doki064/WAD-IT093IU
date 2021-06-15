@@ -7,15 +7,15 @@ from models import Item
 from schemas import ItemCreate
 
 
-async def create(db: Session, item: ItemCreate, category_uid: int, shop_uid: int) -> Item:
-    db_item = Item(**item.dict(), category_uid=category_uid, shop_uid=shop_uid)
+async def create(db: Session, item: ItemCreate, category_id: int, shop_id: int) -> Item:
+    db_item = Item(**item.dict(), category_id=category_id, shop_id=shop_id)
     db.add(db_item)
     await db.commit()
     return db_item
 
 
-async def get_by_uid(db: Session, item_uid: int) -> Union[Item, None]:
-    q = select(Item).where(Item.uid == item_uid)
+async def get_by_id(db: Session, item_id: int) -> Union[Item, None]:
+    q = select(Item).where(Item.id == item_id)
     result = await db.execute(q)
     return result.scalars().first()
 

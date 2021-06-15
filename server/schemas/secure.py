@@ -1,4 +1,5 @@
 from typing import Optional
+from uuid import UUID
 
 from pydantic import BaseModel as _BaseModel
 
@@ -9,7 +10,7 @@ class UserBase(_BaseModel):
 
 
 class User(UserBase):
-    uid: int
+    uuid: UUID
     disabled: Optional[bool] = None
 
     class Config:
@@ -23,5 +24,5 @@ class Token(_BaseModel):
 
 
 class TokenData(_BaseModel):
-    user_uid: Optional[int] = None
+    uuid: Optional[UUID] = None
     username: Optional[str] = None

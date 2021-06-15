@@ -34,8 +34,8 @@ class ImportDetailCreate(ImportDetailBase):
 
 
 class ImportDetail(ImportDetailBase):
-    importation_uid: int
-    item_uid: int
+    importation_id: int
+    item_id: int
 
     class Config:
         orm_mode = True
@@ -51,8 +51,8 @@ class ImportationCreate(ImportationBase):
 
 
 class Importation(ImportationBase):
-    uid: int
-    shop_uid: int
+    id: int
+    shop_id: int
     importation_details: List[ImportDetail] = []
 
     class Config:
@@ -70,8 +70,8 @@ class TransactDetailCreate(TransactDetailBase):
 
 
 class TransactDetail(TransactDetailBase):
-    transaction_uid: int
-    item_uid: int
+    transaction_id: int
+    item_id: int
 
     class Config:
         orm_mode = True
@@ -88,9 +88,9 @@ class TransactionCreate(TransactionBase):
 
 
 class Transaction(TransactionBase):
-    uid: int
-    customer_uid: int
-    shop_uid: int
+    id: int
+    customer_id: int
+    shop_id: int
     transaction_details: List[TransactDetail] = []
 
     class Config:
@@ -108,8 +108,8 @@ class ItemCreate(ItemBase):
 
 
 class Item(ItemBase):
-    uid: int
-    category_uid: int
+    id: int
+    category_id: int
     shop_uid: int
 
     class Config:
@@ -126,7 +126,7 @@ class CategoryCreate(CategoryBase):
 
 
 class Category(CategoryBase):
-    uid: int
+    id: int
     items: List[Item] = []
 
     class Config:
@@ -143,7 +143,7 @@ class ShopCreate(ShopBase):
 
 
 class Shop(ShopBase):
-    uid: int
+    id: int
     importations: List[Importation] = []
     transactions: List[Transaction] = []
     items: List[Item] = []
@@ -162,7 +162,7 @@ class CustomerCreate(CustomerBase):
 
 
 class Customer(CustomerBase):
-    uid: int
+    id: int
     transactions: List[Transaction] = []
 
     class Config:

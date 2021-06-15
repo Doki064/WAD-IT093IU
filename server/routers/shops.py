@@ -51,18 +51,18 @@ async def read_shops(shop_name: Optional[str] = None,
             return await _shop.get_all(session, skip=skip, limit=limit)
 
 
-@router.get("/{shop_uid}", response_model=Shop)
-async def read_shop(shop_uid: int):
+@router.get("/{shop_id}", response_model=Shop)
+async def read_shop(shop_id: int):
     async with async_session() as session:
         async with session.begin():
-            db_shop = await _shop.get_by_uid(session, shop_uid=shop_uid)
+            db_shop = await _shop.get_by_id(session, shop_id=shop_id)
             if db_shop is None:
                 raise HTTPException(status_code=404, detail="Shop not found")
             return db_shop
 
 
-@router.post("/{shop_uid}/importations/", response_model=Importation, status_code=201)
-async def create_importation_for_shop(shop_uid: int,
+@router.post("/{shop_id}/importations/", response_model=Importation, status_code=201)
+async def create_importation_for_shop(shop_id: int,
                                       importation: ImportationCreate,
                                       importation_details: List[ImportDetailCreate],
                                       item_name: str = Body(...)):
@@ -73,41 +73,41 @@ async def create_importation_for_shop(shop_uid: int,
                 raise HTTPException(status_code=404, detail="Item not found")
             db_importation = await _importation.create(session,
                                                        importation=importation,
-                                                       shop_uid=shop_uid)
+                                                       shop_id=shop_id)
             for detail in importation_details:
                 await _import_detail.create(session,
                                             importation_detail=detail,
-                                            importation_uid=db_importation.uid,
-                                            item_uid=db_item.uid)
+                                            importation_id=db_importation.id,
+                                            item_id=db_item.id)
 
             return db_importation
 
 
-@router.get("/{shop_uid}/importations/", response_model=List[Importation])
-async def read_importations_of_shop(shop_uid: int):
+@router.get("/{shop_id}/importations/", response_model=List[Importation])
+async def read_importations_of_shop(shop_id: int):
     async with async_session() as session:
         async with session.begin():
-            db_shop = await _shop.get_by_uid(session, shop_uid=shop_uid)
+            db_shop = await _shop.get_by_id(session, shop_id=shop_id)
             if db_shop is None:
                 raise HTTPException(status_code=404, detail="Shop not found")
             return db_shop.importations
 
 
-@router.get("/{shop_uid}/transactions/", response_model=List[Transaction])
-async def read_transactions_of_shop(shop_uid: int):
+@router.get("/{shop_id}/transactions/", response_model=List[Transaction])
+async def read_transactions_of_shop(shop_id: int):
     async with async_session() as session:
         async with session.begin():
-            db_shop = await _shop.get_by_uid(session, shop_uid=shop_uid)
+            db_shop = await _shop.get_by_id(session, shop_id=shop_id)
             if db_shop is None:
                 raise HTTPException(status_code=404, detail="Shop not found")
             return db_shop.transactions
 
 
-@router.get("/{shop_uid}/items/", response_model=List[Item])
-async def read_items_of_shop(shop_uid: int):
+@router.get("/{shop_id}/items/", response_model=List[Item])
+async def read_items_of_shop(shop_id: int):
     async with async_session() as session:
         async with session.begin():
-            db_shop = await _shop.get_by_uid(session, shop_uid=shop_uid)
+            db_shop = await _shop.get_by_id(session, shop_id=shop_id)
             if db_shop is None:
                 raise HTTPException(status_code=404, detail="Shop not found")
             return db_shop.items

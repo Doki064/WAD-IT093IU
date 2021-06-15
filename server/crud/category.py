@@ -14,8 +14,8 @@ async def create(db: Session, category: CategoryCreate) -> Category:
     return db_category
 
 
-async def get_by_uid(db: Session, category_uid: int) -> Union[Category, None]:
-    q = select(Category).where(Category.uid == category_uid)
+async def get_by_id(db: Session, category_id: int) -> Union[Category, None]:
+    q = select(Category).where(Category.id == category_id)
     result = await db.execute(q)
     return result.scalars().first()
 

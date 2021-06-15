@@ -10,6 +10,8 @@ __all__ = [
     "TransactDetail",
 ]
 
+from uuid import uuid4
+
 from sqlalchemy import (
     Column,
     ForeignKey,
@@ -19,6 +21,7 @@ from sqlalchemy import (
     String,
     Date,
 )
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import functions
 from sqlalchemy.orm import relationship
 
@@ -28,16 +31,19 @@ from database.config import Base
 class User(Base):
     __tablename__ = "users"
 
-    uid = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True)
+    uuid = Column(UUID(as_uuid=True), unique=True, index=True, default=uuid4)
     username = Column(String(100), unique=True, index=True, nullable=False)
     hashed_password = Column(String(100), nullable=False)
     salt = Column(String(100), nullable=False)
+
+    __mapper_args__ = {"eager_defaults": True}
 
 
 class Customer(Base):
     __tablename__ = "customers"
 
-    uid = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), index=True, nullable=False)
 
     transactions = relationship("Transaction", back_populates="customer")
@@ -46,7 +52,7 @@ class Customer(Base):
 class Category(Base):
     __tablename__ = "categories"
 
-    uid = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), unique=True, index=True, nullable=False)
 
     items = relationship("Item", back_populates="category", lazy="joined", innerjoin=True)
@@ -55,11 +61,11 @@ class Category(Base):
 class Item(Base):
     __tablename__ = "items"
 
-    uid = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), unique=True, index=True, nullable=False)
     quantity = Column(Integer, CheckConstraint("quantity >= 0"), default=0)
-    category_uid = Column(Integer, ForeignKey("categories.uid"))
-    shop_uid = Column(Integer, ForeignKey("shops.uid"))
+    category_id = Column(Integer, ForeignKey("categories.id"))
+    shop_id = Column(Integer, ForeignKey("shops.id"))
 
     category = relationship("Category", back_populates="items")
     shop = relationship("Shop", back_populates="items")
@@ -70,7 +76,7 @@ class Item(Base):
 class Shop(Base):
     __tablename__ = "shops"
 
-    uid = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), unique=True, index=True, nullable=False)
 
     importations = relationship("Importation", back_populates="shop")
@@ -81,12 +87,12 @@ class Shop(Base):
 class Importation(Base):
     __tablename__ = "importations"
 
-    uid = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True)
     date = Column(Date,
                   index=True,
                   nullable=False,
                   server_default=functions.current_date())
-    shop_uid = Column(Integer, ForeignKey("shops.uid"))
+    shop_id = Column(Integer, ForeignKey("shops.id"))
 
     importation_details = relationship("ImportDetail",
                                        back_populates="importation",
@@ -100,14 +106,14 @@ class Importation(Base):
 class Transaction(Base):
     __tablename__ = "transactions"
 
-    uid = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True)
     date = Column(Date,
                   index=True,
                   nullable=False,
                   server_default=functions.current_date())
     status = Column(String(100), default="PENDING")
-    customer_uid = Column(Integer, ForeignKey("customers.uid"))
-    shop_uid = Column(Integer, ForeignKey("shops.uid"))
+    customer_id = Column(Integer, ForeignKey("customers.id"))
+    shop_id = Column(Integer, ForeignKey("shops.id"))
 
     transaction_details = relationship("TransactDetail",
                                        back_populates="transaction",
@@ -122,21 +128,21 @@ class Transaction(Base):
 class ImportDetail(Base):
     __tablename__ = "importation_details"
 
-    importation_uid = Column(Integer, ForeignKey("importations.uid"), primary_key=True)
-    item_uid = Column(Integer, ForeignKey("items.uid"), primary_key=True)
+    importation_id = Column(Integer, ForeignKey("importations.id"), primary_key=True)
+    item_id = Column(Integer, ForeignKey("items.id"), primary_key=True)
     item_amount = Column(Integer, CheckConstraint("item_amount > 0"))
 
     importation = relationship("Importation", back_populates="importation_details")
-    item = relationship("Item", foreign_keys=item_uid)
+    item = relationship("Item", foreign_keys=item_id)
 
 
 class TransactDetail(Base):
     __tablename__ = "transaction_details"
 
-    transaction_uid = Column(Integer, ForeignKey("transactions.uid"), primary_key=True)
-    item_uid = Column(Integer, ForeignKey("items.uid"), primary_key=True)
+    transaction_id = Column(Integer, ForeignKey("transactions.id"), primary_key=True)
+    item_id = Column(Integer, ForeignKey("items.id"), primary_key=True)
     item_price = Column(Float, nullable=False)
     item_amount = Column(Integer, CheckConstraint("item_amount > 0"))
 
     transaction = relationship("Transaction", back_populates="transaction_details")
-    item = relationship("Item", foreign_keys=item_uid)
+    item = relationship("Item", foreign_keys=item_id)

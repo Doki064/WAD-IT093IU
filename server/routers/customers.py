@@ -50,18 +50,18 @@ async def read_customers(customer_name: Optional[str] = None,
             return await _customer.get_all(session, skip=skip, limit=limit)
 
 
-@router.get("/{customer_uid}", response_model=Customer)
-async def read_customer(customer_uid: int):
+@router.get("/{customer_id}", response_model=Customer)
+async def read_customer(customer_id: int):
     async with async_session() as session:
         async with session.begin():
-            db_customer = await _customer.get_by_uid(session, customer_uid=customer_uid)
+            db_customer = await _customer.get_by_id(session, customer_id=customer_id)
             if db_customer is None:
                 raise HTTPException(status_code=404, detail="Customer not found")
             return db_customer
 
 
-@router.post("/{customer_uid}/transactions/", response_model=Transaction, status_code=201)
-async def create_transaction_for_customer(customer_uid: int,
+@router.post("/{customer_id}/transactions/", response_model=Transaction, status_code=201)
+async def create_transaction_for_customer(customer_id: int,
                                           transaction: TransactionCreate,
                                           transaction_details: List[TransactDetailCreate],
                                           item_name: str = Body(...),
@@ -76,21 +76,21 @@ async def create_transaction_for_customer(customer_uid: int,
                 raise HTTPException(status_code=404, detail="Shop not found")
             db_transaction = await _transaction.create(session,
                                                        transaction=transaction,
-                                                       customer_uid=customer_uid,
-                                                       shop_uid=db_shop.uid)
+                                                       customer_id=customer_id,
+                                                       shop_id=db_shop.id)
             for detail in transaction_details:
                 await _transact_detail.create(session,
                                               transaction_detail=detail,
-                                              transaction_uid=db_transaction.uid,
-                                              item_uid=db_item.uid)
+                                              transaction_id=db_transaction.id,
+                                              item_id=db_item.id)
             return db_transaction
 
 
-@router.get("/{customer_uid}/transactions/", response_model=List[Transaction])
-async def read_transactions_of_customer(customer_uid: int):
+@router.get("/{customer_id}/transactions/", response_model=List[Transaction])
+async def read_transactions_of_customer(customer_id: int):
     async with async_session() as session:
         async with session.begin():
-            db_customer = await _customer.get_by_uid(session, customer_uid=customer_uid)
+            db_customer = await _customer.get_by_id(session, customer_id=customer_id)
             if db_customer is None:
                 raise HTTPException(status_code=404, detail="Customer not found")
             return db_customer.transactions

@@ -1,5 +1,6 @@
-from typing import List, Union, Optional
 import secrets
+from typing import List, Union, Optional
+from uuid import UUID
 
 from sqlalchemy import update
 from sqlalchemy.future import select
@@ -18,8 +19,14 @@ async def create(db: Session, username: str, password: str) -> User:
     return db_user
 
 
-async def get_by_uid(db: Session, user_uid: int) -> Union[User, None]:
-    q = select(User).where(User.uid == user_uid)
+async def get_by_id(db: Session, user_id: int) -> Union[User, None]:
+    q = select(User).where(User.id == user_id)
+    result = await db.execute(q)
+    return result.scalars().first()
+
+
+async def get_by_uuid(db: Session, uuid: UUID) -> Union[User, None]:
+    q = select(User).where(User.uuid == uuid)
     result = await db.execute(q)
     return result.scalars().first()
 
@@ -50,14 +57,14 @@ async def authenticate(session, username: str, password: str):
     if not encryption.verify_password(db_user.hashed_password, password, salt):
         return None
     if encryption.needs_rehash(db_user.hashed_password):
-        await rehash_password(session, user_uid=db_user.uid, password=password)
+        await rehash_password(session, user_id=db_user.id, password=password)
     return db_user
 
 
-async def rehash_password(db: Session, user_uid: int, password: str):
+async def rehash_password(db: Session, user_id: int, password: str):
     salt = secrets.token_bytes(16)
     hashed_password = encryption.hash_password(password, salt)
-    q = update(User).where(User.uid == user_uid)
+    q = update(User).where(User.id == user_id)
     q.values(hashed_password=hashed_password)
     q.values(salt=salt.hex())
     await db.execute(q)

@@ -42,18 +42,18 @@ async def read_categories(category_name: Optional[str] = None,
             return await _category.get_all(session, skip=skip, limit=limit)
 
 
-@router.get("/{category_uid}", response_model=Category)
-async def read_category(category_uid: int):
+@router.get("/{category_id}", response_model=Category)
+async def read_category(category_id: int):
     async with async_session() as session:
         async with session.begin():
-            db_category = await _category.get_by_uid(session, category_uid=category_uid)
+            db_category = await _category.get_by_id(session, category_id=category_id)
             if db_category is None:
                 raise HTTPException(status_code=404, detail="Category not found")
             return db_category
 
 
-@router.post("/{category_uid}/items/", response_model=Item, status_code=201)
-async def create_item_for_category(category_uid: int,
+@router.post("/{category_id}/items/", response_model=Item, status_code=201)
+async def create_item_for_category(category_id: int,
                                    item: ItemCreate,
                                    shop_name: str = Body(...)):
     async with async_session() as session:
@@ -66,15 +66,15 @@ async def create_item_for_category(category_uid: int,
                 raise HTTPException(status_code=404, detail="Shop not found")
             return await _item.create(session,
                                       item=item,
-                                      category_uid=category_uid,
-                                      shop_uid=db_shop.uid)
+                                      category_id=category_id,
+                                      shop_id=db_shop.id)
 
 
-@router.get("/{category_uid}/items/", response_model=List[Item])
-async def read_items_of_category(category_uid: int):
+@router.get("/{category_id}/items/", response_model=List[Item])
+async def read_items_of_category(category_id: int):
     async with async_session() as session:
         async with session.begin():
-            db_category = await _category.get_by_uid(session, category_uid=category_uid)
+            db_category = await _category.get_by_id(session, category_id=category_id)
             if db_category is None:
                 raise HTTPException(status_code=404, detail="Category not found")
             return db_category.items

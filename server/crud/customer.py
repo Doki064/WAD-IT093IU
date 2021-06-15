@@ -14,8 +14,8 @@ async def create(db: Session, customer: CustomerCreate) -> Customer:
     return db_customer
 
 
-async def get_by_uid(db: Session, customer_uid: int) -> Union[Customer, None]:
-    q = select(Customer).where(Customer.uid == customer_uid)
+async def get_by_id(db: Session, customer_id: int) -> Union[Customer, None]:
+    q = select(Customer).where(Customer.id == customer_id)
     result = await db.execute(q)
     return result.scalars().first()
 

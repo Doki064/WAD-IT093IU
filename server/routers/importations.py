@@ -31,21 +31,21 @@ async def read_importations_by_date(date: date, limit: Optional[int] = None):
             return await _importation.get_by_date(session, date=date, limit=limit)
 
 
-@router.get("/{importation_uid}", response_model=Importation)
-async def read_importation(importation_uid: int):
+@router.get("/{importation_id}", response_model=Importation)
+async def read_importation(importation_id: int):
     async with async_session() as session:
         async with session.begin():
-            db_importation = await _importation.get_by_uid(
-                session, importation_uid=importation_uid)
+            db_importation = await _importation.get_by_id(session,
+                                                          importation_id=importation_id)
             if db_importation is None:
                 raise HTTPException(status_code=404, detail="Importation not found")
             return db_importation
 
 
-@router.get("/{importation_uid}/details/", response_model=List[ImportDetail])
-async def read_importation_details(importation_uid: int):
+@router.get("/{importation_id}/details/", response_model=List[ImportDetail])
+async def read_importation_details(importation_id: int):
     async with async_session() as session:
         async with session.begin():
-            db_importation = await _importation.get_by_uid(
-                session, importation_uid=importation_uid)
+            db_importation = await _importation.get_by_id(session,
+                                                          importation_id=importation_id)
             return db_importation.importation_details

@@ -8,18 +8,18 @@ from models import Transaction
 from schemas import TransactionCreate
 
 
-async def create(db: Session, transaction: TransactionCreate, customer_uid: int,
-                 shop_uid: int) -> Transaction:
+async def create(db: Session, transaction: TransactionCreate, customer_id: int,
+                 shop_id: int) -> Transaction:
     db_transaction = Transaction(**transaction.dict(),
-                                 customer_uid=customer_uid,
-                                 shop_uid=shop_uid)
+                                 customer_id=customer_id,
+                                 shop_id=shop_id)
     db.add(db_transaction)
     await db.commit()
     return db_transaction
 
 
-async def get_by_uid(db: Session, transaction_uid: int) -> Union[Transaction, None]:
-    q = select(Transaction).where(Transaction.uid == transaction_uid)
+async def get_by_id(db: Session, transaction_id: int) -> Union[Transaction, None]:
+    q = select(Transaction).where(Transaction.id == transaction_id)
     result = await db.execute(q)
     return result.scalars().first()
 

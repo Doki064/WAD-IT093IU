@@ -9,15 +9,15 @@ from schemas import ImportationCreate
 
 
 async def create(db: Session, importation: ImportationCreate,
-                 shop_uid: int) -> Importation:
-    db_importation = Importation(**importation.dict(), shop_uid=shop_uid)
+                 shop_id: int) -> Importation:
+    db_importation = Importation(**importation.dict(), shop_id=shop_id)
     db.add(db_importation)
     await db.commit()
     return db_importation
 
 
-async def get_by_uid(db: Session, importation_uid: int) -> Union[Importation, None]:
-    q = select(Importation).where(Importation.uid == importation_uid)
+async def get_by_id(db: Session, importation_id: int) -> Union[Importation, None]:
+    q = select(Importation).where(Importation.id == importation_id)
     result = await db.execute(q)
     return result.scalars().first()
 

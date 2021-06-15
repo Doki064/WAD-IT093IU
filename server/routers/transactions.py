@@ -31,21 +31,21 @@ async def read_transactions_by_date(date: date, limit: Optional[int] = None):
             return await _transaction.get_by_date(session, date=date, limit=limit)
 
 
-@router.get("/{transaction_uid}", response_model=Transaction)
-async def read_transaction(transaction_uid: int):
+@router.get("/{transaction_id}", response_model=Transaction)
+async def read_transaction(transaction_id: int):
     async with async_session() as session:
         async with session.begin():
-            db_transaction = await _transaction.get_by_uid(
-                session, transaction_uid=transaction_uid)
+            db_transaction = await _transaction.get_by_id(session,
+                                                          transaction_id=transaction_id)
             if db_transaction is None:
                 raise HTTPException(status_code=404, detail="Transaction not found")
             return db_transaction
 
 
-@router.get("/{transaction_uid}/details/", response_model=List[TransactDetail])
-async def read_transaction_details(transaction_uid: int):
+@router.get("/{transaction_id}/details/", response_model=List[TransactDetail])
+async def read_transaction_details(transaction_id: int):
     async with async_session() as session:
         async with session.begin():
-            db_transaction = await _transaction.get_by_uid(
-                session, transaction_uid=transaction_uid)
+            db_transaction = await _transaction.get_by_id(session,
+                                                          transaction_id=transaction_id)
             return db_transaction.transaction_details

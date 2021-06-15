@@ -8,10 +8,10 @@ from schemas import TransactDetailCreate
 
 
 async def create(db: Session, transaction_detail: TransactDetailCreate,
-                 transaction_uid: int, item_uid: int) -> TransactDetail:
+                 transaction_id: int, item_id: int) -> TransactDetail:
     db_transaction_detail = TransactDetail(**transaction_detail.dict(),
-                                           transaction_uid=transaction_uid,
-                                           item_uid=item_uid)
+                                           transaction_id=transaction_id,
+                                           item_id=item_id)
     db.add(db_transaction_detail)
     await db.commit()
     return db_transaction_detail

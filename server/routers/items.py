@@ -30,11 +30,11 @@ async def read_items(item_name: Optional[str] = None,
             return await _item.get_all(session, skip=skip, limit=limit)
 
 
-@router.get("/{item_uid}", response_model=Item)
-async def read_item(item_uid: int):
+@router.get("/{item_id}", response_model=Item)
+async def read_item(item_id: int):
     async with async_session() as session:
         async with session.begin():
-            db_item = await _item.get_by_uid(session, item_uid=item_uid)
+            db_item = await _item.get_by_id(session, item_id=item_id)
             if db_item is None:
                 raise HTTPException(status_code=404, detail="Item not found")
             return db_item
