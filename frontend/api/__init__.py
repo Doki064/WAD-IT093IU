@@ -1,6 +1,6 @@
-from settings import SERVER_HOST, SERVER_PORT
+from core.config import SERVER_URI
 
-BASE_URL = f"http://{SERVER_HOST}:{SERVER_PORT}/api"
+BASE_URL = SERVER_URI
 
 
 class Response:
