@@ -1,18 +1,19 @@
 """All user route methods."""
 from datetime import timedelta
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import HTTPException, Depends
+from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
-from jose import jwt, JWTError
 
-import encryption
+from routers.internal import APIRouter
+from security import auth
 from database.config import async_session
-from schemas.secure import User, Token, TokenData
+from schemas.secure import User, Token
 from crud import user as _user
-from settings import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_DAYS
+from settings import ACCESS_TOKEN_EXPIRE_DAYS
 
 router = APIRouter(
-    prefix="/api/users",
+    prefix="/users",
     tags=["users"],
     responses={404: {
         "description": "Not found"
@@ -20,33 +21,15 @@ router = APIRouter(
 )
 
 
-async def _get_current_user(session, token: str = Depends(encryption.oauth2_scheme)):
-    credentials_exception = HTTPException(
-        status_code=401,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        uuid: int = payload.get("sub")
-        if uuid is None:
-            raise credentials_exception
-        token_data = TokenData(uuid=uuid)
-    except JWTError:
-        raise credentials_exception
-    db_user = await _user.get_by_uuid(session, uuid=token_data.uuid)
-    if db_user is None:
-        raise credentials_exception
-    return db_user
+@router.post("/token", response_model=Token)
+async def get_access_token(db_user: User):
+    access_token_expires = timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
+    access_token = await auth.create_access_token(data={"sub": db_user.uuid},
+                                                  expires_delta=access_token_expires)
+    return {"access_token": access_token, "token_type": "bearer"}
 
 
-async def _get_current_active_user(current_user: User = Depends(_get_current_user)):
-    if current_user.disabled:
-        raise HTTPException(status_code=400, detail="Inactive user")
-    return current_user
-
-
-@router.post("/login/", response_model=Token)
+@router.post("/login/")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     async with async_session() as session:
         async with session.begin():
@@ -58,34 +41,30 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
                     detail="Incorrect username or password",
                     headers={"WWW-Authenticate": "Bearer"},
                 )
-            access_token_expires = timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
-            access_token = encryption.create_access_token(
-                data={"sub": db_user.uuid}, expires_delta=access_token_expires)
-            return {"access_token": access_token, "token_type": "bearer"}
+            return RedirectResponse(url="/users/token")
 
 
-@router.post("/register/", response_model=Token, status_code=201)
+@router.post("/register/", status_code=201)
 async def register(form_data: OAuth2PasswordRequestForm = Depends()):
     async with async_session() as session:
         async with session.begin():
             db_user = await _user.get_by_username(session, username=form_data.username)
             if db_user is not None:
                 raise HTTPException(status_code=409, detail="Username already exists")
-            db_user = await _user.create(session,
-                                         username=form_data.username,
-                                         password=form_data.password)
-            access_token_expires = timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
-            access_token = encryption.create_access_token(
-                data={"sub": db_user.uuid}, expires_delta=access_token_expires)
-            return {"access_token": access_token, "token_type": "bearer"}
+            await _user.create(session,
+                               username=form_data.username,
+                               password=form_data.password)
+            return RedirectResponse(url="/users/token")
 
 
 @router.get("/me/", response_model=User)
-async def read_user_me(current_user: User = Depends(_get_current_active_user)):
+async def read_user_me(current_user: User = Depends(auth.get_current_active_user)):
     return current_user
 
 
-@router.get("/", response_model=User)
+@router.get("/",
+            response_model=User,
+            dependencies=[Depends(auth.get_current_active_user)])
 async def read_users(username: str):
     async with async_session() as session:
         async with session.begin():
@@ -95,7 +74,9 @@ async def read_users(username: str):
             return db_user
 
 
-@router.get("/{user_id}", response_model=User)
+@router.get("/{user_id}",
+            response_model=User,
+            dependencies=[Depends(auth.get_current_active_user)])
 async def read_user(user_id: int):
     async with async_session() as session:
         async with session.begin():

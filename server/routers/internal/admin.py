@@ -1,13 +1,13 @@
 """All internal API methods for admin only."""
 from typing import Dict, List
 
-from fastapi import APIRouter
 from fastapi.responses import ORJSONResponse
 
 import models
+from routers.internal import APIRouter
 
 router = APIRouter(
-    prefix="/api/internal/admin",
+    prefix="/internal/admin",
     tags=["admin"],
     responses={418: {
         "description": "I'm an administrator"

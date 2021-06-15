@@ -6,13 +6,13 @@ from sqlalchemy import update
 from sqlalchemy.future import select
 from sqlalchemy.orm import Session
 
-import encryption
+import security
 from models import User
 
 
 async def create(db: Session, username: str, password: str) -> User:
     salt = secrets.token_bytes(16)
-    hashed_password = encryption.hash_password(password, salt)
+    hashed_password = security.hash_password(password, salt)
     db_user = User(username=username, hashed_password=hashed_password, salt=salt.hex())
     db.add(db_user)
     await db.commit()
@@ -54,16 +54,16 @@ async def authenticate(session, username: str, password: str):
     if db_user is None:
         return None
     salt = bytes.fromhex(db_user.salt)
-    if not encryption.verify_password(db_user.hashed_password, password, salt):
+    if not security.verify_password(db_user.hashed_password, password, salt):
         return None
-    if encryption.needs_rehash(db_user.hashed_password):
+    if security.needs_rehash(db_user.hashed_password):
         await rehash_password(session, user_id=db_user.id, password=password)
     return db_user
 
 
 async def rehash_password(db: Session, user_id: int, password: str):
     salt = secrets.token_bytes(16)
-    hashed_password = encryption.hash_password(password, salt)
+    hashed_password = security.hash_password(password, salt)
     q = update(User).where(User.id == user_id)
     q.values(hashed_password=hashed_password)
     q.values(salt=salt.hex())

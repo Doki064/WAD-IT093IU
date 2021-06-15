@@ -1,20 +1,15 @@
 import base64
 import hashlib
 import hmac
-from datetime import datetime, timedelta
-from typing import Optional
 
-from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
-from jose import jwt
 
-from settings import HASH_SCHEME, SECRET_KEY, ALGORITHM
+from settings import HASH_SCHEME
 
 pwd_context = CryptContext(
     schemes=HASH_SCHEME,
     deprecated="auto",
 )
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 def hash_password(password: str, salt: bytes) -> str:
@@ -65,14 +60,3 @@ def needs_rehash(hashed_password: str):
         True if needs to be rehashed, False otherwise.
     """
     return pwd_context.needs_update(hashed_password)
-
-
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(hours=1)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
