@@ -1,13 +1,21 @@
+import os
 import secrets
 from typing import Any, Dict, List, Optional, Union
 
 from pydantic import AnyHttpUrl, BaseSettings, PostgresDsn, validator
 
+if os.getenv("NODE_ENV", "development") != "production":
+    from pathlib import Path
+    from dotenv import load_dotenv
+
+    base_dir = Path(__file__).parents[1]
+    load_dotenv(base_dir.joinpath(".env").resolve())
+
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Wholesale Management System"
 
-    NODE_ENV: str = "development"
+    NODE_ENV: str
     SERVER_SOFTWARE: str
 
     API_PATH: str = "/api/v1"
