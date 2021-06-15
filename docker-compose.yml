@@ -3,11 +3,13 @@ version: "3"
 services:
     frontend:
         container_name: Streamlit
-        build: client/
+        build: ./frontend
         image: frontend:beta
         env_file:
-            - client/.env.prod
+            - ./frontend/.env.prod
         working_dir: /app
+        volumes:
+            - ./frontend:/app
         ports:
             - "80:8501"
         networks:
@@ -17,12 +19,15 @@ services:
 
     backend:
         container_name: FastAPI
-        build: server/
+        build: ./backend
         image: backend:beta
         env_file:
-            - server/.env.prod
+            - ./backend/.env.prod
         working_dir: /app
-        command: bash /app/start-reload.sh
+        command: /start-reload.sh
+        volumes:
+            - ./backend:/app
+            # - ./backend/alembic/versions:/app/alembic/versions
         ports:
             - "8080:8080"
         networks:
