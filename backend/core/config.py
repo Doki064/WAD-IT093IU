@@ -7,7 +7,7 @@ from pydantic import AnyHttpUrl, BaseSettings, PostgresDsn, validator
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Wholesale Management System"
 
-    NODE_ENV: str
+    NODE_ENV: str = "development"
     SERVER_SOFTWARE: str
 
     API_PATH: str = "/api/v1"
