@@ -9,6 +9,7 @@ Example:
 import re
 
 import streamlit as st
+from aiohttp import ClientSession
 
 from session_state import SessionState
 from api import user
@@ -53,7 +54,7 @@ class MainPage:
         """)
 
     @staticmethod
-    async def form(state, session):
+    async def form(state: SessionState, session: ClientSession):
         if state.form == "login":
             with st.form("login_form"):
                 username = st.text_input("Username: ", value="", key="login_username")
@@ -72,7 +73,7 @@ class MainPage:
                             st.error(response.status)
                             st.error(response.data["detail"])
                             st.stop()
-                    # self.state.token = response.data["token"]
+                    state.token = response.data["access_token"]
                     st.experimental_rerun()
 
         else:
@@ -105,5 +106,5 @@ class MainPage:
                         st.error(response.status)
                         st.error(response.data["detail"])
                         st.stop()
-                    # self.state.token = response.data["token"]
+                    state.token = response.data["access_token"]
                     st.experimental_rerun()
