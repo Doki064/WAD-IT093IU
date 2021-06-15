@@ -1,27 +1,28 @@
+from typing import Union, Optional, Any
 from datetime import datetime, timedelta
-from typing import Optional
+from uuid import UUID
 
 from aioify import aioify
 from fastapi import HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 
-from schemas.secure import User, TokenData
+from schemas.internal import User, TokenPayload
 from crud import user as _user
-from settings import SECRET_KEY, ALGORITHM
+from core.config import settings
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_PATH}/access-token/")
 
 
 @aioify
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
-    to_encode = data.copy()
+def create_access_token(subject: Union[UUID, str, Any],
+                        expires_delta: Optional[timedelta] = None):
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
         expire = datetime.utcnow() + timedelta(hours=1)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    to_encode = {"exp": expire, "sub": str(subject)}
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
 
 
@@ -32,20 +33,27 @@ async def get_current_user(session, token: str = Depends(oauth2_scheme)):
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        uuid: int = payload.get("sub")
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        uuid: UUID = payload.get("sub")
         if uuid is None:
             raise credentials_exception
-        token_data = TokenData(uuid=uuid)
+        token_data = TokenPayload(sub=uuid)
     except JWTError:
         raise credentials_exception
-    db_user = await _user.get_by_uuid(session, uuid=token_data.uuid)
+    db_user = await _user.get_by_uuid(session, uuid=token_data.sub)
     if db_user is None:
         raise credentials_exception
     return db_user
 
 
 async def get_current_active_user(current_user: User = Depends(get_current_user)):
-    if current_user.disabled:
+    if current_user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user
+
+
+async def get_current_active_superuser(current_user: User = Depends(get_current_user)):
+    if not current_user.is_superuser:
+        raise HTTPException(status_code=400,
+                            detail="The user doesn't have enough privileges")
     return current_user
