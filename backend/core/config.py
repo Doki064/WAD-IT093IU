@@ -5,6 +5,8 @@ from pydantic import AnyHttpUrl, BaseSettings, PostgresDsn, validator
 
 
 class Settings(BaseSettings):
+    PROJECT_NAME: str = "Wholesale Management System"
+
     NODE_ENV: str
     SERVER_SOFTWARE: str
 
@@ -33,9 +35,9 @@ class Settings(BaseSettings):
             return v
         raise ValueError(v)
 
-    POSTGRES_HOST: str
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
+    POSTGRES_HOST: str
     POSTGRES_DB: str
     SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = None
 
@@ -48,7 +50,7 @@ class Settings(BaseSettings):
             user=values.get("POSTGRES_USER"),
             password=values.get("POSTGRES_PASSWORD"),
             host=values.get("POSTGRES_HOST"),
-            path=f"/{values.get('POSTGRES_DB') or ''}",
+            path=f"/{values.get('POSTGRES_DB', '')}",
         )
 
     FIRST_SUPERUSER: str
