@@ -1,15 +1,18 @@
 """All item route methods."""
 from typing import List, Union, Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import HTTPException, Depends
 
+from routers.internal import APIRouter
+from security import auth
 from database.config import async_session
 from schemas import Item
 from crud import item as _item
 
 router = APIRouter(
-    prefix="/api/items",
+    prefix="/items",
     tags=["items"],
+    dependencies=[Depends(auth.get_current_active_user)],
     responses={404: {
         "description": "Not found"
     }},

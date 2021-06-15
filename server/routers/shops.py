@@ -1,8 +1,10 @@
 """All shop route methods."""
 from typing import List, Union, Optional
 
-from fastapi import APIRouter, HTTPException, Body
+from fastapi import HTTPException, Depends, Body
 
+from routers.internal import APIRouter
+from security import auth
 from database.config import async_session
 from schemas import (
     Shop,
@@ -19,8 +21,9 @@ from crud import importation as _importation
 from crud import import_detail as _import_detail
 
 router = APIRouter(
-    prefix="/api/shops",
+    prefix="/shops",
     tags=["shops"],
+    dependencies=[Depends(auth.get_current_active_user)],
     responses={404: {
         "description": "Not found"
     }},

@@ -2,15 +2,18 @@
 from typing import List, Optional
 from datetime import date
 
-from fastapi import APIRouter, HTTPException
+from fastapi import HTTPException, Depends
 
+from routers.internal import APIRouter
+from security import auth
 from database.config import async_session
 from schemas import Importation, ImportDetail
 from crud import importation as _importation
 
 router = APIRouter(
-    prefix="/api/importations",
+    prefix="/importations",
     tags=["importations"],
+    dependencies=[Depends(auth.get_current_active_user)],
     responses={404: {
         "description": "Not found"
     }},

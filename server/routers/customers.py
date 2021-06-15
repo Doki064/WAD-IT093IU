@@ -1,8 +1,10 @@
 """All customer route methods."""
 from typing import List, Union, Optional
 
-from fastapi import APIRouter, HTTPException, Body
+from fastapi import HTTPException, Depends, Body
 
+from routers.internal import APIRouter
+from security import auth
 from database.config import async_session
 from schemas import (
     Customer,
@@ -18,8 +20,9 @@ from crud import transact_detail as _transact_detail
 from crud import transaction as _transaction
 
 router = APIRouter(
-    prefix="/api/customers",
+    prefix="/customers",
     tags=["customers"],
+    dependencies=[Depends(auth.get_current_active_user)],
     responses={404: {
         "description": "Not found"
     }},
