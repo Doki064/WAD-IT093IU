@@ -10,18 +10,15 @@ async def show_item_search(mngmt: Management):
         col1, col2 = st.beta_columns(2)
         with col1:
             st.info("""
-                    Input uid or name to search for item in the database.
+                    Input id or name to search for item in the database.
                     Default to search all items.\n
                     *Limit to 1000 rows.*
                 """)
-            choice = st.radio("Search by all/uid/name: ", options=["all", "uid", "name"])
+            choice = st.radio("Search by all/id/name: ", options=["all", "id", "name"])
 
             if choice == "id":
-                item_uid = st.number_input("Input item uid: ",
-                                           step=1,
-                                           value=0,
-                                           min_value=0)
-                response = await items.get_by_uid(mngmt.session, item_uid)
+                item_id = st.number_input("Input item id: ", step=1, value=0, min_value=0)
+                response = await items.get_by_id(mngmt.session, item_id)
                 if response.status != 200:
                     st.error(response.status)
                     st.error(response.data["detail"])

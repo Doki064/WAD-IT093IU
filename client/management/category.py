@@ -11,18 +11,18 @@ async def show_category_search(mngmt: Management):
 
         with col1:
             st.info("""
-                    Input uid or name to search for category in the database.
+                    Input id or name to search for category in the database.
                     Default to search all categories.\n
                     *Limit to 1000 rows.*
                 """)
-            choice = st.radio("Search by all/uid/name: ", options=["all", "uid", "name"])
+            choice = st.radio("Search by all/id/name: ", options=["all", "id", "name"])
 
-            if choice == "uid":
-                category_uid = st.number_input("Input category uid: ",
-                                               step=1,
-                                               value=0,
-                                               min_value=0)
-                response = await categories.get_by_uid(mngmt.session, category_uid)
+            if choice == "id":
+                category_id = st.number_input("Input category id: ",
+                                              step=1,
+                                              value=0,
+                                              min_value=0)
+                response = await categories.get_by_id(mngmt.session, category_id)
                 if response.status != 200:
                     st.error(response.status)
                     st.error(response.data["detail"])

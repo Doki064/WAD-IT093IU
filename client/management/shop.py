@@ -10,18 +10,15 @@ async def show_shop_search(mngmt: Management):
         col1, col2 = st.beta_columns(2)
         with col1:
             st.info("""
-                    Input uid or name to search for shop in the database.
+                    Input id or name to search for shop in the database.
                     Default to search all shops.\n
                     *Limit to 1000 rows.*
                 """)
-            choice = st.radio("Search by all/uid/name: ", options=["all", "uid", "name"])
+            choice = st.radio("Search by all/id/name: ", options=["all", "id", "name"])
 
             if choice == "id":
-                shop_uid = st.number_input("Input item uid: ",
-                                           step=1,
-                                           value=0,
-                                           min_value=0)
-                response = await shops.get_by_uid(mngmt.session, shop_uid)
+                shop_id = st.number_input("Input item id: ", step=1, value=0, min_value=0)
+                response = await shops.get_by_id(mngmt.session, shop_id)
                 if response.status != 200:
                     st.error(response.status)
                     st.error(response.data["detail"])

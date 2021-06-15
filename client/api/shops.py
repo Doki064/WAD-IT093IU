@@ -34,8 +34,8 @@ async def create(session: ClientSession, shop: ShopCreate):
         return Response(status, data)
 
 
-async def get_by_uid(session: ClientSession, shop_uid: int):
-    async with session.get(f"{BASE_URL}/shops/{shop_uid}") as response:
+async def get_by_id(session: ClientSession, shop_id: int):
+    async with session.get(f"{BASE_URL}/shops/{shop_id}") as response:
         status = response.status,
         data = await response.json()
         return Response(status, data)
@@ -65,7 +65,7 @@ async def get_all(session: ClientSession,
         return Response(status, data)
 
 
-async def create_shop_importation(session: ClientSession, shop_uid: int,
+async def create_shop_importation(session: ClientSession, shop_id: int,
                                   importation: ImportationCreate,
                                   importation_details: List[ImportDetailCreate],
                                   item_name: str):
@@ -74,29 +74,28 @@ async def create_shop_importation(session: ClientSession, shop_uid: int,
         "importation_details": [vars(detail) for detail in importation_details],
         "item_name": item_name,
     }
-    async with session.post(f"{BASE_URL}/{shop_uid}/importations/",
-                            json=json) as response:
+    async with session.post(f"{BASE_URL}/{shop_id}/importations/", json=json) as response:
         status = response.status
         data = await response.json()
         return Response(status, data)
 
 
-async def get_shop_importations(session: ClientSession, shop_uid: int):
-    async with session.get(f"{BASE_URL}/{shop_uid}/importations/") as response:
+async def get_shop_importations(session: ClientSession, shop_id: int):
+    async with session.get(f"{BASE_URL}/{shop_id}/importations/") as response:
         status = response.status
         data = await response.json()
         return Response(status, data)
 
 
-async def get_shop_transactions(session: ClientSession, shop_uid: int):
-    async with session.get(f"{BASE_URL}/{shop_uid}/transactions/") as response:
+async def get_shop_transactions(session: ClientSession, shop_id: int):
+    async with session.get(f"{BASE_URL}/{shop_id}/transactions/") as response:
         status = response.status
         data = await response.json()
         return Response(status, data)
 
 
-async def get_shop_items(session: ClientSession, shop_uid: int):
-    async with session.get(f"{BASE_URL}/{shop_uid}/items/") as response:
+async def get_shop_items(session: ClientSession, shop_id: int):
+    async with session.get(f"{BASE_URL}/{shop_id}/items/") as response:
         status = response.status
         data = await response.json()
         return Response(status, data)

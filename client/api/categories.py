@@ -28,8 +28,8 @@ async def create(session: ClientSession, category: CategoryCreate):
         return Response(status, data)
 
 
-async def get_by_uid(session: ClientSession, category_uid: int):
-    async with session.get(f"{BASE_URL}/categories/{category_uid}") as response:
+async def get_by_id(session: ClientSession, category_id: int):
+    async with session.get(f"{BASE_URL}/categories/{category_id}") as response:
         status = response.status,
         data = await response.json()
         return Response(status, data)
@@ -59,20 +59,20 @@ async def get_all(session: ClientSession,
         return Response(status, data)
 
 
-async def create_category_item(session: ClientSession, category_uid: int,
-                               item: ItemCreate, shop_name: str):
+async def create_category_item(session: ClientSession, category_id: int, item: ItemCreate,
+                               shop_name: str):
     json = {
         "item": vars(item),
         "shop_name": shop_name,
     }
-    async with session.post(f"{BASE_URL}/{category_uid}/items/", json=json) as response:
+    async with session.post(f"{BASE_URL}/{category_id}/items/", json=json) as response:
         status = response.status
         data = await response.json()
         return Response(status, data)
 
 
-async def get_category_items(session: ClientSession, category_uid: int):
-    async with session.get(f"{BASE_URL}/{category_uid}/items/") as response:
+async def get_category_items(session: ClientSession, category_id: int):
+    async with session.get(f"{BASE_URL}/{category_id}/items/") as response:
         status = response.status
         data = await response.json()
         return Response(status, data)

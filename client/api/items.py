@@ -5,8 +5,8 @@ from aiohttp import ClientSession
 from api import BASE_URL, Response
 
 
-async def get_by_uid(session: ClientSession, item_uid: int):
-    async with session.get(f"{BASE_URL}/items/{item_uid}") as response:
+async def get_by_id(session: ClientSession, item_id: int):
+    async with session.get(f"{BASE_URL}/items/{item_id}") as response:
         status = response.status
         data = await response.json()
         return Response(status, data)

@@ -55,12 +55,14 @@ class Plot:
         Raises:
             AssertionError: if `end_date` is less than `start_date`
         """
+        if self.state.plot is None:
+            self.state.plot = {}
 
         self.df = await _load_df(self.session)
         self.shop_df = await _load_shop(self.session)
         self.min_date = self.df["date"].min()
         self.max_date = self.df["date"].max()
-        self.shop_ids = tuple(self.shop_df["uid"].unique())
+        self.shop_ids = tuple(self.shop_df["id"].unique())
 
         with st.beta_container():
             # Options
@@ -179,7 +181,7 @@ def _select_df_in_between(df, start_date, end_date, shop_ids):
     """
 
     selected_df = df[(df["date"].between(start_date, end_date)) &
-                     (df["shop_uid"].isin(shop_ids))]
+                     (df["shop_id"].isin(shop_ids))]
     # selected_df["profit"] = selected_df["itemPrice"] * selected_df["transactionAmount"]
     selected_df.loc[:, "profit"] = selected_df.loc[:, "item_price"].multiply(
         selected_df.loc[:, "item_amount"], axis="index")
@@ -198,7 +200,7 @@ def _group_by(df, freq):
          profit_df: pandas DataFrame. The grouped DF by freq, with profit calculated.
     """
     df["date"] = pd.to_datetime(df["date"]) - pd.to_timedelta(7, unit="d")
-    profit_df = df.groupby([pd.Grouper(key="date", freq=freq), "shop_uid"])["profit"] \
+    profit_df = df.groupby([pd.Grouper(key="date", freq=freq), "shop_id"])["profit"] \
         .sum() \
         .reset_index() \
         .sort_values("date")  # Group by week

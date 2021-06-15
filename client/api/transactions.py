@@ -6,8 +6,8 @@ from aiohttp import ClientSession
 from api import BASE_URL, Response
 
 
-async def get_by_uid(session: ClientSession, transaction_uid: int):
-    async with session.get(f"{BASE_URL}/transactions/{transaction_uid}") as response:
+async def get_by_id(session: ClientSession, transaction_id: int):
+    async with session.get(f"{BASE_URL}/transactions/{transaction_id}") as response:
         status = response.status
         data = await response.json()
         return Response(status, data)
@@ -34,8 +34,8 @@ async def get_all(session: ClientSession,
         return Response(status, data)
 
 
-async def get_details(session: ClientSession, transaction_uid: int):
-    async with session.get(f"{BASE_URL}/{transaction_uid}/details/") as response:
+async def get_details(session: ClientSession, transaction_id: int):
+    async with session.get(f"{BASE_URL}/{transaction_id}/details/") as response:
         status = response.status
         data = await response.json()
         return Response(status, data)

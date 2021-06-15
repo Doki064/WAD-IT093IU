@@ -36,8 +36,8 @@ async def create(session: ClientSession, customer: CustomerCreate):
         return Response(status, data)
 
 
-async def get_by_uid(session: ClientSession, customer_uid: int):
-    async with session.get(f"{BASE_URL}/customers/{customer_uid}") as response:
+async def get_by_id(session: ClientSession, customer_id: int):
+    async with session.get(f"{BASE_URL}/customers/{customer_id}") as response:
         status = response.status
         data = await response.json()
         return Response(status, data)
@@ -67,7 +67,7 @@ async def get_all(session: ClientSession,
         return Response(status, data)
 
 
-async def create_customer_transaction(session: ClientSession, customer_uid: int,
+async def create_customer_transaction(session: ClientSession, customer_id: int,
                                       transaction: TransactionCreate,
                                       transaction_details: List[TransactDetailCreate],
                                       item_name: str, shop_name: str):
@@ -77,15 +77,15 @@ async def create_customer_transaction(session: ClientSession, customer_uid: int,
         "item_name": item_name,
         "shop_name": shop_name,
     }
-    async with session.post(f"{BASE_URL}/{customer_uid}/transactions/",
+    async with session.post(f"{BASE_URL}/{customer_id}/transactions/",
                             json=json) as response:
         status = response.status
         data = await response.json()
         return Response(status, data)
 
 
-async def get_customer_transactions(session: ClientSession, customer_uid: int):
-    async with session.get(f"{BASE_URL}/{customer_uid}/transactions/") as response:
+async def get_customer_transactions(session: ClientSession, customer_id: int):
+    async with session.get(f"{BASE_URL}/{customer_id}/transactions/") as response:
         status = response.status
         data = await response.json()
         return Response(status, data)

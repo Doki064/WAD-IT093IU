@@ -8,18 +8,18 @@ from api import transactions
 async def show_transaction_search(mngmt: Management):
     with st.beta_container():
         st.info("""
-                Input uid or date to search for transaction in the database.
+                Input id or date to search for transaction in the database.
                 Default to search all transactions.\n
                 *Limit to 1000 rows.*
             """)
-        choice = st.radio("Search by all/uid/date: ", options=["all", "uid"])
+        choice = st.radio("Search by all/id/date: ", options=["all", "id"])
 
         if choice == "id":
-            transaction_uid = st.number_input("Input transaction uid: ",
-                                              step=1,
-                                              value=0,
-                                              min_value=0)
-            response = await transactions.get_by_uid(mngmt.session, transaction_uid)
+            transaction_id = st.number_input("Input transaction id: ",
+                                             step=1,
+                                             value=0,
+                                             min_value=0)
+            response = await transactions.get_by_id(mngmt.session, transaction_id)
             if response.status != 200:
                 st.error(response.status)
                 st.error(response.data["detail"])
@@ -55,13 +55,13 @@ async def show_transaction_search(mngmt: Management):
                 st.dataframe(df[columns])
         with col2:
             with st.beta_expander("Show transaction details", expanded=True):
-                uid_list = df["uid"].tolist()
-                if len(uid_list) == 1:
-                    uid = uid_list[0]
+                id_list = df["id"].tolist()
+                if len(id_list) == 1:
+                    id = id_list[0]
                 else:
-                    uid = st.selectbox("Select transaction: ", options=uid_list)
+                    id = st.selectbox("Select transaction: ", options=id_list)
 
-                response = await transactions.get_details(mngmt.session, uid)
+                response = await transactions.get_details(mngmt.session, id)
                 if response.status != 200:
                     st.error(response.status)
                     st.error(response.data["detail"])
