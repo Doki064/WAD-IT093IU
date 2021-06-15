@@ -19,7 +19,7 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=Union[Item, List[Item]])
+@router.get("", response_model=Union[Item, List[Item]])
 async def read_items(item_name: Optional[str] = None,
                      skip: Optional[int] = None,
                      limit: Optional[int] = None):

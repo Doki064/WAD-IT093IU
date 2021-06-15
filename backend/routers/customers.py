@@ -29,7 +29,7 @@ router = APIRouter(
 )
 
 
-@router.post("/", response_model=Customer, status_code=201)
+@router.post("", response_model=Customer, status_code=201)
 async def create_customer(customer: CustomerCreate):
     async with async_session() as session:
         async with session.begin():
@@ -39,7 +39,7 @@ async def create_customer(customer: CustomerCreate):
             return await _customer.create(session, customer=customer)
 
 
-@router.get("/", response_model=Union[Customer, List[Customer]])
+@router.get("", response_model=Union[Customer, List[Customer]])
 async def read_customers(customer_name: Optional[str] = None,
                          skip: Optional[int] = None,
                          limit: Optional[int] = None):
@@ -63,7 +63,7 @@ async def read_customer(customer_id: int):
             return db_customer
 
 
-@router.post("/{customer_id}/transactions/", response_model=Transaction, status_code=201)
+@router.post("/{customer_id}/transactions", response_model=Transaction, status_code=201)
 async def create_transaction_for_customer(customer_id: int,
                                           transaction: TransactionCreate,
                                           transaction_details: List[TransactDetailCreate],
@@ -89,7 +89,7 @@ async def create_transaction_for_customer(customer_id: int,
             return db_transaction
 
 
-@router.get("/{customer_id}/transactions/", response_model=List[Transaction])
+@router.get("/{customer_id}/transactions", response_model=List[Transaction])
 async def read_transactions_of_customer(customer_id: int):
     async with async_session() as session:
         async with session.begin():

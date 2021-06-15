@@ -21,7 +21,7 @@ router = APIRouter(
 )
 
 
-@router.post("/", response_model=Category, status_code=201)
+@router.post("", response_model=Category, status_code=201)
 async def create_category(category: CategoryCreate):
     async with async_session() as session:
         async with session.begin():
@@ -31,7 +31,7 @@ async def create_category(category: CategoryCreate):
             return await _category.create(session, category=category)
 
 
-@router.get("/", response_model=Union[Category, List[Category]])
+@router.get("", response_model=Union[Category, List[Category]])
 async def read_categories(category_name: Optional[str] = None,
                           skip: Optional[int] = None,
                           limit: Optional[int] = None):
@@ -55,7 +55,7 @@ async def read_category(category_id: int):
             return db_category
 
 
-@router.post("/{category_id}/items/", response_model=Item, status_code=201)
+@router.post("/{category_id}/items", response_model=Item, status_code=201)
 async def create_item_for_category(category_id: int,
                                    item: ItemCreate,
                                    shop_name: str = Body(...)):
@@ -73,7 +73,7 @@ async def create_item_for_category(category_id: int,
                                       shop_id=db_shop.id)
 
 
-@router.get("/{category_id}/items/", response_model=List[Item])
+@router.get("/{category_id}/items", response_model=List[Item])
 async def read_items_of_category(category_id: int):
     async with async_session() as session:
         async with session.begin():

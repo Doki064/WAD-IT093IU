@@ -20,7 +20,7 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=List[Importation])
+@router.get("", response_model=List[Importation])
 async def read_importations(skip: Optional[int] = None, limit: Optional[int] = None):
     async with async_session() as session:
         async with session.begin():
@@ -45,7 +45,7 @@ async def read_importation(importation_id: int):
             return db_importation
 
 
-@router.get("/{importation_id}/details/", response_model=List[ImportDetail])
+@router.get("/{importation_id}/details", response_model=List[ImportDetail])
 async def read_importation_details(importation_id: int):
     async with async_session() as session:
         async with session.begin():

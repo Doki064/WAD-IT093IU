@@ -20,7 +20,7 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=List[Transaction])
+@router.get("", response_model=List[Transaction])
 async def read_transactions(skip: Optional[int] = None, limit: Optional[int] = None):
     async with async_session() as session:
         async with session.begin():
@@ -45,7 +45,7 @@ async def read_transaction(transaction_id: int):
             return db_transaction
 
 
-@router.get("/{transaction_id}/details/", response_model=List[TransactDetail])
+@router.get("/{transaction_id}/details", response_model=List[TransactDetail])
 async def read_transaction_details(transaction_id: int):
     async with async_session() as session:
         async with session.begin():

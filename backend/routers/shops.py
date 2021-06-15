@@ -30,7 +30,7 @@ router = APIRouter(
 )
 
 
-@router.post("/", response_model=Shop)
+@router.post("", response_model=Shop)
 async def create_shop(shop: ShopCreate, status_code=201):
     async with async_session() as session:
         async with session.begin():
@@ -40,7 +40,7 @@ async def create_shop(shop: ShopCreate, status_code=201):
             return await _shop.create(session, shop=shop)
 
 
-@router.get("/", response_model=Union[Shop, List[Shop]])
+@router.get("", response_model=Union[Shop, List[Shop]])
 async def read_shops(shop_name: Optional[str] = None,
                      skip: Optional[int] = None,
                      limit: Optional[int] = None):
@@ -64,7 +64,7 @@ async def read_shop(shop_id: int):
             return db_shop
 
 
-@router.post("/{shop_id}/importations/", response_model=Importation, status_code=201)
+@router.post("/{shop_id}/importations", response_model=Importation, status_code=201)
 async def create_importation_for_shop(shop_id: int,
                                       importation: ImportationCreate,
                                       importation_details: List[ImportDetailCreate],
@@ -86,7 +86,7 @@ async def create_importation_for_shop(shop_id: int,
             return db_importation
 
 
-@router.get("/{shop_id}/importations/", response_model=List[Importation])
+@router.get("/{shop_id}/importations", response_model=List[Importation])
 async def read_importations_of_shop(shop_id: int):
     async with async_session() as session:
         async with session.begin():
@@ -96,7 +96,7 @@ async def read_importations_of_shop(shop_id: int):
             return db_shop.importations
 
 
-@router.get("/{shop_id}/transactions/", response_model=List[Transaction])
+@router.get("/{shop_id}/transactions", response_model=List[Transaction])
 async def read_transactions_of_shop(shop_id: int):
     async with async_session() as session:
         async with session.begin():
@@ -106,7 +106,7 @@ async def read_transactions_of_shop(shop_id: int):
             return db_shop.transactions
 
 
-@router.get("/{shop_id}/items/", response_model=List[Item])
+@router.get("/{shop_id}/items", response_model=List[Item])
 async def read_items_of_shop(shop_id: int):
     async with async_session() as session:
         async with session.begin():

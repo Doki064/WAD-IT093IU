@@ -16,7 +16,7 @@ router = APIRouter(
 )
 
 
-@router.get("/")
+@router.get("")
 def read_table_info() -> Dict[str, List[str]]:
     response = dict()
     for model in models.__all__:
