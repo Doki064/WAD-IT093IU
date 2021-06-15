@@ -1,7 +1,5 @@
 from routers.internal import APIRouter
-
-from routers import (
-    users,
+from routers.endpoints import (
     customers,
     categories,
     items,
@@ -9,6 +7,7 @@ from routers import (
     transactions,
     importations,
 )
+from routers import users
 
 api_router = APIRouter()
 

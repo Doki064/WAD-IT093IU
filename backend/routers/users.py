@@ -10,7 +10,7 @@ from core.security import auth
 from database.config import async_session
 from schemas.internal import User, Token
 from crud import user as _user
-from settings import ACCESS_TOKEN_EXPIRE_DAYS
+from core.config import settings
 
 router = APIRouter(
     prefix="/users",
@@ -21,15 +21,15 @@ router = APIRouter(
 )
 
 
-@router.post("/token", response_model=Token)
+@router.post("/access-token", response_model=Token)
 async def get_access_token(db_user: User):
-    access_token_expires = timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
-    access_token = await auth.create_access_token(data={"sub": db_user.uuid},
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = await auth.create_access_token(uuid=db_user.uuid,
                                                   expires_delta=access_token_expires)
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.post("/login/")
+@router.post("/login")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     async with async_session() as session:
         async with session.begin():
@@ -41,10 +41,12 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
                     detail="Incorrect username or password",
                     headers={"WWW-Authenticate": "Bearer"},
                 )
-            return RedirectResponse(url="/users/token")
+            elif db_user.is_active:
+                raise HTTPException(status_code=400, detail="Inactive user")
+            return RedirectResponse(url=f"{settings.API_PATH}/users/access-token")
 
 
-@router.post("/register/", status_code=201)
+@router.post("/register", status_code=201)
 async def register(form_data: OAuth2PasswordRequestForm = Depends()):
     async with async_session() as session:
         async with session.begin():
@@ -54,17 +56,15 @@ async def register(form_data: OAuth2PasswordRequestForm = Depends()):
             await _user.create(session,
                                username=form_data.username,
                                password=form_data.password)
-            return RedirectResponse(url="/users/token")
+            return RedirectResponse(url=f"{settings.API_PATH}/users/access-token")
 
 
-@router.get("/me/", response_model=User)
+@router.get("/me", response_model=User)
 async def read_user_me(current_user: User = Depends(auth.get_current_active_user)):
     return current_user
 
 
-@router.get("/",
-            response_model=User,
-            dependencies=[Depends(auth.get_current_active_user)])
+@router.get("", response_model=User, dependencies=[Depends(auth.get_current_active_user)])
 async def read_users(username: str):
     async with async_session() as session:
         async with session.begin():
