@@ -16,6 +16,7 @@ from sqlalchemy import (
     Column,
     ForeignKey,
     CheckConstraint,
+    Boolean,
     Integer,
     Float,
     String,
@@ -36,6 +37,8 @@ class User(Base):
     username = Column(String(100), unique=True, index=True, nullable=False)
     hashed_password = Column(String(100), nullable=False)
     salt = Column(String(100), nullable=False)
+    is_active = Column(Boolean, default=True)
+    is_superuser = Column(Boolean, default=False)
 
     __mapper_args__ = {"eager_defaults": True}
 
