@@ -1,7 +1,21 @@
-from routers.users import router as users_router
-from routers.customers import router as customers_router
-from routers.categories import router as categories_router
-from routers.items import router as items_router
-from routers.shops import router as shops_router
-from routers.transactions import router as transactions_router
-from routers.importations import router as importations_router
+from routers.internal import APIRouter
+
+from routers import (
+    users,
+    customers,
+    categories,
+    items,
+    shops,
+    transactions,
+    importations,
+)
+
+api_router = APIRouter()
+
+api_router.include_router(users.router)
+api_router.include_router(customers.router)
+api_router.include_router(categories.router)
+api_router.include_router(items.router)
+api_router.include_router(shops.router)
+api_router.include_router(transactions.router)
+api_router.include_router(importations.router)

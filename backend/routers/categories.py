@@ -4,7 +4,7 @@ from typing import List, Union, Optional
 from fastapi import HTTPException, Depends, Body
 
 from routers.internal import APIRouter
-from security import auth
+from core.security import auth
 from database.config import async_session
 from schemas import Category, CategoryCreate, Item, ItemCreate
 from crud import category as _category

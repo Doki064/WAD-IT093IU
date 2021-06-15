@@ -6,9 +6,9 @@ from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
 from routers.internal import APIRouter
-from security import auth
+from core.security import auth
 from database.config import async_session
-from schemas.secure import User, Token
+from schemas.internal import User, Token
 from crud import user as _user
 from settings import ACCESS_TOKEN_EXPIRE_DAYS
 

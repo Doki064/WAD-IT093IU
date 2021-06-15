@@ -5,7 +5,7 @@ from datetime import date
 from fastapi import HTTPException, Depends
 
 from routers.internal import APIRouter
-from security import auth
+from core.security import auth
 from database.config import async_session
 from schemas import Importation, ImportDetail
 from crud import importation as _importation

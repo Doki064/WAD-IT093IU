@@ -6,14 +6,18 @@ from sqlalchemy import update
 from sqlalchemy.future import select
 from sqlalchemy.orm import Session
 
-import security
+from core import security
 from models import User
+from schemas.internal import UserCreate
 
 
-async def create(db: Session, username: str, password: str) -> User:
+async def create(db: Session, user: UserCreate) -> User:
     salt = secrets.token_bytes(16)
-    hashed_password = security.hash_password(password, salt)
-    db_user = User(username=username, hashed_password=hashed_password, salt=salt.hex())
+    hashed_password = security.hash_password(user.password, salt)
+    db_user = User(username=user.username,
+                   hashed_password=hashed_password,
+                   salt=salt.hex(),
+                   is_superuser=user.is_superuser)
     db.add(db_user)
     await db.commit()
     return db_user
