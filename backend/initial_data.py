@@ -1,15 +1,16 @@
 import asyncio
 import logging
 
-from database import init_db
+from database.init_db import init_db
 from database.config import async_session
 
 logger = logging.getLogger(__name__)
 
 
 async def init():
-    db = async_session()
-    await init_db(db)
+    async with async_session() as session:
+        async with session.begin():
+            await init_db(session)
 
 
 async def main():
