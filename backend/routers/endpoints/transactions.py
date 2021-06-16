@@ -38,8 +38,9 @@ async def read_transactions_by_date(date: date, limit: Optional[int] = None):
 async def read_transaction(transaction_id: int):
     async with async_session() as session:
         async with session.begin():
-            db_transaction = await _transaction.get_by_id(session,
-                                                          transaction_id=transaction_id)
+            db_transaction = await _transaction.get_by_id(
+                session, transaction_id=transaction_id
+            )
             if db_transaction is None:
                 raise HTTPException(status_code=404, detail="Transaction not found")
             return db_transaction
@@ -49,6 +50,7 @@ async def read_transaction(transaction_id: int):
 async def read_transaction_details(transaction_id: int):
     async with async_session() as session:
         async with session.begin():
-            db_transaction = await _transaction.get_by_id(session,
-                                                          transaction_id=transaction_id)
+            db_transaction = await _transaction.get_by_id(
+                session, transaction_id=transaction_id
+            )
             return db_transaction.transaction_details

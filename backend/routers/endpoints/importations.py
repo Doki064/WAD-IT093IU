@@ -38,8 +38,9 @@ async def read_importations_by_date(date: date, limit: Optional[int] = None):
 async def read_importation(importation_id: int):
     async with async_session() as session:
         async with session.begin():
-            db_importation = await _importation.get_by_id(session,
-                                                          importation_id=importation_id)
+            db_importation = await _importation.get_by_id(
+                session, importation_id=importation_id
+            )
             if db_importation is None:
                 raise HTTPException(status_code=404, detail="Importation not found")
             return db_importation
@@ -49,6 +50,7 @@ async def read_importation(importation_id: int):
 async def read_importation_details(importation_id: int):
     async with async_session() as session:
         async with session.begin():
-            db_importation = await _importation.get_by_id(session,
-                                                          importation_id=importation_id)
+            db_importation = await _importation.get_by_id(
+                session, importation_id=importation_id
+            )
             return db_importation.importation_details

@@ -20,9 +20,11 @@ router = APIRouter(
 
 
 @router.get("", response_model=Union[Item, List[Item]])
-async def read_items(item_name: Optional[str] = None,
-                     skip: Optional[int] = None,
-                     limit: Optional[int] = None):
+async def read_items(
+    item_name: Optional[str] = None,
+    skip: Optional[int] = None,
+    limit: Optional[int] = None
+):
     async with async_session() as session:
         async with session.begin():
             if item_name is not None:

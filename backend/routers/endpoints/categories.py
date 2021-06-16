@@ -32,9 +32,11 @@ async def create_category(category: CategoryCreate):
 
 
 @router.get("", response_model=Union[Category, List[Category]])
-async def read_categories(category_name: Optional[str] = None,
-                          skip: Optional[int] = None,
-                          limit: Optional[int] = None):
+async def read_categories(
+    category_name: Optional[str] = None,
+    skip: Optional[int] = None,
+    limit: Optional[int] = None
+):
     async with async_session() as session:
         async with session.begin():
             if category_name is not None:
@@ -56,9 +58,9 @@ async def read_category(category_id: int):
 
 
 @router.post("/{category_id}/items", response_model=Item, status_code=201)
-async def create_item_for_category(category_id: int,
-                                   item: ItemCreate,
-                                   shop_name: str = Body(...)):
+async def create_item_for_category(
+    category_id: int, item: ItemCreate, shop_name: str = Body(...)
+):
     async with async_session() as session:
         async with session.begin():
             db_item = await _item.get_by_name(session, name=item.name)
@@ -67,10 +69,9 @@ async def create_item_for_category(category_id: int,
             db_shop = await _shop.get_by_name(session, name=shop_name)
             if db_shop is None:
                 raise HTTPException(status_code=404, detail="Shop not found")
-            return await _item.create(session,
-                                      item=item,
-                                      category_id=category_id,
-                                      shop_id=db_shop.id)
+            return await _item.create(
+                session, item=item, category_id=category_id, shop_id=db_shop.id
+            )
 
 
 @router.get("/{category_id}/items", response_model=List[Item])

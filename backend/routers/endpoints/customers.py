@@ -40,9 +40,11 @@ async def create_customer(customer: CustomerCreate):
 
 
 @router.get("", response_model=Union[Customer, List[Customer]])
-async def read_customers(customer_name: Optional[str] = None,
-                         skip: Optional[int] = None,
-                         limit: Optional[int] = None):
+async def read_customers(
+    customer_name: Optional[str] = None,
+    skip: Optional[int] = None,
+    limit: Optional[int] = None
+):
     async with async_session() as session:
         async with session.begin():
             if customer_name is not None:
@@ -64,11 +66,13 @@ async def read_customer(customer_id: int):
 
 
 @router.post("/{customer_id}/transactions", response_model=Transaction, status_code=201)
-async def create_transaction_for_customer(customer_id: int,
-                                          transaction: TransactionCreate,
-                                          transaction_details: List[TransactDetailCreate],
-                                          item_name: str = Body(...),
-                                          shop_name: str = Body(...)):
+async def create_transaction_for_customer(
+    customer_id: int,
+    transaction: TransactionCreate,
+    transaction_details: List[TransactDetailCreate],
+    item_name: str = Body(...),
+    shop_name: str = Body(...)
+):
     async with async_session() as session:
         async with session.begin():
             db_item = await _item.get_by_name(session, item_name)
@@ -77,15 +81,19 @@ async def create_transaction_for_customer(customer_id: int,
             db_shop = await _shop.get_by_name(session, shop_name)
             if db_shop is None:
                 raise HTTPException(status_code=404, detail="Shop not found")
-            db_transaction = await _transaction.create(session,
-                                                       transaction=transaction,
-                                                       customer_id=customer_id,
-                                                       shop_id=db_shop.id)
+            db_transaction = await _transaction.create(
+                session,
+                transaction=transaction,
+                customer_id=customer_id,
+                shop_id=db_shop.id
+            )
             for detail in transaction_details:
-                await _transact_detail.create(session,
-                                              transaction_detail=detail,
-                                              transaction_id=db_transaction.id,
-                                              item_id=db_item.id)
+                await _transact_detail.create(
+                    session,
+                    transaction_detail=detail,
+                    transaction_id=db_transaction.id,
+                    item_id=db_item.id
+                )
             return db_transaction
 
 

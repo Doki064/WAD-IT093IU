@@ -1,4 +1,5 @@
 from routers.internal import APIRouter
+
 from routers.endpoints import (
     customers,
     categories,
