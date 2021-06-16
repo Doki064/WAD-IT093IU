@@ -1,16 +1,17 @@
 """First_revision
 
-Revision ID: 7b95c2ce02a2
+Revision ID: a5785f2bb5b3
 Revises: 
-Create Date: 2021-06-15 19:12:30.750446
+Create Date: 2021-06-16 01:53:45.267661
 
 """
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
+import sqlalchemy_utils.types.password
 
 # revision identifiers, used by Alembic.
-revision = '7b95c2ce02a2'
+revision = 'a5785f2bb5b3'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -43,7 +44,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.Column('username', sa.String(length=100), nullable=False),
-    sa.Column('hashed_password', sa.String(length=100), nullable=False),
+    sa.Column('hashed_password', sqlalchemy_utils.types.password.PasswordType(max_length=4294967331), nullable=False),
     sa.Column('salt', sa.String(length=100), nullable=False),
     sa.Column('is_active', sa.Boolean(), nullable=True),
     sa.Column('is_superuser', sa.Boolean(), nullable=True),
