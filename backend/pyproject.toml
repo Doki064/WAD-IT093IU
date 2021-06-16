@@ -17,6 +17,9 @@ uvicorn = {extras = ["standard"], version = "^0.14.0"}
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 passlib = {extras = ["argon2"], version = "^1.7.4"}
 python-multipart = "^0.0.5"
+aioify = "^0.4.0"
+tenacity = "^7.0.0"
+SQLAlchemy-Utils = "^0.37.7"
 
 [tool.poetry.dev-dependencies]
 requests = "^2.25.1"
