@@ -1,9 +1,8 @@
 from typing import List, Optional
 from datetime import date
 
-from aiohttp import ClientSession
+from httpx import AsyncClient
 
-from api import Response
 from core.config import SERVER_URI
 
 
@@ -22,49 +21,37 @@ class ImportDetailCreate:
         self.item_amount = item_amount
 
 
-async def create(session: ClientSession, shop: ShopCreate):
+async def create(client: AsyncClient, shop: ShopCreate):
     json = {
         "shop_name": vars(shop),
     }
-    async with session.post(f"{SERVER_URI}/shops/", json=json) as response:
-        status = response.status,
-        data = await response.json()
-        return Response(status, data)
+    return await client.post(f"{SERVER_URI}/shops/", json=json)
 
 
-async def get_by_id(session: ClientSession, shop_id: int):
-    async with session.get(f"{SERVER_URI}/shops/{shop_id}") as response:
-        status = response.status,
-        data = await response.json()
-        return Response(status, data)
+async def get_by_id(client: AsyncClient, shop_id: int):
+    return await client.get(f"{SERVER_URI}/shops/{shop_id}")
 
 
-async def get_by_name(session: ClientSession, shop_name: str):
+async def get_by_name(client: AsyncClient, shop_name: str):
     params = {
         "shop_name": shop_name,
     }
-    async with session.get(f"{SERVER_URI}/shops/", params=params) as response:
-        status = response.status,
-        data = await response.json()
-        return Response(status, data)
+    return await client.get(f"{SERVER_URI}/shops/", params=params)
 
 
 async def get_all(
-    session: ClientSession, skip: Optional[int] = None, limit: Optional[int] = None
+    client: AsyncClient, skip: Optional[int] = None, limit: Optional[int] = None
 ):
     params = {}
     if skip is not None:
         params["skip"] = skip
     if limit is not None:
         params["limit"] = limit
-    async with session.get(f"{SERVER_URI}/shops/", params=params) as response:
-        status = response.status
-        data = await response.json()
-        return Response(status, data)
+    return await client.get(f"{SERVER_URI}/shops/", params=params)
 
 
 async def create_shop_importation(
-    session: ClientSession, shop_id: int, importation: ImportationCreate,
+    client: AsyncClient, shop_id: int, importation: ImportationCreate,
     importation_details: List[ImportDetailCreate], item_name: str
 ):
     json = {
@@ -72,30 +59,16 @@ async def create_shop_importation(
         "importation_details": [vars(detail) for detail in importation_details],
         "item_name": item_name,
     }
-    async with session.post(
-        f"{SERVER_URI}/{shop_id}/importations/", json=json
-    ) as response:
-        status = response.status
-        data = await response.json()
-        return Response(status, data)
+    return await client.post(f"{SERVER_URI}/{shop_id}/importations/", json=json)
 
 
-async def get_shop_importations(session: ClientSession, shop_id: int):
-    async with session.get(f"{SERVER_URI}/{shop_id}/importations/") as response:
-        status = response.status
-        data = await response.json()
-        return Response(status, data)
+async def get_shop_importations(client: AsyncClient, shop_id: int):
+    return await client.get(f"{SERVER_URI}/{shop_id}/importations/")
 
 
-async def get_shop_transactions(session: ClientSession, shop_id: int):
-    async with session.get(f"{SERVER_URI}/{shop_id}/transactions/") as response:
-        status = response.status
-        data = await response.json()
-        return Response(status, data)
+async def get_shop_transactions(client: AsyncClient, shop_id: int):
+    return await client.get(f"{SERVER_URI}/{shop_id}/transactions/")
 
 
-async def get_shop_items(session: ClientSession, shop_id: int):
-    async with session.get(f"{SERVER_URI}/{shop_id}/items/") as response:
-        status = response.status
-        data = await response.json()
-        return Response(status, data)
+async def get_shop_items(client: AsyncClient, shop_id: int):
+    return await client.get(f"{SERVER_URI}/{shop_id}/items/")

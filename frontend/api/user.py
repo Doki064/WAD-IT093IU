@@ -1,26 +1,20 @@
-from aiohttp import ClientSession
+from httpx import AsyncClient
 
-from api import Response
 from core.config import SERVER_URI
 
 
-async def login(session: ClientSession, username: str, password: str):
+async def login(client: AsyncClient, username: str, password: str):
+    data = {
+        "username": username,
+        "password": password,
+    }
+    headers = {"content-type": "application/x-www-form-urlencoded"}
+    return await client.post(f"{SERVER_URI}/users/login/auth", data=data, headers=headers)
+
+
+async def register(client: AsyncClient, username: str, password: str):
     json = {
         "username": username,
         "password": password,
     }
-    async with session.post(f"{SERVER_URI}/users/login/", json=json) as response:
-        status = response.status
-        data = await response.json()
-        return Response(status, data)
-
-
-async def register(session: ClientSession, username: str, password: str):
-    json = {
-        "username": username,
-        "password": password,
-    }
-    async with session.post(f"{SERVER_URI}/users/register/", json=json) as response:
-        status = response.status
-        data = await response.json()
-        return Response(status, data)
+    return await client.post(f"{SERVER_URI}/users/register", json=json)

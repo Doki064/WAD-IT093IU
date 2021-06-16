@@ -1,9 +1,8 @@
 from typing import List, Optional
 from datetime import date
 
-from aiohttp import ClientSession
+from httpx import AsyncClient
 
-from api import Response
 from core.config import SERVER_URI
 
 
@@ -24,49 +23,37 @@ class TransactDetailCreate:
         self.item_amount = item_amount
 
 
-async def create(session: ClientSession, customer: CustomerCreate):
+async def create(client: AsyncClient, customer: CustomerCreate):
     json = {
         "customer_name": vars(customer),
     }
-    async with session.post(f"{SERVER_URI}/customers/", json=json) as response:
-        status = response.status,
-        data = await response.json()
-        return Response(status, data)
+    return await client.post(f"{SERVER_URI}/customers/", json=json)
 
 
-async def get_by_id(session: ClientSession, customer_id: int):
-    async with session.get(f"{SERVER_URI}/customers/{customer_id}") as response:
-        status = response.status
-        data = await response.json()
-        return Response(status, data)
+async def get_by_id(client: AsyncClient, customer_id: int):
+    return await client.get(f"{SERVER_URI}/customers/{customer_id}")
 
 
-async def get_by_name(session: ClientSession, customer_name: str):
+async def get_by_name(client: AsyncClient, customer_name: str):
     params = {
         "customer_name": customer_name,
     }
-    async with session.get(f"{SERVER_URI}/customers/", params=params) as response:
-        status = response.status
-        data = await response.json()
-        return Response(status, data)
+    return await client.get(f"{SERVER_URI}/customers/", params=params)
 
 
 async def get_all(
-    session: ClientSession, skip: Optional[int] = None, limit: Optional[int] = None
+    client: AsyncClient, skip: Optional[int] = None, limit: Optional[int] = None
 ):
     params = {}
     if skip is not None:
         params["skip"] = skip
     if limit is not None:
         params["limit"] = limit
-    async with session.get(f"{SERVER_URI}/customers/", params=params) as response:
-        status = response.status
-        data = await response.json()
-        return Response(status, data)
+    return await client.get(f"{SERVER_URI}/customers/", params=params)
 
 
 async def create_customer_transaction(
-    session: ClientSession, customer_id: int, transaction: TransactionCreate,
+    client: AsyncClient, customer_id: int, transaction: TransactionCreate,
     transaction_details: List[TransactDetailCreate], item_name: str, shop_name: str
 ):
     json = {
@@ -75,16 +62,8 @@ async def create_customer_transaction(
         "item_name": item_name,
         "shop_name": shop_name,
     }
-    async with session.post(
-        f"{SERVER_URI}/{customer_id}/transactions/", json=json
-    ) as response:
-        status = response.status
-        data = await response.json()
-        return Response(status, data)
+    return await client.post(f"{SERVER_URI}/{customer_id}/transactions/", json=json)
 
 
-async def get_customer_transactions(session: ClientSession, customer_id: int):
-    async with session.get(f"{SERVER_URI}/{customer_id}/transactions/") as response:
-        status = response.status
-        data = await response.json()
-        return Response(status, data)
+async def get_customer_transactions(client: AsyncClient, customer_id: int):
+    return await client.get(f"{SERVER_URI}/{customer_id}/transactions/")
