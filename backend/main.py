@@ -1,49 +1,62 @@
-import uvicorn
+import logging
+
 from fastapi import FastAPI
-from fastapi.responses import ORJSONResponse, RedirectResponse
+from fastapi.logger import logger as fastapi_logger
+from fastapi.responses import ORJSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-import models
 import routers
-from internal import admin
-from database.config import engine
+from routers.internal import admin
+from core.config import settings
 
-app = FastAPI(default_response_class=ORJSONResponse)
+if "gunicorn" in str(settings.SERVER_SOFTWARE):
+    """
+    When running with gunicorn the log handlers get suppressed instead of
+    passed along to the container manager. This forces the gunicorn handlers
+    to be used throughout the project.
+    """
 
-origins = ["*"]
+    gunicorn_logger = logging.getLogger("gunicorn")
+    log_level = gunicorn_logger.level
+
+    root_logger = logging.getLogger()
+    gunicorn_error_logger = logging.getLogger("gunicorn.error")
+    uvicorn_access_logger = logging.getLogger("uvicorn.access")
+
+    # Use gunicorn error handlers for root, uvicorn, and fastapi loggers
+    root_logger.handlers = gunicorn_error_logger.handlers
+    uvicorn_access_logger.handlers = gunicorn_error_logger.handlers
+    fastapi_logger.handlers = gunicorn_error_logger.handlers
+
+    # Pass on logging levels for root, uvicorn, and fastapi loggers
+    root_logger.setLevel(log_level)
+    uvicorn_access_logger.setLevel(log_level)
+    fastapi_logger.setLevel(log_level)
+
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    openapi_url=f"{settings.API_PATH}/openapi.json",
+    default_response_class=ORJSONResponse,
+)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=settings.BACKEND_CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
-@app.on_event("startup")
-async def startup():
-    async with engine.begin() as conn:
-        await conn.run_sync(models.Base.metadata.create_all)
-
-
 @app.get("/", tags=["root"])
 def root():
-    return RedirectResponse(url="/docs")
+    return {"message": "Hello, Streamlit!"}
 
 
-@app.get("/api/", tags=["root"])
-def main():
-    return {"message": "Hello, Docker!"}
-
-
-app.include_router(routers.users_router)
-app.include_router(routers.customers_router)
-app.include_router(routers.categories_router)
-app.include_router(routers.items_router)
-app.include_router(routers.shops_router)
-app.include_router(routers.transactions_router)
-app.include_router(routers.importations_router)
+app.include_router(routers.api_router, prefix=settings.API_PATH)
 app.include_router(admin.router)
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8080, reload=True)
+    import uvicorn
+
+    uvicorn.run("main:app", host="0.0.0.0", port=8080, reload=True, debug=True)
