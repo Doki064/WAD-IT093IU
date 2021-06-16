@@ -4,9 +4,12 @@ services:
     frontend:
         container_name: Streamlit
         build: ./frontend
-        image: frontend:beta
+        image: frontend:${TAG-latest}
         env_file:
-            - ./frontend/.env.prod
+            - .env
+        environment:
+            - BASE_URL=http://${DOMAIN:?variable not set}:8080
+            - API_PATH=${API_PATH:?variable not set}
         working_dir: /app
         volumes:
             - ./frontend:/app
@@ -20,14 +23,17 @@ services:
     backend:
         container_name: FastAPI
         build: ./backend
-        image: backend:beta
+        image: backend:${TAG-latest}
         env_file:
-            - ./backend/.env.prod
+            - .env
+        environment:
+            - SERVER_DOMAIN=${DOMAIN:?variable not set}
+            - SERVER_URL=http://${DOMAIN:?variable not set}:8080
         working_dir: /app
         command: /start-reload.sh
         volumes:
             - ./backend:/app
-            # - ./backend/alembic/versions:/app/alembic/versions
+            - ./backend/alembic/versions:/app/alembic/versions
         ports:
             - "8080:8080"
         networks:
@@ -41,8 +47,8 @@ services:
         image: dpage/pgadmin4
         tty: true
         environment:
-            - PGADMIN_DEFAULT_EMAIL=pgadmin4@pgadmin.org
-            - PGADMIN_DEFAULT_PASSWORD=admin
+            - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+            - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD:-admin}
         volumes:
             - pgadmin:/var/lib/pgadmin4/storage
         ports:
@@ -55,10 +61,12 @@ services:
     db:
         container_name: PostgreSQL
         image: postgres:latest
+        env_file:
+            - .env
         environment:
-            - POSTGRES_USER=postgres
-            - POSTGRES_PASSWORD=postgres
-            - POSTGRES_DB=postgres
+            - POSTGRES_USER=${POSTGRES_USER:-postgres}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+            - POSTGRES_DB=${POSTGRES_DB:-postgres}
         volumes:
             - pgdata:/var/lib/postgresql/data
         ports:
