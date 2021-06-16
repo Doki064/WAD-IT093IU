@@ -1,6 +1,7 @@
 from typing import Optional
 from uuid import UUID
 
+from sqlalchemy_utils import Password
 from pydantic import BaseModel as _BaseModel
 
 
@@ -27,7 +28,11 @@ class UserInDBBase(UserBase):
 
 
 class UserInDB(UserInDBBase):
-    hashed_password: str
+    hashed_password: Password
+    salt: str
+
+    class Config:
+        arbitrary_types_allowed = True
 
 
 class User(UserInDBBase):

@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from alembic import context
 
 import models
-from settings import DATABASE_URL
+from database.config import DATABASE_URL
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -51,6 +51,7 @@ def run_migrations_offline():
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        render_item=render_item,
     )
 
     with context.begin_transaction():
@@ -58,10 +59,29 @@ def run_migrations_offline():
 
 
 def do_run_migrations(connection):
-    context.configure(connection=connection, target_metadata=target_metadata)
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        render_item=render_item,
+    )
 
     with context.begin_transaction():
         context.run_migrations()
+
+
+def render_item(type_, obj, autogen_context):
+    """Apply custom rendering for selected items."""
+
+    if type_ == "type" and obj.__class__.__module__.startswith("sqlalchemy_utils."):
+        module_name = obj.__class__.__module__
+        class_name = obj.__class__.__name__
+        autogen_context.imports.add(f"import {module_name}")
+        if hasattr(obj, "length"):
+            return f"{module_name}.{class_name}(max_length={obj.length})"
+        # return f"{module_name}.{class_name}()"
+
+    # default rendering for other objects
+    return False
 
 
 async def run_migrations_online():
@@ -77,7 +97,8 @@ async def run_migrations_online():
             prefix="sqlalchemy.",
             poolclass=pool.NullPool,
             future=True,
-        ))
+        )
+    )
 
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)

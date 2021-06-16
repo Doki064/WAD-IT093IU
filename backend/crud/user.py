@@ -13,11 +13,13 @@ from schemas.internal import UserCreate
 
 async def create(db: Session, user: UserCreate) -> User:
     salt = secrets.token_bytes(16)
-    hashed_password = security.hash_password(user.password, salt)
-    db_user = User(username=user.username,
-                   hashed_password=hashed_password,
-                   salt=salt.hex(),
-                   is_superuser=user.is_superuser)
+    encoded_password = security.secret_password(user.password, salt)
+    db_user = User(
+        username=user.username,
+        hashed_password=encoded_password,
+        salt=salt.hex(),
+        is_superuser=user.is_superuser
+    )
     db.add(db_user)
     await db.commit()
     return db_user
@@ -60,8 +62,6 @@ async def authenticate(session, username: str, password: str):
     salt = bytes.fromhex(db_user.salt)
     if not security.verify_password(db_user.hashed_password, password, salt):
         return None
-    if security.needs_rehash(db_user.hashed_password):
-        await rehash_password(session, user_id=db_user.id, password=password)
     return db_user
 
 

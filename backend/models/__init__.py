@@ -25,8 +25,12 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import functions
 from sqlalchemy.orm import relationship
+from sqlalchemy_utils import PasswordType, force_auto_coercion
 
 from database.config import Base
+from core.config import settings
+
+force_auto_coercion()
 
 
 class User(Base):
@@ -35,7 +39,16 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     uuid = Column(UUID(as_uuid=True), unique=True, index=True, default=uuid4)
     username = Column(String(100), unique=True, index=True, nullable=False)
-    hashed_password = Column(String(100), nullable=False)
+    hashed_password = Column(
+        PasswordType(
+            onload=lambda **kwargs: dict(
+                schemes=settings.SCHEMES,
+                deprecated="auto",
+                **kwargs,
+            )
+        ),
+        nullable=False
+    )
     salt = Column(String(100), nullable=False)
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False)
@@ -91,16 +104,14 @@ class Importation(Base):
     __tablename__ = "importations"
 
     id = Column(Integer, primary_key=True, index=True)
-    date = Column(Date,
-                  index=True,
-                  nullable=False,
-                  server_default=functions.current_date())
+    date = Column(
+        Date, index=True, nullable=False, server_default=functions.current_date()
+    )
     shop_id = Column(Integer, ForeignKey("shops.id"))
 
-    importation_details = relationship("ImportDetail",
-                                       back_populates="importation",
-                                       lazy="joined",
-                                       innerjoin=True)
+    importation_details = relationship(
+        "ImportDetail", back_populates="importation", lazy="joined", innerjoin=True
+    )
     shop = relationship("Shop", back_populates="importations")
 
     __mapper_args__ = {"eager_defaults": True}
@@ -110,18 +121,16 @@ class Transaction(Base):
     __tablename__ = "transactions"
 
     id = Column(Integer, primary_key=True, index=True)
-    date = Column(Date,
-                  index=True,
-                  nullable=False,
-                  server_default=functions.current_date())
+    date = Column(
+        Date, index=True, nullable=False, server_default=functions.current_date()
+    )
     status = Column(String(100), default="PENDING")
     customer_id = Column(Integer, ForeignKey("customers.id"))
     shop_id = Column(Integer, ForeignKey("shops.id"))
 
-    transaction_details = relationship("TransactDetail",
-                                       back_populates="transaction",
-                                       lazy="joined",
-                                       innerjoin=True)
+    transaction_details = relationship(
+        "TransactDetail", back_populates="transaction", lazy="joined", innerjoin=True
+    )
     customer = relationship("Customer", back_populates="transactions")
     shop = relationship("Shop", back_populates="transactions")
 
