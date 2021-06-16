@@ -12,7 +12,7 @@ from crud import user as _user
 from database.config import async_session
 from core.config import settings
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_PATH}/users/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_PATH}/users/login/auth")
 
 
 @aioify
