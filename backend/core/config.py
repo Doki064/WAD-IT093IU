@@ -2,38 +2,41 @@ import os
 import secrets
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import AnyHttpUrl, BaseSettings, PostgresDsn, validator
+from pydantic import BaseSettings, AnyHttpUrl, PostgresDsn, validator
 
 if os.getenv("NODE_ENV", "development") != "production":
     from pathlib import Path
     from dotenv import load_dotenv
 
     base_dir = Path(__file__).parents[1]
-    load_dotenv(base_dir.joinpath(".env").resolve())
+    load_dotenv(base_dir.joinpath(".env.local").resolve())
+
+
+class PostgresAsyncpgDsn(PostgresDsn):
+    allowed_schemes = {
+        "postgres",
+        "postgresql",
+        "postgres+asyncpg",
+        "postgresql+asyncpg",
+    }
 
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Wholesale Management System"
 
-    NODE_ENV: str
+    NODE_ENV: str = "development"
     SERVER_SOFTWARE: str
 
     API_PATH: str = "/api/v1"
 
-    SCHEMES: Union[str, List[str]]
+    SCHEMES: List[str]
     SECRET_KEY: str = secrets.token_urlsafe(32)
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
 
-    SERVER_NAME: str
-    SERVER_HOST: AnyHttpUrl
-    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = [
-        "http://localhost",
-        "http://localhost:5432",
-        "http://localhost:8080",
-        "http://localhost:8501",
-        "http://frontend:8501",
-    ]
+    SERVER_DOMAIN: str
+    SERVER_URL: AnyHttpUrl
+    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
 
     @validator("BACKEND_CORS_ORIGINS", pre=True)
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
@@ -47,14 +50,14 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str
     POSTGRES_HOST: str
     POSTGRES_DB: str
-    SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = None
+    SQLALCHEMY_DATABASE_URI: Optional[PostgresAsyncpgDsn] = None
 
     @validator("SQLALCHEMY_DATABASE_URI", pre=True)
     def assemble_db_connection(cls, v: Optional[str], values: Dict[str, Any]) -> Any:
         if isinstance(v, str):
             return v
-        return PostgresDsn.build(
-            scheme="postgresql",
+        return PostgresAsyncpgDsn.build(
+            scheme="postgresql+asyncpg",
             user=values.get("POSTGRES_USER"),
             password=values.get("POSTGRES_PASSWORD"),
             host=values.get("POSTGRES_HOST"),
