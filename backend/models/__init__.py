@@ -38,7 +38,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     uuid = Column(UUID(as_uuid=True), unique=True, index=True, default=uuid4)
-    username = Column(String(100), unique=True, index=True, nullable=False)
+    username = Column(String(50), unique=True, index=True, nullable=False)
     hashed_password = Column(
         PasswordType(
             onload=lambda **kwargs: dict(
@@ -49,7 +49,7 @@ class User(Base):
         ),
         nullable=False
     )
-    salt = Column(String(100), nullable=False)
+    salt = Column(String(32), nullable=False)
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False)
 
@@ -59,26 +59,26 @@ class User(Base):
 class Customer(Base):
     __tablename__ = "customers"
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(100), index=True, nullable=False)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=False)
+    name = Column(String(255), index=True, nullable=False)
 
-    transactions = relationship("Transaction", back_populates="customer")
+    transactions = relationship("Transaction", back_populates="customer", lazy="subquery")
 
 
 class Category(Base):
     __tablename__ = "categories"
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(100), unique=True, index=True, nullable=False)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=False)
+    name = Column(String(255), unique=True, index=True, nullable=False)
 
-    items = relationship("Item", back_populates="category", lazy="joined", innerjoin=True)
+    items = relationship("Item", back_populates="category", lazy="subquery")
 
 
 class Item(Base):
     __tablename__ = "items"
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(100), unique=True, index=True, nullable=False)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=False)
+    name = Column(String(255), unique=True, index=True, nullable=False)
     quantity = Column(Integer, CheckConstraint("quantity >= 0"), default=0)
     category_id = Column(Integer, ForeignKey("categories.id"))
     shop_id = Column(Integer, ForeignKey("shops.id"))
@@ -92,25 +92,25 @@ class Item(Base):
 class Shop(Base):
     __tablename__ = "shops"
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(100), unique=True, index=True, nullable=False)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=False)
+    name = Column(String(255), unique=True, index=True, nullable=False)
 
-    importations = relationship("Importation", back_populates="shop")
-    transactions = relationship("Transaction", back_populates="shop")
-    items = relationship("Item", back_populates="shop", lazy="joined", innerjoin=True)
+    importations = relationship("Importation", back_populates="shop", lazy="subquery")
+    transactions = relationship("Transaction", back_populates="shop", lazy="subquery")
+    items = relationship("Item", back_populates="shop", lazy="subquery")
 
 
 class Importation(Base):
     __tablename__ = "importations"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=False)
     date = Column(
         Date, index=True, nullable=False, server_default=functions.current_date()
     )
     shop_id = Column(Integer, ForeignKey("shops.id"))
 
     importation_details = relationship(
-        "ImportDetail", back_populates="importation", lazy="joined", innerjoin=True
+        "ImportDetail", back_populates="importation", lazy="subquery"
     )
     shop = relationship("Shop", back_populates="importations")
 
@@ -120,16 +120,16 @@ class Importation(Base):
 class Transaction(Base):
     __tablename__ = "transactions"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=False)
     date = Column(
         Date, index=True, nullable=False, server_default=functions.current_date()
     )
-    status = Column(String(100), default="PENDING")
+    status = Column(String(20), default="PENDING")
     customer_id = Column(Integer, ForeignKey("customers.id"))
     shop_id = Column(Integer, ForeignKey("shops.id"))
 
     transaction_details = relationship(
-        "TransactDetail", back_populates="transaction", lazy="joined", innerjoin=True
+        "TransactDetail", back_populates="transaction", lazy="subquery"
     )
     customer = relationship("Customer", back_populates="transactions")
     shop = relationship("Shop", back_populates="transactions")
