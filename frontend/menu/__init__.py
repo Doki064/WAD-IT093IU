@@ -6,10 +6,12 @@ Example:
 """
 
 import streamlit as st
+from httpx import AsyncClient
 
 from management import Management as _Management
 from plot import Plot as _Plot
 from table import Table as _Table
+from session_state import SessionState
 
 
 class Menu:
@@ -24,16 +26,20 @@ class Menu:
         plot: An instance of Plot to show the plot of profit.
         table: An instance of Table to display data statistics of the database.
     """
-
-    def __init__(self, connection):
+    @classmethod
+    async def create(cls, state: SessionState, client: AsyncClient):
         """Initialize Menu instance."""
+        self = Menu()
+        self.state = state
+        self.client = client
         self.container = st.sidebar.beta_container()
-        self.options = ["Search", "Add", "Remove", "View table", "View profit plot"]
-        self.management = _Management(connection)
-        self.plot = _Plot(connection)
-        self.table = _Table(connection)
+        self.options = ["Search", "Add", "Remove", "View table", "View plot"]
+        self.management = await _Management.create(state, client)
+        self.table = _Table(state, client)
+        self.plot = await _Plot.create(state, client)
+        return self
 
-    def display_option(self):
+    async def display_option(self):
         """Display options as select box"""
 
         # Options:
@@ -41,19 +47,21 @@ class Menu:
         #     'Add'               go to add page
         #     'Remove'            go to remove page
         #     'View table'        view the statistics in the database
-        #     'View profit plot'  view the plot of profit in a specific amount of time
+        #     'View plot'         view the plot of profit in a specific amount of time
 
         self.container.header("NAVIGATION")
 
         current_option = self.container.radio("Go to: ", self.options)
         if current_option == "Search":
-            self.management.show_search()
-        elif current_option == "Add":
-            self.management.show_add()
-        elif current_option == "Remove":
-            self.management.show_remove()
-        elif current_option == "View table":
-            self.table.show_dataframe()
-        elif current_option == "View profit plot":
-            self.plot.plot()
+            await self.management.show_search()
+        if current_option == "Add":
+            st.warning("Not implemented")
+            st.stop()
+        if current_option == "Remove":
+            st.warning("Not implemented")
+            st.stop()
+        if current_option == "View table":
+            await self.table.show_dataframe()
+        if current_option == "View plot":
+            await self.plot.plot()
         return self.container
