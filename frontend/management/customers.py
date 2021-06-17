@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from management import Management
 
+import httpx
 import pandas as pd
 import streamlit as st
 
@@ -27,25 +28,31 @@ async def show_search(mngmt: Management):
                     "Input customer id: ", step=1, value=0, min_value=0
                 )
                 response = await customers.get_by_id(mngmt.client, customer_id)
-                if response.status_code != 200:
-                    st.error(response.status_code)
-                    st.error(response.json())
+                try:
+                    response.raise_for_status()
+                except httpx.HTTPStatusError:
+                    st.error(f"Status code: {response.status_code}")
+                    st.error(response.json()["detail"])
                     st.stop()
                 df = pd.json_normalize(response.json())
 
             elif choice == "name":
                 customer_name = st.text_input("Input customer name: ", value="")
                 response = await customers.get_by_name(mngmt.client, customer_name)
-                if response.status_code != 200:
-                    st.error(response.status_code)
+                try:
+                    response.raise_for_status()
+                except httpx.HTTPStatusError:
+                    st.error(f"Status code: {response.status_code}")
                     st.error(response.json()["detail"])
                     st.stop()
                 df = pd.json_normalize(response.json())
 
             else:
                 response = await customers.get_all(mngmt.client, mngmt.limit)
-                if response.status_code != 200:
-                    st.error(response.status_code)
+                try:
+                    response.raise_for_status()
+                except httpx.HTTPStatusError:
+                    st.error(f"Status code: {response.status_code}")
                     st.error(response.json()["detail"])
                     st.stop()
                 df = pd.json_normalize(response.json())

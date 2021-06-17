@@ -1,5 +1,5 @@
+import httpx
 import streamlit as st
-from httpx import AsyncClient
 
 from management import (
     customers,
@@ -10,12 +10,11 @@ from management import (
     transactions,
 )
 from session_state import SessionState
-from core.config import SERVER_URI
 
 
 class Management:
     @classmethod
-    async def create(cls, state: SessionState, client: AsyncClient):
+    async def create(cls, state: SessionState, client: httpx.AsyncClient):
         self = Management()
         self.state = state
         self.client = client
@@ -24,9 +23,14 @@ class Management:
         return self
 
     async def show_search(self):
-        response = await self.client.get(f"{SERVER_URI}/internal/admin/")
-        if response.raise_for_status() is None:
-            data = response.json()
+        response = await self.client.get("/internal/admin")
+        try:
+            response.raise_for_status()
+        except httpx.HTTPStatusError:
+            st.error(f"Status code: {response.status_code}")
+            st.error(response.json()["detail"])
+            st.stop()
+        data = response.json()
         self.tables = list(data.keys())
         try:
             self.tables.remove("users")

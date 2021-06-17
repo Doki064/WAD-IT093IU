@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from management import Management
 
+import httpx
 import pandas as pd
 import streamlit as st
 
@@ -25,8 +26,10 @@ async def show_search(mngmt: Management):
                 "Input importation id: ", step=1, value=0, min_value=0
             )
             response = await importations.get_by_id(mngmt.client, importation_id)
-            if response.status_code != 200:
-                st.error(response.status_code)
+            try:
+                response.raise_for_status()
+            except httpx.HTTPStatusError:
+                st.error(f"Status code: {response.status_code}")
                 st.error(response.json()["detail"])
                 st.stop()
             df = pd.json_normalize(response.json())
@@ -34,16 +37,20 @@ async def show_search(mngmt: Management):
         elif choice == "date":
             importation_date = st.date_input("Input importation date: ")
             response = await importations.get_by_date(mngmt.client, importation_date)
-            if response.status_code != 200:
-                st.error(response.status_code)
+            try:
+                response.raise_for_status()
+            except httpx.HTTPStatusError:
+                st.error(f"Status code: {response.status_code}")
                 st.error(response.json()["detail"])
                 st.stop()
             df = pd.json_normalize(response.json())
 
         else:
             response = await importations.get_all(mngmt.client, mngmt.limit)
-            if response.status_code != 200:
-                st.error(response.status_code)
+            try:
+                response.raise_for_status()
+            except httpx.HTTPStatusError:
+                st.error(f"Status code: {response.status_code}")
                 st.error(response.json()["detail"])
                 st.stop()
             df = pd.json_normalize(response.json())
@@ -69,8 +76,10 @@ async def show_search(mngmt: Management):
                     id = st.selectbox("Select importation: ", options=id_list)
 
                 response = await importations.get_details(mngmt.client, id)
-                if response.status_code != 200:
-                    st.error(response.status_code)
+                try:
+                    response.raise_for_status()
+                except httpx.HTTPStatusError:
+                    st.error(f"Status code: {response.status_code}")
                     st.error(response.json()["detail"])
                     st.stop()
                 detail_df = pd.json_normalize(response.json())

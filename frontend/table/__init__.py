@@ -7,15 +7,14 @@ Example:
 
 import io
 
+import httpx
 import hiplot as hip
 import pandas as pd
 import pandas_profiling as pp
 import streamlit as st
 import streamlit.components.v1 as components
-from httpx import AsyncClient
 
 from session_state import SessionState
-from core.config import SERVER_URI
 
 
 class Table:
@@ -37,7 +36,7 @@ class Table:
         profile_report: Pandas Profiling ProfileReport.
             The Pandas Profiling ProfileReport that will be displayed as HTML.
     """
-    def __init__(self, state: SessionState, client: AsyncClient):
+    def __init__(self, state: SessionState, client: httpx.AsyncClient):
         """Initializes Table instance."""
         self.state = state
         self.client = client
@@ -55,42 +54,48 @@ class Table:
     async def show_dataframe(self, minimal=True):
         with st.beta_container():
             # Options
-            response = await self.client.get(f"{SERVER_URI}/internal/admin/")
-            assert response.raise_for_status() is None
-            data = response.json()
-            options = tuple(data.keys())
-            table = st.selectbox(self.text, options, index=3)
-            st.info(
-                f"Note: due to limited output size, the displayed DataFrame is "
-                f"limited to the first {self.limit_rows} rows only.\n\n"
-                f"However, the Pandas Profiling Report "
-                f"calculates on the full DataFrame."
-            )
-
-            col1, col2 = st.beta_columns(2)
-            with col1:
-                response = await self.client.get(f"{SERVER_URI}/{table}/")
-                assert response.raise_for_status() is None
+            if st.button("Get table"):
+                response = await self.client.get("/internal/admin")
+                try:
+                    response.raise_for_status()
+                except httpx.HTTPStatusError:
+                    st.error(f"Status code: {response.status_code}")
+                    st.error(response.json()["detail"])
+                    st.stop()
                 data = response.json()
-                df = pd.json_normalize(data)
-                self.show_df = df.head(self.limit_rows)    # Only shows limited rows
-                self.profile_df = df
-
-                # Show DataFrame's info
-                buffer = io.StringIO()
-                df.info(buf=buffer)
-                st.text(buffer.getvalue())
-
-                # Show HiPlot
-                xp = hip.Experiment.from_dataframe(self.show_df)
-                xp.display_st(key="hip")
-
-            with col2:
-                # Show Pandas Profile Report
-                self.profile_report = pp.ProfileReport(
-                    self.profile_df, minimal=minimal, progress_bar=False
+                options = tuple(data.keys())
+                table = st.selectbox(self.text, options, index=3)
+                st.info(
+                    f"Note: due to limited output size, the displayed DataFrame is "
+                    f"limited to the first {self.limit_rows} rows only.\n\n"
+                    f"However, the Pandas Profiling Report "
+                    f"calculates on the full DataFrame."
                 )
-                with st.spinner("Generating profile report..."):
-                    components.html(
-                        self.profile_report.to_html(), height=1500, scrolling=True
+
+                col1, col2 = st.beta_columns(2)
+                with col1:
+                    response = await self.client.get(f"/{table}")
+                    if response.raise_for_status() is None:
+                        data = response.json()
+                    df = pd.json_normalize(data)
+                    self.show_df = df.head(self.limit_rows)    # Only shows limited rows
+                    self.profile_df = df
+
+                    # Show DataFrame's info
+                    buffer = io.StringIO()
+                    df.info(buf=buffer)
+                    st.text(buffer.getvalue())
+
+                    # Show HiPlot
+                    xp = hip.Experiment.from_dataframe(self.show_df)
+                    xp.display_st(key="hip")
+
+                with col2:
+                    # Show Pandas Profile Report
+                    self.profile_report = pp.ProfileReport(
+                        self.profile_df, minimal=minimal, progress_bar=False
                     )
+                    with st.spinner("Generating profile report..."):
+                        components.html(
+                            self.profile_report.to_html(), height=1500, scrolling=True
+                        )

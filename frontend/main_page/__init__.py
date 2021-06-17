@@ -8,8 +8,8 @@ Example:
 
 import re
 
+import httpx
 import streamlit as st
-from httpx import AsyncClient
 
 from api import user
 from session_state import SessionState
@@ -57,24 +57,22 @@ class MainPage:
         )
 
     @staticmethod
-    async def form(state: SessionState, client: AsyncClient):
+    async def form(state: SessionState, client: httpx.AsyncClient):
         if state.form == "login":
             with st.form("login_form"):
                 username = st.text_input("Username: ", value="", key="login_username")
                 password = st.text_input(
                     "Password: ", type="password", value="", key="login_password"
                 )
-                warn_msg = st.empty()
                 submitted = st.form_submit_button("Sign in")
                 if submitted and username and password:
                     response = await user.login(client, username, password)
-                    if response.status_code != 200:
-                        if response.status_code == 401:
-                            warn_msg.warning("The username or password was not correct")
-                        else:
-                            st.error(response.status)
-                            st.error(response.json()["detail"])
-                            st.stop()
+                    try:
+                        response.raise_for_status()
+                    except httpx.HTTPStatusError:
+                        st.error(f"Status code: {response.status_code}")
+                        st.error(response.json()["detail"])
+                        st.stop()
                     return response.json()
         else:
             with st.form("register_form"):
@@ -103,8 +101,10 @@ class MainPage:
                         pwd_warn.warning("The password confirmation does not match")
                         st.stop()
                     response = await user.register(client, username, password)
-                    if response.status != 201:
-                        st.error(response.status)
+                    try:
+                        response.raise_for_status()
+                    except httpx.HTTPStatusError:
+                        st.error(f"Status code: {response.status_code}")
                         st.error(response.json()["detail"])
                         st.stop()
                     return response.json()
