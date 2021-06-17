@@ -1,12 +1,19 @@
 from typing import Optional
 from uuid import UUID
 
+import orjson
 from sqlalchemy_utils import Password
 from pydantic import BaseModel as _BaseModel
 
 
+class BaseModelConfig(_BaseModel):
+    class Config:
+        json_loads = orjson.loads
+        json_dumps = orjson.dumps
+
+
 # Schema for users
-class UserBase(_BaseModel):
+class UserBase(BaseModelConfig):
     username: str
     is_active: Optional[bool] = True
     is_superuser: bool = False
@@ -40,7 +47,7 @@ class User(UserInDBBase):
 
 
 # Schema for tokens
-class Token(_BaseModel):
+class Token(BaseModelConfig):
     access_token: str
     token_type: str
 

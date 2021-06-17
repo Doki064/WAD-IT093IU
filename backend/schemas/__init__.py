@@ -1,6 +1,4 @@
 __all__ = [
-    "User",
-    "UserCreate",
     "Customer",
     "CustomerCreate",
     "Category",
@@ -22,11 +20,11 @@ __all__ = [
 from typing import List
 from datetime import date
 
-from pydantic import BaseModel as _BaseModel
+from schemas.internal import BaseModelConfig
 
 
 # Schema for importation details
-class ImportDetailBase(_BaseModel):
+class ImportDetailBase(BaseModelConfig):
     item_amount: int
 
 
@@ -43,7 +41,7 @@ class ImportDetail(ImportDetailBase):
 
 
 # Schema for importations
-class ImportationBase(_BaseModel):
+class ImportationBase(BaseModelConfig):
     date: date
 
 
@@ -61,7 +59,7 @@ class Importation(ImportationBase):
 
 
 # Schema for transaction details
-class TransactDetailBase(_BaseModel):
+class TransactDetailBase(BaseModelConfig):
     item_price: float
     item_amount: int
 
@@ -79,7 +77,7 @@ class TransactDetail(TransactDetailBase):
 
 
 # Schema for transactions
-class TransactionBase(_BaseModel):
+class TransactionBase(BaseModelConfig):
     date: date
     status: str
 
@@ -99,7 +97,7 @@ class Transaction(TransactionBase):
 
 
 # Schema for items
-class ItemBase(_BaseModel):
+class ItemBase(BaseModelConfig):
     name: str
     quantity: int
 
@@ -111,14 +109,14 @@ class ItemCreate(ItemBase):
 class Item(ItemBase):
     id: int
     category_id: int
-    shop_uid: int
+    shop_id: int
 
     class Config:
         orm_mode = True
 
 
 # Schema for categories
-class CategoryBase(_BaseModel):
+class CategoryBase(BaseModelConfig):
     name: str
 
 
@@ -135,7 +133,7 @@ class Category(CategoryBase):
 
 
 # Schema for shops
-class ShopBase(_BaseModel):
+class ShopBase(BaseModelConfig):
     name: str
 
 
@@ -145,16 +143,17 @@ class ShopCreate(ShopBase):
 
 class Shop(ShopBase):
     id: int
-    importations: List[Importation] = []
-    transactions: List[Transaction] = []
-    items: List[Item] = []
+
+    # importations: List[Importation] = []
+    # transactions: List[Transaction] = []
+    # items: List[Item] = []
 
     class Config:
         orm_mode = True
 
 
 # Schema for customers
-class CustomerBase(_BaseModel):
+class CustomerBase(BaseModelConfig):
     name: str
 
 
@@ -164,7 +163,8 @@ class CustomerCreate(CustomerBase):
 
 class Customer(CustomerBase):
     id: int
-    transactions: List[Transaction] = []
+
+    # transactions: List[Transaction.id] = []
 
     class Config:
         orm_mode = True
