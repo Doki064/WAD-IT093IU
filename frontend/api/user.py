@@ -8,8 +8,7 @@ async def login(client: AsyncClient, username: str, password: str):
         "username": username,
         "password": password,
     }
-    headers = {"content-type": "application/x-www-form-urlencoded"}
-    return await client.post(f"{SERVER_URI}/users/login/auth", data=data, headers=headers)
+    return await client.post(f"{SERVER_URI}/users/login/auth", data=data)
 
 
 async def register(client: AsyncClient, username: str, password: str):

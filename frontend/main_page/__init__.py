@@ -9,10 +9,12 @@ Example:
 import re
 
 import streamlit as st
-from aiohttp import ClientSession
+from httpx import AsyncClient
+from httpx_auth import OAuth2ResourceOwnerPasswordCredentials
 
-from session_state import SessionState
 from api import user
+from session_state import SessionState
+from core.config import SERVER_URI
 
 
 class MainPage:
@@ -26,7 +28,6 @@ class MainPage:
         info_field: A Streamlit reserved field,
             which contains short description of the web.
     """
-
     @staticmethod
     def welcome():
         """Sets up the welcome screen."""
@@ -36,36 +37,39 @@ class MainPage:
     @staticmethod
     def intro():
         """Shows intro section."""
-        st.markdown("""
+        st.markdown(
+            """
             ---\n
             This is a project for Web Application Development course in
             [International University - VNU-HCM](https://hcmiu.edu.vn/en/).\n
             Source code is available at [GitHub](https://github.com/Doki064/WAD_IT093IU).
-        """)
+        """
+        )
 
     @staticmethod
     def info():
         """Shows info, a short summary of intro section."""
-        st.sidebar.markdown("""
+        st.sidebar.markdown(
+            """
             ---\n
             [International University - VNU-HCM](https://hcmiu.edu.vn/en/)\n
             [Streamlit](https://www.streamlit.io/)\n
             [GitHub](https://github.com/Doki064/WAD-IT093IU)
-        """)
+        """
+        )
 
     @staticmethod
-    async def form(state: SessionState, session: ClientSession):
+    async def form(state: SessionState, client: AsyncClient):
         if state.form == "login":
             with st.form("login_form"):
                 username = st.text_input("Username: ", value="", key="login_username")
-                password = st.text_input("Password: ",
-                                         type="password",
-                                         value="",
-                                         key="login_password")
+                password = st.text_input(
+                    "Password: ", type="password", value="", key="login_password"
+                )
                 warn_msg = st.empty()
                 submitted = st.form_submit_button("Sign in")
                 if submitted and username and password:
-                    response = await user.login(session, username, password)
+                    response = await user.login(client, username, password)
                     if response.status != 200:
                         if response.status == 401:
                             warn_msg.warning("The username or password was not correct")
@@ -73,21 +77,28 @@ class MainPage:
                             st.error(response.status)
                             st.error(response.data["detail"])
                             st.stop()
-                    state.token = response.data["access_token"]
+                    state.token = response.data
+                    state.auth = OAuth2ResourceOwnerPasswordCredentials(
+                        f"{SERVER_URI}/users/login/auth",
+                        username,
+                        password,
+                        client=client
+                    )
                     st.experimental_rerun()
 
         else:
             with st.form("register_form"):
                 username = st.text_input("Username: ", value="", key="register_username")
                 uname_warn = st.empty()
-                password = st.text_input("Password: ",
-                                         type="password",
-                                         value="",
-                                         key="register_password")
-                password_confirm = st.text_input("Confirm password: ",
-                                                 type="password",
-                                                 value="",
-                                                 key="password_confirm")
+                password = st.text_input(
+                    "Password: ", type="password", value="", key="register_password"
+                )
+                password_confirm = st.text_input(
+                    "Confirm password: ",
+                    type="password",
+                    value="",
+                    key="password_confirm"
+                )
                 pwd_warn = st.empty()
                 submitted = st.form_submit_button("Sign up")
                 if submitted and username and password:
@@ -101,10 +112,16 @@ class MainPage:
                     elif password_confirm != password:
                         pwd_warn.warning("The password confirmation does not match")
                         st.stop()
-                    response = await user.register(session, username, password)
+                    response = await user.register(client, username, password)
                     if response.status != 201:
                         st.error(response.status)
                         st.error(response.data["detail"])
                         st.stop()
-                    state.token = response.data["access_token"]
+                    state.token = response.data
+                    state.auth = OAuth2ResourceOwnerPasswordCredentials(
+                        f"{SERVER_URI}/users/login/auth",
+                        username,
+                        password,
+                        client=client
+                    )
                     st.experimental_rerun()
