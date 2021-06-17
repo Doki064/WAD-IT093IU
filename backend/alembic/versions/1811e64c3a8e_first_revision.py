@@ -1,8 +1,8 @@
 """First_revision
 
-Revision ID: a5785f2bb5b3
+Revision ID: 1811e64c3a8e
 Revises: 
-Create Date: 2021-06-16 01:53:45.267661
+Create Date: 2021-06-17 02:09:52.964856
 
 """
 from alembic import op
@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 import sqlalchemy_utils.types.password
 
 # revision identifiers, used by Alembic.
-revision = 'a5785f2bb5b3'
+revision = '1811e64c3a8e'
 down_revision = None
 branch_labels = None
 depends_on = None
