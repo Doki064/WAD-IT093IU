@@ -25,28 +25,28 @@ async def show_search(mngmt: Management):
                 "Input transaction id: ", step=1, value=0, min_value=0
             )
             response = await transactions.get_by_id(mngmt.client, transaction_id)
-            if response.status != 200:
-                st.error(response.status)
-                st.error(response.data["detail"])
+            if response.status_code != 200:
+                st.error(response.status_code)
+                st.error(response.json()["detail"])
                 st.stop()
-            df = pd.json_normalize(response.data)
+            df = pd.json_normalize(response.json())
 
         elif choice == "date":
             transaction_date = st.date_input("Input transaction date: ")
             response = await transactions.get_by_date(mngmt.client, transaction_date)
-            if response.status != 200:
-                st.error(response.status)
-                st.error(response.data["detail"])
+            if response.status_code != 200:
+                st.error(response.status_code)
+                st.error(response.json()["detail"])
                 st.stop()
-            df = pd.json_normalize(response.data)
+            df = pd.json_normalize(response.json())
 
         else:
             response = await transactions.get_all(mngmt.client, mngmt.limit)
-            if response.status != 200:
-                st.error(response.status)
-                st.error(response.data["detail"])
+            if response.status_code != 200:
+                st.error(response.status_code)
+                st.error(response.json()["detail"])
                 st.stop()
-            df = pd.json_normalize(response.data)
+            df = pd.json_normalize(response.json())
 
         columns = st.multiselect(
             "Select columns to show: ", mngmt.self.tables["transactions"]
@@ -69,9 +69,9 @@ async def show_search(mngmt: Management):
                     id = st.selectbox("Select transaction: ", options=id_list)
 
                 response = await transactions.get_details(mngmt.client, id)
-                if response.status != 200:
-                    st.error(response.status)
-                    st.error(response.data["detail"])
+                if response.status_code != 200:
+                    st.error(response.status_code)
+                    st.error(response.json()["detail"])
                     st.stop()
-                detail_df = pd.json_normalize(response.data)
+                detail_df = pd.json_normalize(response.json())
                 st.dataframe(detail_df)

@@ -20,9 +20,13 @@ class Management:
         self.state = state
         self.client = client
         self.limit = 1000
+        self.tables = None
+        return self
+
+    async def show_search(self):
         response = await self.client.get(f"{SERVER_URI}/internal/admin/")
-        assert response.raise_for_status() is None
-        data = await response.json()
+        if response.raise_for_status() is None:
+            data = response.json()
         self.tables = list(data.keys())
         try:
             self.tables.remove("users")
@@ -31,9 +35,7 @@ class Management:
             self.state.mngmt_search = self.tables[0]
         except ValueError:
             pass
-        return self
 
-    async def show_search(self):
         self.state.mngmt_search = st.selectbox(
             "Select table to search: ",
             options=self.tables,

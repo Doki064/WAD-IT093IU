@@ -25,28 +25,28 @@ async def show_search(mngmt: Management):
             if choice == "id":
                 shop_id = st.number_input("Input item id: ", step=1, value=0, min_value=0)
                 response = await shops.get_by_id(mngmt.client, shop_id)
-                if response.status != 200:
-                    st.error(response.status)
-                    st.error(response.data["detail"])
+                if response.status_code != 200:
+                    st.error(response.status_code)
+                    st.error(response.json()["detail"])
                     st.stop()
-                df = pd.json_normalize(response.data)
+                df = pd.json_normalize(response.json())
 
             elif choice == "name":
                 shop_name = st.text_input("Input item name: ", value="")
                 response = await shops.get_by_name(mngmt.client, shop_name)
-                if response.status != 200:
-                    st.error(response.status)
-                    st.error(response.data["detail"])
+                if response.status_code != 200:
+                    st.error(response.status_code)
+                    st.error(response.json()["detail"])
                     st.stop()
-                df = pd.json_normalize(response.data)
+                df = pd.json_normalize(response.json())
 
             else:
                 response = await shops.get_all(mngmt.client, mngmt.limit)
-                if response.status != 200:
-                    st.error(response.status)
-                    st.error(response.data["detail"])
+                if response.status_code != 200:
+                    st.error(response.status_code)
+                    st.error(response.json()["detail"])
                     st.stop()
-                df = pd.json_normalize(response.data)
+                df = pd.json_normalize(response.json())
 
             columns = st.multiselect(
                 "Select columns to show: ", mngmt.self.tables["shops"]

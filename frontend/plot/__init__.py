@@ -34,11 +34,11 @@ class Plot:
         self = Plot()
         self.state = state
         self.client = client
-        self.df = await _load_df(self.client)
-        self.shop_df = await _load_shop(self.client)
-        self.min_date = self.df["date"].min()
-        self.max_date = self.df["date"].max()
-        self.shop_ids = tuple(self.shop_df["id"].unique())
+        self.df = None
+        self.shop_df = None
+        self.min_date = None
+        self.max_date = None
+        self.shop_ids = None
         self.datetime_format = "%Y-%m-%d"
         self.num_days_to_plot_week = 90
         self.template = "plotly"
@@ -59,6 +59,12 @@ class Plot:
         """
         if self.state.plot is None:
             self.state.plot = {}
+
+        self.df = await _load_df(self.client)
+        self.shop_df = await _load_shop(self.client)
+        self.min_date = self.df["date"].min()
+        self.max_date = self.df["date"].max()
+        self.shop_ids = tuple(self.shop_df["id"].unique())
 
         with st.beta_container():
             # Options
@@ -98,17 +104,16 @@ class Plot:
                 st.dataframe(self.shop_df)    # Show the sample DF
 
         try:
-            assert self.state.plot.get("start_date", None) is not None
-            assert self.state.plot.get("end_date", None) is not None
-            assert self.state.plot.get("shop_ids", None) is not None
-        except AssertionError:
+            self.state.plot["start_date"]
+            self.state.plot["end_date"]
+            self.state.plot["shop_ids"]
+        except KeyError:
             st.stop()
 
         # Sanity check start_date and end_date
-        try:
-            assert self.state.plot["start_date"] <= self.state.plot["end_date"]
-        except AssertionError:
+        if self.state.plot["start_date"] <= self.state.plot["end_date"]:
             st.warning("Start date must be before end date.")
+            st.stop()
         else:
             # Get days in between
             days_in_between = self.state.plot["end_date"] - self.state.plot["start_date"]
@@ -154,7 +159,6 @@ class Plot:
                     st.plotly_chart(fig, use_container_width=True)
 
 
-@st.cache(persist=True, show_spinner=False)
 async def _load_df(client: AsyncClient):
     # query = '''
     #         SELECT t.transactionDate, t.shopID, td.itemID,
@@ -162,19 +166,19 @@ async def _load_df(client: AsyncClient):
     #         FROM Transactions t INNER JOIN TransactionDetail td
     #         ON t.transactionID = td.transactionID
     #         '''
-    response = await client.get(f"{SERVER_URI}/transactions")
-    assert response.raise_for_status() is None
-    df = pd.json_normalize(response.json())
+    params = {"limit": 10}
+    response = await client.get(f"{SERVER_URI}/transactions", params=params, timeout=None)
+    if response.raise_for_status() is None:
+        df = pd.json_normalize(response.json())
     df = df[["date", "shop_id", "item_id", "item_price", "item_amount"]]
     df["date"] = pd.to_datetime(df["date"])
     return df
 
 
-@st.cache(persist=True, show_spinner=False)
 async def _load_shop(client: AsyncClient):
-    response = await client.get(f"{SERVER_URI}/shops")
-    assert response.raise_for_status() is None
-    df = pd.json_normalize(response.json())
+    response = await client.get(f"{SERVER_URI}/shops", timeout=None)
+    if response.raise_for_status() is None:
+        df = pd.json_normalize(response.json())
     return df
 
 

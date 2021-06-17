@@ -11,11 +11,11 @@ from main_page import MainPage
 async def main():
     state = session_state.get()
 
-    async with httpx.AsyncClient(auth=state.auth) as client:
+    st.set_page_config(page_title="Wholesale Management System", layout="wide")
 
-        st.set_page_config(page_title="Wholesale Management System", layout="wide")
+    MainPage.welcome()
 
-        MainPage.welcome()
+    async with httpx.AsyncClient() as client:
 
         if state.token is None:
             MainPage.intro()
@@ -29,20 +29,23 @@ async def main():
                 if st.sidebar.button("Register"):
                     state.form = "register"
 
-            await MainPage.form(state=state, client=client)
+            state.token = await MainPage.form(state=state, client=client)
 
         else:
+
             st.sidebar.header("LOGOUT SECTION")
             st.sidebar.write(f"*Current session ID: {state.get_id()}*")
             if st.sidebar.button("Sign out"):
                 state.clear()
 
-            menu = await Menu.create(state=state, client=client)
-            await menu.display_option()
+            async with httpx.AsyncClient(auth=state.auth) as client:
+
+                menu = await Menu.create(state=state, client=client)
+                await menu.display_option()
 
             MainPage.info()
 
-        state.sync()
+    state.sync()
 
 
 if __name__ == "__main__":

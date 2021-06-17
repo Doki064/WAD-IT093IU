@@ -10,11 +10,9 @@ import re
 
 import streamlit as st
 from httpx import AsyncClient
-from httpx_auth import OAuth2ResourceOwnerPasswordCredentials
 
 from api import user
 from session_state import SessionState
-from core.config import SERVER_URI
 
 
 class MainPage:
@@ -70,22 +68,14 @@ class MainPage:
                 submitted = st.form_submit_button("Sign in")
                 if submitted and username and password:
                     response = await user.login(client, username, password)
-                    if response.status != 200:
-                        if response.status == 401:
+                    if response.status_code != 200:
+                        if response.status_code == 401:
                             warn_msg.warning("The username or password was not correct")
                         else:
                             st.error(response.status)
-                            st.error(response.data["detail"])
+                            st.error(response.json()["detail"])
                             st.stop()
-                    state.token = response.data
-                    state.auth = OAuth2ResourceOwnerPasswordCredentials(
-                        f"{SERVER_URI}/users/login/auth",
-                        username,
-                        password,
-                        client=client
-                    )
-                    st.experimental_rerun()
-
+                    return response.json()
         else:
             with st.form("register_form"):
                 username = st.text_input("Username: ", value="", key="register_username")
@@ -115,13 +105,6 @@ class MainPage:
                     response = await user.register(client, username, password)
                     if response.status != 201:
                         st.error(response.status)
-                        st.error(response.data["detail"])
+                        st.error(response.json()["detail"])
                         st.stop()
-                    state.token = response.data
-                    state.auth = OAuth2ResourceOwnerPasswordCredentials(
-                        f"{SERVER_URI}/users/login/auth",
-                        username,
-                        password,
-                        client=client
-                    )
-                    st.experimental_rerun()
+                    return response.json()

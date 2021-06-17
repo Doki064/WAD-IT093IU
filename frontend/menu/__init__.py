@@ -55,11 +55,9 @@ class Menu:
         if current_option == "Search":
             await self.management.show_search()
         if current_option == "Add":
-            st.warning("Not implemented")
-            st.stop()
+            raise NotImplementedError
         if current_option == "Remove":
-            st.warning("Not implemented")
-            st.stop()
+            raise NotImplementedError
         if current_option == "View table":
             await self.table.show_dataframe()
         if current_option == "View plot":
