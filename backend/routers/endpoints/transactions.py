@@ -1,5 +1,5 @@
 """All transaction route methods."""
-from typing import List, Optional
+from typing import List
 from datetime import date
 
 from fastapi import HTTPException, Depends    # noqa: F401
@@ -9,6 +9,7 @@ from routers.internal import APIRouter
 from database.config import async_session
 from schemas import TransactDetail, Transaction
 from crud import transaction as _transaction
+from crud.transact_detail import get_transaction_details
 
 router = APIRouter(
     prefix="/transactions",
@@ -21,14 +22,14 @@ router = APIRouter(
 
 
 @router.get("", response_model=List[Transaction])
-async def read_transactions(skip: Optional[int] = None, limit: Optional[int] = None):
+async def read_transactions(skip: int = 0, limit: int = 1000):
     async with async_session() as session:
         async with session.begin():
             return await _transaction.get_all(session, skip=skip, limit=limit)
 
 
 @router.get("/date/{date}", response_model=List[Transaction])
-async def read_transactions_by_date(date: date, limit: Optional[int] = None):
+async def read_transactions_by_date(date: date, limit: int = 1000):
     async with async_session() as session:
         async with session.begin():
             return await _transaction.get_by_date(session, date=date, limit=limit)
@@ -50,7 +51,7 @@ async def read_transaction(transaction_id: int):
 async def read_transaction_details(transaction_id: int):
     async with async_session() as session:
         async with session.begin():
-            db_transaction = await _transaction.get_by_id(
+            db_transaction_details = await get_transaction_details(
                 session, transaction_id=transaction_id
             )
-            return db_transaction.transaction_details
+            return db_transaction_details

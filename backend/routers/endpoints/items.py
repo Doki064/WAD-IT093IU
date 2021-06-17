@@ -1,7 +1,10 @@
 """All item route methods."""
+import io
+import pickle
 from typing import List, Union, Optional
 
 from fastapi import HTTPException, Depends    # noqa: F401
+from fastapi.responses import StreamingResponse
 
 from routers.internal import APIRouter
 # from core.security import auth
@@ -20,11 +23,7 @@ router = APIRouter(
 
 
 @router.get("", response_model=Union[Item, List[Item]])
-async def read_items(
-    item_name: Optional[str] = None,
-    skip: Optional[int] = None,
-    limit: Optional[int] = None
-):
+async def read_items(item_name: Optional[str] = None, skip: int = 0, limit: int = 1000):
     async with async_session() as session:
         async with session.begin():
             if item_name is not None:
@@ -32,7 +31,11 @@ async def read_items(
                 if db_item is None:
                     raise HTTPException(status_code=404, detail="Item not found")
                 return db_item
-            return await _item.get_all(session, skip=skip, limit=limit)
+            db_item = await _item.get_all(session, skip=skip, limit=limit)
+            stream = io.BytesIO(pickle.dumps(db_item))
+            return StreamingResponse(
+                iter([stream.getvalue()]), media_type="application/json"
+            )
 
 
 @router.get("/{item_id}", response_model=Item)

@@ -30,8 +30,8 @@ router = APIRouter(
 )
 
 
-@router.post("", response_model=Shop)
-async def create_shop(shop: ShopCreate, status_code=201):
+@router.post("", response_model=Shop, status_code=201)
+async def create_shop(shop: ShopCreate):
     async with async_session() as session:
         async with session.begin():
             db_shop = await _shop.get_by_name(session, name=shop.name)
@@ -41,11 +41,7 @@ async def create_shop(shop: ShopCreate, status_code=201):
 
 
 @router.get("", response_model=Union[Shop, List[Shop]])
-async def read_shops(
-    shop_name: Optional[str] = None,
-    skip: Optional[int] = None,
-    limit: Optional[int] = None
-):
+async def read_shops(shop_name: Optional[str] = None, skip: int = 0, limit: int = 1000):
     async with async_session() as session:
         async with session.begin():
             if shop_name is not None:

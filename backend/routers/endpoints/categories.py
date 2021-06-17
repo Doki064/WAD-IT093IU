@@ -33,9 +33,7 @@ async def create_category(category: CategoryCreate):
 
 @router.get("", response_model=Union[Category, List[Category]])
 async def read_categories(
-    category_name: Optional[str] = None,
-    skip: Optional[int] = None,
-    limit: Optional[int] = None
+    category_name: Optional[str] = None, skip: int = 0, limit: int = 1000
 ):
     async with async_session() as session:
         async with session.begin():

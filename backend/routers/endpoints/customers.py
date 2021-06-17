@@ -41,9 +41,7 @@ async def create_customer(customer: CustomerCreate):
 
 @router.get("", response_model=Union[Customer, List[Customer]])
 async def read_customers(
-    customer_name: Optional[str] = None,
-    skip: Optional[int] = None,
-    limit: Optional[int] = None
+    customer_name: Optional[str] = None, skip: int = 0, limit: int = 1000
 ):
     async with async_session() as session:
         async with session.begin():
@@ -51,7 +49,6 @@ async def read_customers(
                 db_customer = await _customer.get_by_name(session, name=customer_name)
                 if db_customer is None:
                     raise HTTPException(status_code=404, detail="Customer not found")
-                return db_customer
             return await _customer.get_all(session, skip=skip, limit=limit)
 
 
