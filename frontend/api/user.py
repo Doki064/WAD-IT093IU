@@ -1,6 +1,6 @@
 from httpx import AsyncClient
 
-from core.config import SERVER_URI
+import orjson
 
 
 async def login(client: AsyncClient, username: str, password: str):
@@ -8,12 +8,12 @@ async def login(client: AsyncClient, username: str, password: str):
         "username": username,
         "password": password,
     }
-    return await client.post(f"{SERVER_URI}/users/login/auth", data=data)
+    return await client.post("/users/login/auth", data=orjson.dumps(data))
 
 
 async def register(client: AsyncClient, username: str, password: str):
-    json = {
+    data = {
         "username": username,
         "password": password,
     }
-    return await client.post(f"{SERVER_URI}/users/register", json=json)
+    return await client.post("/users/register", data=orjson.dumps(data))

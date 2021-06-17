@@ -3,15 +3,13 @@ from datetime import date
 
 from httpx import AsyncClient
 
-from core.config import SERVER_URI
-
 
 async def get_by_id(client: AsyncClient, transaction_id: int):
-    return await client.get(f"{SERVER_URI}/transactions/{transaction_id}")
+    return await client.get(f"/transactions/{transaction_id}")
 
 
 async def get_by_date(client: AsyncClient, date: date):
-    return await client.get(f"{SERVER_URI}/transactions/date/{date}")
+    return await client.get(f"/transactions/date/{date}")
 
 
 async def get_all(
@@ -22,8 +20,8 @@ async def get_all(
         params["skip"] = skip
     if limit is not None:
         params["limit"] = limit
-    return await client.get(f"{SERVER_URI}/transactions/", params=params)
+    return await client.get("/transactions", params=params)
 
 
 async def get_details(client: AsyncClient, transaction_id: int):
-    return await client.get(f"{SERVER_URI}/{transaction_id}/details/")
+    return await client.get(f"/{transaction_id}/details")

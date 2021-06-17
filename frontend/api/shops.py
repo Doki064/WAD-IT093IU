@@ -1,9 +1,8 @@
 from typing import List, Optional
 from datetime import date
 
+import orjson
 from httpx import AsyncClient
-
-from core.config import SERVER_URI
 
 
 class ShopCreate:
@@ -22,21 +21,21 @@ class ImportDetailCreate:
 
 
 async def create(client: AsyncClient, shop: ShopCreate):
-    json = {
+    data = {
         "shop_name": vars(shop),
     }
-    return await client.post(f"{SERVER_URI}/shops/", json=json)
+    return await client.post("/shops/", json=orjson.dumps(data))
 
 
 async def get_by_id(client: AsyncClient, shop_id: int):
-    return await client.get(f"{SERVER_URI}/shops/{shop_id}")
+    return await client.get(f"/shops/{shop_id}")
 
 
 async def get_by_name(client: AsyncClient, shop_name: str):
     params = {
         "shop_name": shop_name,
     }
-    return await client.get(f"{SERVER_URI}/shops/", params=params)
+    return await client.get("/shops/", params=params)
 
 
 async def get_all(
@@ -47,28 +46,28 @@ async def get_all(
         params["skip"] = skip
     if limit is not None:
         params["limit"] = limit
-    return await client.get(f"{SERVER_URI}/shops/", params=params)
+    return await client.get("/shops/", params=params)
 
 
 async def create_shop_importation(
     client: AsyncClient, shop_id: int, importation: ImportationCreate,
     importation_details: List[ImportDetailCreate], item_name: str
 ):
-    json = {
+    data = {
         "importation": vars(importation),
         "importation_details": [vars(detail) for detail in importation_details],
         "item_name": item_name,
     }
-    return await client.post(f"{SERVER_URI}/{shop_id}/importations/", json=json)
+    return await client.post(f"/{shop_id}/importations", json=orjson.dumps(data))
 
 
 async def get_shop_importations(client: AsyncClient, shop_id: int):
-    return await client.get(f"{SERVER_URI}/{shop_id}/importations/")
+    return await client.get(f"/{shop_id}/importations")
 
 
 async def get_shop_transactions(client: AsyncClient, shop_id: int):
-    return await client.get(f"{SERVER_URI}/{shop_id}/transactions/")
+    return await client.get(f"/{shop_id}/transactions")
 
 
 async def get_shop_items(client: AsyncClient, shop_id: int):
-    return await client.get(f"{SERVER_URI}/{shop_id}/items/")
+    return await client.get(f"/{shop_id}/items")

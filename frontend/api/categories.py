@@ -1,8 +1,7 @@
 from typing import Optional
 
+import orjson
 from httpx import AsyncClient
-
-from core.config import SERVER_URI
 
 
 class CategoryCreate:
@@ -17,21 +16,21 @@ class ItemCreate:
 
 
 async def create(client: AsyncClient, category: CategoryCreate):
-    json = {
+    data = {
         "category_name": vars(category),
     }
-    return await client.post(f"{SERVER_URI}/categories/", json=json)
+    return await client.post("/categories", data=orjson.dumps(data))
 
 
 async def get_by_id(client: AsyncClient, category_id: int):
-    return await client.get(f"{SERVER_URI}/categories/{category_id}")
+    return await client.get(f"/categories/{category_id}")
 
 
 async def get_by_name(client: AsyncClient, category_name: str):
     params = {
         "category_name": category_name,
     }
-    return await client.get(f"{SERVER_URI}/categories/", params=params)
+    return await client.get("/categories", params=params)
 
 
 async def get_all(
@@ -42,18 +41,18 @@ async def get_all(
         params["skip"] = skip
     if limit is not None:
         params["limit"] = limit
-    return await client.get(f"{SERVER_URI}/categories/", params=params)
+    return await client.get("/categories", params=params)
 
 
 async def create_category_item(
     client: AsyncClient, category_id: int, item: ItemCreate, shop_name: str
 ):
-    json = {
+    data = {
         "item": vars(item),
         "shop_name": shop_name,
     }
-    return await client.post(f"{SERVER_URI}/{category_id}/items/", json=json)
+    return await client.post(f"/{category_id}/items", json=orjson.dumps(data))
 
 
 async def get_category_items(client: AsyncClient, category_id: int):
-    return await client.get(f"{SERVER_URI}/{category_id}/items/")
+    return await client.get(f"/{category_id}/items")

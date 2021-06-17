@@ -1,9 +1,8 @@
 from typing import List, Optional
 from datetime import date
 
+import orjson
 from httpx import AsyncClient
-
-from core.config import SERVER_URI
 
 
 class CustomerCreate:
@@ -24,21 +23,21 @@ class TransactDetailCreate:
 
 
 async def create(client: AsyncClient, customer: CustomerCreate):
-    json = {
+    data = {
         "customer_name": vars(customer),
     }
-    return await client.post(f"{SERVER_URI}/customers/", json=json)
+    return await client.post("/customers", json=orjson.dumps(data))
 
 
 async def get_by_id(client: AsyncClient, customer_id: int):
-    return await client.get(f"{SERVER_URI}/customers/{customer_id}")
+    return await client.get(f"/customers/{customer_id}")
 
 
 async def get_by_name(client: AsyncClient, customer_name: str):
     params = {
         "customer_name": customer_name,
     }
-    return await client.get(f"{SERVER_URI}/customers/", params=params)
+    return await client.get("/customers", params=params)
 
 
 async def get_all(
@@ -49,21 +48,21 @@ async def get_all(
         params["skip"] = skip
     if limit is not None:
         params["limit"] = limit
-    return await client.get(f"{SERVER_URI}/customers/", params=params)
+    return await client.get("/customers", params=params)
 
 
 async def create_customer_transaction(
     client: AsyncClient, customer_id: int, transaction: TransactionCreate,
     transaction_details: List[TransactDetailCreate], item_name: str, shop_name: str
 ):
-    json = {
+    data = {
         "transaction": vars(transaction),
         "transaction_details": [vars(detail) for detail in transaction_details],
         "item_name": item_name,
         "shop_name": shop_name,
     }
-    return await client.post(f"{SERVER_URI}/{customer_id}/transactions/", json=json)
+    return await client.post(f"/{customer_id}/transactions", json=orjson.dumps(data))
 
 
 async def get_customer_transactions(client: AsyncClient, customer_id: int):
-    return await client.get(f"{SERVER_URI}/{customer_id}/transactions/")
+    return await client.get(f"/{customer_id}/transactions")
