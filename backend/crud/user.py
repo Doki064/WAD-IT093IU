@@ -17,7 +17,7 @@ async def create(db: Session, user: UserCreate) -> User:
     db_user = User(
         username=user.username,
         hashed_password=encoded_password,
-        salt=salt.hex,
+        salt=salt.hex(),
         is_superuser=user.is_superuser
     )
     db.add(db_user)
