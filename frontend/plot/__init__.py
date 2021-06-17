@@ -185,7 +185,7 @@ async def _load_df(client: httpx.AsyncClient):
     return df
 
 
-async def _load_shop(client: httpx.syncClient):
+async def _load_shop(client: httpx.AsyncClient):
     response = await client.get("/shops", timeout=None)
     try:
         response.raise_for_status()
