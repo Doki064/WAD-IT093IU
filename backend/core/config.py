@@ -4,12 +4,12 @@ from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseSettings, AnyHttpUrl, PostgresDsn, validator
 
-if os.getenv("NODE_ENV") != "production":
+if os.getenv("PYTHON_ENV") != "production":
     from pathlib import Path
     from dotenv import load_dotenv
 
-    if os.getenv("NODE_ENV") is None:
-        os.environ["NODE_ENV"] = "development"
+    if os.getenv("PYTHON_ENV") is None:
+        os.environ["PYTHON_ENV"] = "development"
     base_dir = Path(__file__).parents[1]
     load_dotenv(base_dir.joinpath(".env.local").resolve())
 
@@ -26,7 +26,7 @@ class PostgresAsyncpgDsn(PostgresDsn):
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Wholesale Management System"
 
-    NODE_ENV: str = "development"
+    PYTHON_ENV: str = "development"
     SERVER_SOFTWARE: str = "uvicorn"
 
     API_PATH: str = "/api/v1"
