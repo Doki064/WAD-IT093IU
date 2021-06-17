@@ -68,7 +68,7 @@ async def create_item_for_category(
                 raise HTTPException(status_code=409, detail="Item already exists")
             db_shop = await _shop.get_by_name(session, name=shop_name)
             if db_shop is None:
-                raise HTTPException(status_code=404, detail="Shop not found")
+                raise HTTPException(status_code=404, detail="Category not found")
             return await _item.create(
                 session, item=item, category_id=category_id, shop_id=db_shop.id
             )
