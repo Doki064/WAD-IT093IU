@@ -3,7 +3,9 @@
 # H403: multi line docstrings should end on a new line
 # H404: multi line docstring should start without a leading new line
 # H405: multi line docstring summary not separated with an empty line
-ignore E402, H401, H403, H404, H405
+# F403: 'from module import *' used; unable to detect undefined names
+# F405: name may be undefined, or defined from star imports: module
+ignore E402, H401, H403, H404, H405, F403, F405
 # F401: imported but unused in __init__.py
 per-file-ignores =
     __init__.py: F401
