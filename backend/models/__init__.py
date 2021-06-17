@@ -59,25 +59,25 @@ class User(Base):
 class Customer(Base):
     __tablename__ = "customers"
 
-    id = Column(Integer, primary_key=True, index=True, autoincrement=False)
+    id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), index=True, nullable=False)
 
-    transactions = relationship("Transaction", back_populates="customer", lazy="subquery")
+    transactions = relationship("Transaction", back_populates="customer", lazy="raise")
 
 
 class Category(Base):
     __tablename__ = "categories"
 
-    id = Column(Integer, primary_key=True, index=True, autoincrement=False)
+    id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), unique=True, index=True, nullable=False)
 
-    items = relationship("Item", back_populates="category", lazy="subquery")
+    items = relationship("Item", back_populates="category")
 
 
 class Item(Base):
     __tablename__ = "items"
 
-    id = Column(Integer, primary_key=True, index=True, autoincrement=False)
+    id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), unique=True, index=True, nullable=False)
     quantity = Column(Integer, CheckConstraint("quantity >= 0"), default=0)
     category_id = Column(Integer, ForeignKey("categories.id"))
@@ -92,25 +92,25 @@ class Item(Base):
 class Shop(Base):
     __tablename__ = "shops"
 
-    id = Column(Integer, primary_key=True, index=True, autoincrement=False)
+    id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), unique=True, index=True, nullable=False)
 
-    importations = relationship("Importation", back_populates="shop", lazy="subquery")
-    transactions = relationship("Transaction", back_populates="shop", lazy="subquery")
-    items = relationship("Item", back_populates="shop", lazy="subquery")
+    importations = relationship("Importation", back_populates="shop", lazy="raise")
+    transactions = relationship("Transaction", back_populates="shop", lazy="raise")
+    items = relationship("Item", back_populates="shop")
 
 
 class Importation(Base):
     __tablename__ = "importations"
 
-    id = Column(Integer, primary_key=True, index=True, autoincrement=False)
+    id = Column(Integer, primary_key=True, index=True)
     date = Column(
         Date, index=True, nullable=False, server_default=functions.current_date()
     )
     shop_id = Column(Integer, ForeignKey("shops.id"))
 
     importation_details = relationship(
-        "ImportDetail", back_populates="importation", lazy="subquery"
+        "ImportDetail", back_populates="importation", lazy="immediate"
     )
     shop = relationship("Shop", back_populates="importations")
 
@@ -120,7 +120,7 @@ class Importation(Base):
 class Transaction(Base):
     __tablename__ = "transactions"
 
-    id = Column(Integer, primary_key=True, index=True, autoincrement=False)
+    id = Column(Integer, primary_key=True, index=True)
     date = Column(
         Date, index=True, nullable=False, server_default=functions.current_date()
     )
@@ -129,7 +129,7 @@ class Transaction(Base):
     shop_id = Column(Integer, ForeignKey("shops.id"))
 
     transaction_details = relationship(
-        "TransactDetail", back_populates="transaction", lazy="subquery"
+        "TransactDetail", back_populates="transaction", lazy="immediate"
     )
     customer = relationship("Customer", back_populates="transactions")
     shop = relationship("Shop", back_populates="transactions")
