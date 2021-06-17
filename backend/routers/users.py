@@ -31,7 +31,7 @@ async def register(user: UserCreate):
             return {"message": "Account created successfully"}
 
 
-@router.post("/login", response_model=Token)
+@router.post("/login/auth", response_model=Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     async with async_session() as session:
         async with session.begin():

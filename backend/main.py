@@ -54,7 +54,7 @@ def root():
 
 
 app.include_router(routers.api_router, prefix=settings.API_PATH)
-app.include_router(admin.router)
+app.include_router(admin.router, prefix=settings.API_PATH)
 
 if __name__ == "__main__":
     import uvicorn
