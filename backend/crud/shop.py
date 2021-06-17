@@ -1,4 +1,4 @@
-from typing import List, Union, Optional
+from typing import List, Union
 
 from sqlalchemy.future import select
 from sqlalchemy.orm import Session
@@ -26,13 +26,7 @@ async def get_by_name(db: Session, name: str) -> Union[Shop, None]:
     return result.scalars().first()
 
 
-async def get_all(db: Session,
-                  skip: Optional[int] = None,
-                  limit: Optional[int] = None) -> List[Shop]:
-    q = select(Shop)
-    if skip is not None:
-        q.offset(skip)
-    if limit is not None:
-        q.limit(limit)
+async def get_all(db: Session, skip: int, limit: int) -> List[Shop]:
+    q = select(Shop).offset(skip).limit(limit)
     result = await db.execute(q)
     return result.scalars().all()
