@@ -1,7 +1,6 @@
 import asyncio
 
-import orjson
-import aiohttp
+import httpx
 import streamlit as st
 
 import session_state
@@ -10,8 +9,9 @@ from main_page import MainPage
 
 
 async def main():
-    async with aiohttp.ClientSession(json_serialize=orjson.dumps) as session:
-        state = session_state.get()
+    state = session_state.get()
+
+    async with httpx.AsyncClient(auth=state.auth) as client:
 
         st.set_page_config(page_title="Wholesale Management System", layout="wide")
 
@@ -20,7 +20,7 @@ async def main():
         if state.token is None:
             MainPage.intro()
 
-            if state.form == "register":
+            if state.form == "register" or state.form is None:
                 st.sidebar.write("Already have an account?")
                 if st.sidebar.button("Sign in"):
                     state.form = "login"
@@ -29,7 +29,7 @@ async def main():
                 if st.sidebar.button("Register"):
                     state.form = "register"
 
-            await MainPage.form(state, session)
+            await MainPage.form(state=state, client=client)
 
         else:
             st.sidebar.header("LOGOUT SECTION")
@@ -37,8 +37,8 @@ async def main():
             if st.sidebar.button("Sign out"):
                 state.clear()
 
-            menu = Menu(state=state, session=session)
-            menu.display_option()
+            menu = await Menu.create(state=state, client=client)
+            await menu.display_option()
 
             MainPage.info()
 
