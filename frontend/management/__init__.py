@@ -1,4 +1,5 @@
 import streamlit as st
+from httpx import AsyncClient
 
 from management import (
     customers,
@@ -8,23 +9,20 @@ from management import (
     importations,
     transactions,
 )
+from session_state import SessionState
 from core.config import SERVER_URI
 
 
 class Management:
     @classmethod
-    async def create(cls, state, client):
+    async def create(cls, state: SessionState, client: AsyncClient):
         self = Management()
         self.state = state
         self.client = client
         self.limit = 1000
-        async with self.client.get(f"{SERVER_URI}/internal/admin/") as response:
-            if response.status >= 400:
-                st.error(response.status)
-                err = await response.json()
-                st.error(err["detail"])
-                st.stop()
-            data = await response.json()
+        response = await self.client.get(f"{SERVER_URI}/internal/admin/")
+        assert response.raise_for_status() is None
+        data = await response.json()
         self.tables = list(data.keys())
         try:
             self.tables.remove("users")
