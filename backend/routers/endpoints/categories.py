@@ -1,10 +1,10 @@
 """All category route methods."""
 from typing import List, Union, Optional
 
-from fastapi import HTTPException, Depends, Body
+from fastapi import HTTPException, Depends, Body    # noqa: F401
 
 from routers.internal import APIRouter
-from core.security import auth
+# from core.security import auth
 from database.config import async_session
 from schemas import Category, CategoryCreate, Item, ItemCreate
 from crud import category as _category
@@ -14,7 +14,7 @@ from crud import item as _item
 router = APIRouter(
     prefix="/categories",
     tags=["categories"],
-    dependencies=[Depends(auth.get_current_active_user)],
+    # dependencies=[Depends(auth.get_current_active_user)],
     responses={404: {
         "description": "Not found"
     }},

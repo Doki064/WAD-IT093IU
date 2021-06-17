@@ -1,10 +1,10 @@
 """All item route methods."""
 from typing import List, Union, Optional
 
-from fastapi import HTTPException, Depends
+from fastapi import HTTPException, Depends    # noqa: F401
 
 from routers.internal import APIRouter
-from core.security import auth
+# from core.security import auth
 from database.config import async_session
 from schemas import Item
 from crud import item as _item
@@ -12,7 +12,7 @@ from crud import item as _item
 router = APIRouter(
     prefix="/items",
     tags=["items"],
-    dependencies=[Depends(auth.get_current_active_user)],
+    # dependencies=[Depends(auth.get_current_active_user)],
     responses={404: {
         "description": "Not found"
     }},

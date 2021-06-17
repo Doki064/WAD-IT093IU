@@ -2,10 +2,10 @@
 from typing import List, Optional
 from datetime import date
 
-from fastapi import HTTPException, Depends
+from fastapi import HTTPException, Depends    # noqa: F401
 
 from routers.internal import APIRouter
-from core.security import auth
+# from core.security import auth
 from database.config import async_session
 from schemas import TransactDetail, Transaction
 from crud import transaction as _transaction
@@ -13,7 +13,7 @@ from crud import transaction as _transaction
 router = APIRouter(
     prefix="/transactions",
     tags=["transactions"],
-    dependencies=[Depends(auth.get_current_active_user)],
+    # dependencies=[Depends(auth.get_current_active_user)],
     responses={404: {
         "description": "Not found"
     }},
