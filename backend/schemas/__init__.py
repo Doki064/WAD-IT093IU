@@ -20,6 +20,7 @@ __all__ = [
 ]
 
 from typing import List
+from datetime import date
 
 from pydantic import BaseModel as _BaseModel
 
@@ -43,7 +44,7 @@ class ImportDetail(ImportDetailBase):
 
 # Schema for importations
 class ImportationBase(_BaseModel):
-    date: str
+    date: date
 
 
 class ImportationCreate(ImportationBase):
@@ -79,7 +80,7 @@ class TransactDetail(TransactDetailBase):
 
 # Schema for transactions
 class TransactionBase(_BaseModel):
-    date: str
+    date: date
     status: str
 
 
