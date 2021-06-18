@@ -4,6 +4,7 @@ Example:
     >>> plot = Plot()
     >>> plot.plot()
 """
+import builtins
 import io
 from datetime import datetime
 
@@ -12,6 +13,7 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+from api.transactions import get_min_max_dates
 from session_state import SessionState
 
 
@@ -34,6 +36,7 @@ class Plot:
         self.state = state
         self.client = client
         self.df = None
+        self.profit_df = None
         self.shop_df = None
         self.min_date = None
         self.max_date = None
@@ -59,8 +62,22 @@ class Plot:
         if self.state.plot is None:
             self.state.plot = {}
 
-        self.df = await _load_df(self.client)
-        self.shop_df = await _load_shop(self.client)
+        # response = await get_min_max_dates(self.client)
+        # try:
+        #     response.raise_for_status()
+        # except httpx.HTTPStatusError:
+        #     st.error(f"Status code: {response.status_code}")
+        #     st.error(response.json()["detail"])
+        #     st.stop()
+        # date_range = response.json()
+        # self.min_date = date.fromisoformat(date_range["min_date"])
+        # self.max_date = date.fromisoformat(date_range["max_date"])
+
+        self.state.df = await _load_df(self.client)
+        self.df = self.state.df
+        self.state.shop_df = await _load_shop(self.client)
+        self.shop_df = self.state.shop_df
+
         self.min_date = self.df["date"].min()
         self.max_date = self.df["date"].max()
         self.shop_ids = tuple(self.shop_df["id"].unique())
@@ -132,7 +149,13 @@ class Plot:
                         fig = px.line(
                             title="A beautiful blank chart", template=self.template
                         )
-                    elif days_in_between.days <= self.num_days_to_plot_week:
+                        st.stop()
+                    # profit_df = await _load_df(
+                    #     self.client, self.state.plot["start_date"].date(),
+                    #     self.state.plot["end_date"].date(), shop_ids
+                    # )
+                    # self.profit_df = profit_df
+                    if days_in_between.days <= self.num_days_to_plot_week:
                         st.info("Plotting profit by week")
                         profit_df = _group_by(selected_df, "W-MON")
                         st.dataframe(profit_df)
@@ -152,13 +175,25 @@ class Plot:
                             y="profit",
                             title="Monthly" + plot_title,
                             template=self.template,
-                            color="shopID"
+                            color="shop_id"
                         )    # Plotly
                     fig.update_layout(title_x=0.5)
                     st.plotly_chart(fig, use_container_width=True)
 
 
-async def _load_df(client: httpx.AsyncClient):
+# @st.cache(
+#     persist=True, show_spinner=False, hash_funcs={
+#         httpx.AsyncClient: hash,
+#     }, ttl=500
+# )
+async def _load_df(
+    client: httpx.AsyncClient,
+    # start_date: date,
+    # end_date: date,
+    # shop_ids: List[int],
+    skip: int = 0,
+    limit: int = 1000000
+):
     # query = '''
     #         SELECT t.transactionDate, t.shopID, td.itemID,
     #             td.itemPrice, td.transactionAmount
@@ -172,7 +207,13 @@ async def _load_df(client: httpx.AsyncClient):
     # df = df[["date", "shop_id", "item_id", "item_price", "item_amount"]]
     # df["date"] = pd.to_datetime(df["date"])
     # return df
-    params = {"limit": 2000000}
+    params = {
+    # "start_date": start_date,
+    # "end_date": end_date,
+    # "shop_ids": shop_ids,
+        "skip": skip,
+        "limit": limit,
+    }
     response = await client.get("/internal/admin/plot", params=params, timeout=None)
     try:
         response.raise_for_status()
@@ -186,6 +227,11 @@ async def _load_df(client: httpx.AsyncClient):
     return df
 
 
+# @st.cache(
+#     persist=True, show_spinner=False, hash_funcs={
+#         httpx.AsyncClient: hash,
+#     }, ttl=500
+# )
 async def _load_shop(client: httpx.AsyncClient):
     response = await client.get("/shops", timeout=None)
     try:
@@ -198,7 +244,7 @@ async def _load_shop(client: httpx.AsyncClient):
     return df
 
 
-@st.cache(show_spinner=False)
+@st.cache(show_spinner=False, suppress_st_warning=True)
 def _select_df_in_between(df, start_date, end_date, shop_ids):
     """Get subset of DF that is between given dates
 
@@ -220,7 +266,7 @@ def _select_df_in_between(df, start_date, end_date, shop_ids):
     return selected_df
 
 
-@st.cache(show_spinner=False)
+@st.cache(show_spinner=False, suppress_st_warning=True)
 def _group_by(df, freq):
     """Group DF by freq
 

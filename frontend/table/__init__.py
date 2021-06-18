@@ -73,7 +73,9 @@ class Table:
 
             col1, col2 = st.beta_columns(2)
             with col1:
-                response = await self.client.get(f"/{table}", params={"limit": 2000000})
+                response = await self.client.get(
+                    f"/{table}", params={"limit": 100000}, timeout=None
+                )
                 if response.raise_for_status() is None:
                     data = response.json()
                 df = pd.json_normalize(data)

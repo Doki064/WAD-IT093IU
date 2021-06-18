@@ -16,4 +16,4 @@ async def register(client: AsyncClient, username: str, password: str):
         "username": username,
         "password": password,
     }
-    return await client.post("/users/register", data=orjson.dumps(data))
+    return await client.post("/users/register", json=data)
