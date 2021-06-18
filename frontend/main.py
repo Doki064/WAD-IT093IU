@@ -6,6 +6,7 @@ import streamlit as st
 import session_state
 from menu import Menu
 from main_page import MainPage
+from core.config import SERVER_URI
 
 
 async def main():
@@ -15,7 +16,7 @@ async def main():
 
     MainPage.welcome()
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(base_url=SERVER_URI) as client:
 
         if state.token is None:
             MainPage.intro()
@@ -32,16 +33,13 @@ async def main():
             state.token = await MainPage.form(state=state, client=client)
 
         else:
-
             st.sidebar.header("LOGOUT SECTION")
             st.sidebar.write(f"*Current session ID: {state.get_id()}*")
             if st.sidebar.button("Sign out"):
                 state.clear()
 
-            async with httpx.AsyncClient(auth=state.auth) as client:
-
-                menu = await Menu.create(state=state, client=client)
-                await menu.display_option()
+            menu = await Menu.create(state=state, client=client)
+            await menu.display_option()
 
             MainPage.info()
 

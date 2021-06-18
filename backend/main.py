@@ -49,7 +49,7 @@ app.add_middleware(
 
 
 @app.get("/", tags=["root"])
-def root():
+async def root():
     return {"message": "Hello, Streamlit!"}
 
 
