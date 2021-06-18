@@ -6,7 +6,6 @@ if [ -n "$SUDO_COMMAND" ]; then
 fi
 
 red="\033[0;31m"
-green="\033[0;32m"
 nocolor="\033[0m"
 
 if ! command -v docker-compose >/dev/null; then
