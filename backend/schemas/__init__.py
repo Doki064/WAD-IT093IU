@@ -87,15 +87,17 @@ class TransactionCreate(TransactionBase):
     pass
 
 
-class Transaction(TransactionBase):
+class TransactionPlot(TransactionBase):
     id: int
-    customer_id: int
     shop_id: int
-
-    # transaction_details: List[TransactDetail] = []
 
     class Config:
         orm_mode = True
+
+
+class Transaction(TransactionPlot):
+    customer_id: int
+    # transaction_details: List[TransactDetail] = []
 
 
 # Schema for items

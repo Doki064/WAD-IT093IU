@@ -2,7 +2,7 @@ from typing import List, Union
 from datetime import date
 
 from sqlalchemy.future import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, subqueryload
 
 from models import Transaction
 from schemas import TransactionCreate
@@ -61,3 +61,11 @@ async def get_max_date(db: Session) -> Union[date, None]:
     if max_date is None:
         return None
     return max_date
+
+
+async def get_all_with_details(db: Session, skip: int, limit: int) -> List[Transaction]:
+    q = select(Transaction).options(subqueryload(Transaction.transaction_details)) \
+        .where(Transaction.id > skip) \
+        .order_by(Transaction.id).limit(limit)
+    result = await db.execute(q)
+    return result.scalars().all()

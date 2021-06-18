@@ -1,9 +1,9 @@
 import logging
 
 from fastapi import FastAPI
-from fastapi.logger import logger as fastapi_logger
 from fastapi.responses import ORJSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.logger import logger as fastapi_logger
 
 import routers
 from routers.internal import admin
@@ -41,7 +41,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[origin for origin in settings.BACKEND_CORS_ORIGINS],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

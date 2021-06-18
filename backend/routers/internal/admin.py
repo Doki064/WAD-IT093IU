@@ -3,15 +3,16 @@ from typing import Dict, List
 from datetime import date
 
 import pandas as pd
+import plotly.express as px
+from aioify import aioify
 from fastapi import HTTPException, Query
 from fastapi.responses import PlainTextResponse
 
 import models
-from schemas import Transaction, TransactDetail
+from schemas import TransactionPlot, TransactDetail
 from routers.internal import APIRouter
 from database.config import async_session
 from crud import transaction as _transaction
-from crud import transact_detail as _transact_detail
 
 router = APIRouter(
     prefix="/internal/admin",
@@ -34,29 +35,34 @@ def read_table_info() -> Dict[str, List[str]]:
 
 @router.get("/plot")
 async def read_transaction_plot(
-    # start_date: date,
-    # end_date: date,
-    # shop_ids: List[int] = Query(None),
+    start_date: date,
+    end_date: date,
+    shop_ids: List[int] = Query(None),
     skip: int = 0,
     limit: int = 1000000
 ):
     async with async_session() as session:
         async with session.begin():
-            db_transactions = await _transaction.get_all(session, skip=skip, limit=limit)
-            transactions = [
-                dict(Transaction.from_orm(transaction)) for transaction in db_transactions
+            db_transactions = await _transaction.get_all_with_details(
+                session, skip=skip, limit=limit
+            )
+            db_details = [
+                db_detail for db_transaction in db_transactions
+                for db_detail in db_transaction.transaction_details
             ]
-            transactions_df = pd.DataFrame.from_records(transactions)
-            db_details = await _transact_detail.get_all(session, skip=skip, limit=limit)
+            transactions = [
+                dict(TransactionPlot.from_orm(transaction))
+                for transaction in db_transactions
+            ]
             details = [dict(TransactDetail.from_orm(detail)) for detail in db_details]
+            transactions_df = pd.DataFrame.from_records(transactions)
             details_df = pd.DataFrame.from_records(details)
             df = pd.merge(
                 transactions_df, details_df, left_on="id", right_on="transaction_id"
             )
-            df = df.drop(["id", "status", "transaction_id"], axis=1)    # Good
-            # profit_df = await plot(df, start_date, end_date, shop_ids)
-            # print(profit_df.head())
-            return PlainTextResponse(df.to_csv(index=False), media_type="text/csv")
+            df = df.drop(["id", "status", "transaction_id"], axis=1)
+            fig = await plot(df, start_date, end_date, shop_ids)
+            return PlainTextResponse(fig.to_json(), media_type="application/json")
 
 
 @router.get("/table")
@@ -66,20 +72,44 @@ async def read_table_statistics():
 
 async def plot(df, start_date: date, end_date: date, shop_ids):
     days_in_between = end_date - start_date
-    selected_df = _select_df_in_between(
+    selected_df = await _select_df_in_between(
         df,
         start_date,
         end_date,
         shop_ids,
     )
     if days_in_between.days <= 90:
-        profit_df = _group_by(selected_df, "W-MON")
+        profit_df = await _group_by(selected_df, "W-MON")
 
     else:
-        profit_df = _group_by(selected_df, "M")
-    return profit_df
+        profit_df = await _group_by(selected_df, "M")
+
+    plot_title = f" profit of shop {shop_ids} from {start_date} to {end_date}"
+
+    if profit_df.empty:
+        fig = px.line(title="A beautiful blank chart", template="plotly")
+    if days_in_between.days <= 90:
+        fig = px.line(
+            profit_df,
+            x="date",
+            y="profit",
+            title="Weekly" + plot_title,
+            template="plotly"
+        )    # Plotly line chart
+    else:
+        fig = px.line(
+            profit_df,
+            x="date",
+            y="profit",
+            title="Monthly" + plot_title,
+            template="plotly",
+            color="shop_id"
+        )    # Plotly
+    fig.update_layout(title_x=0.5)
+    return fig
 
 
+@aioify
 def _select_df_in_between(df, start_date, end_date, shop_ids):
     """Get subset of DF that is between given dates
 
@@ -101,6 +131,7 @@ def _select_df_in_between(df, start_date, end_date, shop_ids):
     return selected_df
 
 
+@aioify
 def _group_by(df, freq):
     """Group DF by freq
 
