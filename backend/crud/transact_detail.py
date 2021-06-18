@@ -20,7 +20,9 @@ async def create(
 
 
 async def get_all(db: Session, skip: int, limit: int) -> List[TransactDetail]:
-    q = select(TransactDetail).offset(skip).limit(limit)
+    q = select(TransactDetail).where(TransactDetail.transaction_id > skip).order_by(
+        TransactDetail.transaction_id
+    ).limit(limit)
     result = await db.execute(q)
     return result.scalars().all()
 

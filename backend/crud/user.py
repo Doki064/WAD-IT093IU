@@ -1,5 +1,5 @@
 import secrets
-from typing import List, Union, Optional
+from typing import List, Union
 from uuid import UUID
 
 from sqlalchemy import update
@@ -43,14 +43,8 @@ async def get_by_username(db: Session, username: str) -> Union[User, None]:
     return result.scalars().first()
 
 
-async def get_all(db: Session,
-                  skip: Optional[int] = None,
-                  limit: Optional[int] = None) -> List[User]:
-    q = select(User)
-    if skip is not None:
-        q.offset(skip)
-    if limit is not None:
-        q.limit(limit)
+async def get_all(db: Session, skip: int, limit: int) -> List[User]:
+    q = select(User).where(User.id > skip).limit(limit)
     result = await db.execute(q)
     return result.scalars().all()
 

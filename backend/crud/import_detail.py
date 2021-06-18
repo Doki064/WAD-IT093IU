@@ -19,7 +19,9 @@ async def create(
 
 
 async def get_all(db: Session, skip: int, limit: int) -> List[ImportDetail]:
-    q = select(ImportDetail).offset(skip).limit(limit)
+    q = select(ImportDetail).where(ImportDetail.importation_id > skip).order_by(
+        ImportDetail.importation_id
+    ).limit(limit)
     result = await db.execute(q)
     return result.scalars().all()
 

@@ -27,6 +27,7 @@ async def get_by_name(db: Session, name: str) -> Union[Customer, None]:
 
 
 async def get_all(db: Session, skip: int, limit: int) -> List[Customer]:
-    q = select(Customer).offset(skip).limit(limit)
+    q = select(Customer).where(Customer.id > skip) \
+        .order_by(Customer.id).limit(limit)
     result = await db.execute(q)
     return result.scalars().all()

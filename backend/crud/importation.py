@@ -24,19 +24,21 @@ async def get_by_id(db: Session, importation_id: int) -> Union[Importation, None
 
 
 async def get_by_date(db: Session, date: date, limit: int) -> List[Importation]:
-    q = select(Importation).limit(limit).where(Importation.date == date)
+    q = select(Importation).where(Importation.date == date) \
+        .order_by(Importation.id).limit(limit)
     result = await db.execute(q)
     return result.scalars().all()
 
 
 async def get_all(db: Session, skip: int, limit: int) -> List[Importation]:
-    q = select(Importation).offset(skip).limit(limit)
+    q = select(Importation).where(Importation.id > skip) \
+        .order_by(Importation.id).limit(limit)
     result = await db.execute(q)
     return result.scalars().all()
 
 
 async def get_min_date(db: Session) -> Union[date, None]:
-    q = select(Importation.date).order_by(Importation.date.asc())
+    q = select(Importation.date).order_by(Importation.date.asc()).limit(1)
     result = await db.execute(q)
     min_date = result.scalar()
     if min_date is None:
@@ -45,7 +47,7 @@ async def get_min_date(db: Session) -> Union[date, None]:
 
 
 async def get_max_date(db: Session) -> Union[date, None]:
-    q = select(Importation.date).order_by(Importation.date.desc())
+    q = select(Importation.date).order_by(Importation.date.desc()).limit(1)
     result = await db.execute(q)
     max_date = result.scalar()
     if max_date is None:

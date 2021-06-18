@@ -2,7 +2,7 @@ from typing import List, Union
 from datetime import date
 
 from sqlalchemy.future import select
-from sqlalchemy.orm import Session, subqueryload
+from sqlalchemy.orm import Session
 
 from models import Transaction
 from schemas import TransactionCreate
@@ -26,25 +26,27 @@ async def get_by_id(db: Session, transaction_id: int) -> Union[Transaction, None
 
 
 async def get_by_date(db: Session, date: date, limit: int) -> List[Transaction]:
-    q = select(Transaction).limit(limit).where(Transaction.date == date)
+    q = select(Transaction).where(Transaction.date == date).limit(limit)
     result = await db.execute(q)
     return result.scalars().all()
 
 
 async def get_by_status(db: Session, status: str, limit: int) -> List[Transaction]:
-    q = select(Transaction).limit(limit).where(Transaction.status == status)
+    q = select(Transaction).where(Transaction.status == status) \
+        .order_by(Transaction.id).limit(limit)
     result = await db.execute(q)
     return result.scalars().all()
 
 
 async def get_all(db: Session, skip: int, limit: int) -> List[Transaction]:
-    q = select(Transaction).offset(skip).limit(limit)
+    q = select(Transaction).where(Transaction.id > skip) \
+        .order_by(Transaction.id).limit(limit)
     result = await db.execute(q)
     return result.scalars().all()
 
 
 async def get_min_date(db: Session) -> Union[date, None]:
-    q = select(Transaction.date).order_by(Transaction.date.asc())
+    q = select(Transaction.date).order_by(Transaction.date.asc()).limit(1)
     result = await db.execute(q)
     min_date = result.scalar()
     if min_date is None:
@@ -53,16 +55,9 @@ async def get_min_date(db: Session) -> Union[date, None]:
 
 
 async def get_max_date(db: Session) -> Union[date, None]:
-    q = select(Transaction.date).order_by(Transaction.date.desc())
+    q = select(Transaction.date).order_by(Transaction.date.desc()).limit(1)
     result = await db.execute(q)
     max_date = result.scalar()
     if max_date is None:
         return None
     return max_date
-
-
-async def get_statistics(db: Session, skip: int, limit: int) -> List[Transaction]:
-    q = select(Transaction).options(subqueryload(Transaction.transaction_details)) \
-        .offset(skip).limit(limit)
-    result = await db.execute(q)
-    return result.scalars().all()
