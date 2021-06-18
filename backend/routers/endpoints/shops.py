@@ -1,5 +1,5 @@
 """All shop route methods."""
-from typing import List, Union, Optional
+from typing import List, Optional
 
 from fastapi import HTTPException, Depends, Body    # noqa: F401
 
@@ -40,15 +40,12 @@ async def create_shop(shop: ShopCreate):
             return await _shop.create(session, shop=shop)
 
 
-@router.get("", response_model=Union[Shop, List[Shop]])
+@router.get("", response_model=List[Shop])
 async def read_shops(shop_name: Optional[str] = None, skip: int = 0, limit: int = 1000):
     async with async_session() as session:
         async with session.begin():
             if shop_name is not None:
-                db_shop = await _shop.get_by_name(session, name=shop_name)
-                if db_shop is None:
-                    raise HTTPException(status_code=404, detail="Shop not found")
-                return db_shop
+                return await _shop.get_by_name(session, name=shop_name)
             return await _shop.get_all(session, skip=skip, limit=limit)
 
 

@@ -1,5 +1,5 @@
 """All category route methods."""
-from typing import List, Union, Optional
+from typing import List, Optional
 
 from fastapi import HTTPException, Depends, Body    # noqa: F401
 
@@ -31,17 +31,14 @@ async def create_category(category: CategoryCreate):
             return await _category.create(session, category=category)
 
 
-@router.get("", response_model=Union[Category, List[Category]])
+@router.get("", response_model=List[Category])
 async def read_categories(
     category_name: Optional[str] = None, skip: int = 0, limit: int = 1000
 ):
     async with async_session() as session:
         async with session.begin():
             if category_name is not None:
-                db_category = await _category.get_by_name(session, name=category_name)
-                if db_category is None:
-                    raise HTTPException(status_code=404, detail="Category not found")
-                return db_category
+                return await _category.get_by_name(session, name=category_name)
             return await _category.get_all(session, skip=skip, limit=limit)
 
 

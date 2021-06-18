@@ -1,5 +1,5 @@
 """All item route methods."""
-from typing import List, Union, Optional
+from typing import List, Optional
 
 from fastapi import HTTPException, Depends    # noqa: F401
 
@@ -19,15 +19,12 @@ router = APIRouter(
 )
 
 
-@router.get("", response_model=Union[Item, List[Item]])
+@router.get("", response_model=List[Item])
 async def read_items(item_name: Optional[str] = None, skip: int = 0, limit: int = 1000):
     async with async_session() as session:
         async with session.begin():
             if item_name is not None:
-                db_item = await _item.get_by_name(session, name=item_name)
-                if db_item is None:
-                    raise HTTPException(status_code=404, detail="Item not found")
-                return db_item
+                return await _item.get_by_name(session, name=item_name)
             return await _item.get_all(session, skip=skip, limit=limit)
 
 

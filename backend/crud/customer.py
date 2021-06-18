@@ -20,10 +20,10 @@ async def get_by_id(db: Session, customer_id: int) -> Union[Customer, None]:
     return result.scalars().first()
 
 
-async def get_by_name(db: Session, name: str) -> Union[Customer, None]:
-    q = select(Customer).where(Customer.name == name)
+async def get_by_name(db: Session, name: str) -> List[Customer]:
+    q = select(Customer).where(Customer.name.like(f"%{name}%"))
     result = await db.execute(q)
-    return result.scalars().first()
+    return result.scalars().all()
 
 
 async def get_all(db: Session, skip: int, limit: int) -> List[Customer]:

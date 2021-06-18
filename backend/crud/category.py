@@ -20,8 +20,8 @@ async def get_by_id(db: Session, category_id: int) -> Union[Category, None]:
     return result.scalars().first()
 
 
-async def get_by_name(db: Session, name: str) -> Union[Category, None]:
-    q = select(Category).where(Category.name == name)
+async def get_by_name(db: Session, name: str) -> List[Category]:
+    q = select(Category).where(Category.ilike(f"%{name}%"))
     result = await db.execute(q)
     return result.scalars().first()
 

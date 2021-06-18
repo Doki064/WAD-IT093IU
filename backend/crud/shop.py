@@ -20,8 +20,8 @@ async def get_by_id(db: Session, shop_id: int) -> Union[Shop, None]:
     return result.scalars().first()
 
 
-async def get_by_name(db: Session, name: str) -> Union[Shop, None]:
-    q = select(Shop).where(Shop.name == name)
+async def get_by_name(db: Session, name: str) -> List[Shop]:
+    q = select(Shop).where(Shop.ilike(f"%{name}%"))
     result = await db.execute(q)
     return result.scalars().first()
 
