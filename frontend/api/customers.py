@@ -26,7 +26,7 @@ async def create(client: AsyncClient, customer: CustomerCreate):
     data = {
         "customer_name": vars(customer),
     }
-    return await client.post("/customers", json=orjson.dumps(data))
+    return await client.post("/customers", content=orjson.dumps(data))
 
 
 async def get_by_id(client: AsyncClient, customer_id: int):
@@ -61,7 +61,7 @@ async def create_customer_transaction(
         "item_name": item_name,
         "shop_name": shop_name,
     }
-    return await client.post(f"/{customer_id}/transactions", json=orjson.dumps(data))
+    return await client.post(f"/{customer_id}/transactions", content=orjson.dumps(data))
 
 
 async def get_customer_transactions(client: AsyncClient, customer_id: int):

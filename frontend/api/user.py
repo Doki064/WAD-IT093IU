@@ -8,7 +8,7 @@ async def login(client: AsyncClient, username: str, password: str):
         "username": username,
         "password": password,
     }
-    return await client.post("/users/login/auth", data=orjson.dumps(data))
+    return await client.post("/users/login/auth", data=data)
 
 
 async def register(client: AsyncClient, username: str, password: str):

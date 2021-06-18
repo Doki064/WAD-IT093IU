@@ -12,4 +12,4 @@ if os.getenv("PYTHON_ENV", "development") != "production":
 BASE_URL = os.getenv("BASE_URL")
 API_PATH = os.getenv("API_PATH")
 
-SERVER_URI = BASE_URL + API_PATH
+SERVER_URI = "".join([BASE_URL, API_PATH])

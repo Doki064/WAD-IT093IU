@@ -24,4 +24,8 @@ async def get_all(
 
 
 async def get_details(client: AsyncClient, importation_id: int):
-    return await client.get(f"/{importation_id}/details")
+    return await client.get(f"/importations/{importation_id}/details")
+
+
+async def get_min_max_dates(client: AsyncClient):
+    return await client.get("/importations/min-max-dates")

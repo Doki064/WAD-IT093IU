@@ -19,7 +19,7 @@ async def create(client: AsyncClient, category: CategoryCreate):
     data = {
         "category_name": vars(category),
     }
-    return await client.post("/categories", data=orjson.dumps(data))
+    return await client.post("/categories", content=orjson.dumps(data))
 
 
 async def get_by_id(client: AsyncClient, category_id: int):
@@ -51,7 +51,7 @@ async def create_category_item(
         "item": vars(item),
         "shop_name": shop_name,
     }
-    return await client.post(f"/{category_id}/items", json=orjson.dumps(data))
+    return await client.post(f"/{category_id}/items", content=orjson.dumps(data))
 
 
 async def get_category_items(client: AsyncClient, category_id: int):
