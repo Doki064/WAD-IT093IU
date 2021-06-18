@@ -28,7 +28,15 @@ async def register(user: UserCreate):
             if db_user is not None:
                 raise HTTPException(status_code=409, detail="Username already exists")
             db_user = await _user.create(session, user)
-            return {"message": "Account created successfully"}
+            access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+            access_token = await auth.sign_token(
+                data={
+                    "sub": db_user.uuid.hex,
+                    "iat": datetime.utcnow(),
+                },
+                expires_delta=access_token_expires
+            )
+            return {"access_token": access_token, "token_type": "bearer"}
 
 
 @router.post("/login/auth", response_model=Token)
