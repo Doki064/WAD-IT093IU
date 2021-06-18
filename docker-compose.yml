@@ -10,10 +10,7 @@ services:
         environment:
             - BASE_URL=http://${DOMAIN:?variable not set}:8080
             - API_PATH=${API_PATH:?variable not set}
-        working_dir: /app/frontend
-        command: bash -c "streamlit run main.py"
-        volumes:
-            - ./frontend:/app/frontend
+        working_dir: /app
         ports:
             - "80:8501"
         networks:
@@ -30,11 +27,7 @@ services:
         environment:
             - SERVER_DOMAIN=${DOMAIN:?variable not set}
             - SERVER_URL=http://${DOMAIN:?variable not set}:8080
-        working_dir: /app/backend
-        command: /start-reload.sh
-        volumes:
-            - ./backend:/app/backend
-            - ./backend/alembic/versions:/app/backend/alembic/versions
+        working_dir: /app
         ports:
             - "8080:8080"
         networks:

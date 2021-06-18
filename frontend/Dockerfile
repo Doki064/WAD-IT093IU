@@ -46,6 +46,6 @@ ENV PATH="$VENV_PATH/bin:$PATH"
 ENV PYTHONPATH="$VENV_PATH/lib/python3.8/site-packages:$PYTHONPATH"
 
 COPY --from=builder-base $PYSETUP_PATH $PYSETUP_PATH
-COPY . /app/frontend
+COPY . /app
 
 CMD [ "streamlit", "run", "main.py" ]
