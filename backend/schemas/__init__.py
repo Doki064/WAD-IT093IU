@@ -52,7 +52,8 @@ class ImportationCreate(ImportationBase):
 class Importation(ImportationBase):
     id: int
     shop_id: int
-    importation_details: List[ImportDetail] = []
+
+    # importation_details: List[ImportDetail] = []
 
     class Config:
         orm_mode = True
@@ -90,7 +91,8 @@ class Transaction(TransactionBase):
     id: int
     customer_id: int
     shop_id: int
-    transaction_details: List[TransactDetail] = []
+
+    # transaction_details: List[TransactDetail] = []
 
     class Config:
         orm_mode = True
@@ -126,7 +128,8 @@ class CategoryCreate(CategoryBase):
 
 class Category(CategoryBase):
     id: int
-    items: List[Item] = []
+
+    # items: List[Item] = []
 
     class Config:
         orm_mode = True

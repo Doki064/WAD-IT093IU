@@ -62,7 +62,7 @@ class Customer(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), index=True, nullable=False)
 
-    transactions = relationship("Transaction", back_populates="customer", lazy="raise")
+    transactions = relationship("Transaction", back_populates="customer")
 
 
 class Category(Base):
@@ -95,8 +95,8 @@ class Shop(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), unique=True, index=True, nullable=False)
 
-    importations = relationship("Importation", back_populates="shop", lazy="raise")
-    transactions = relationship("Transaction", back_populates="shop", lazy="raise")
+    importations = relationship("Importation", back_populates="shop")
+    transactions = relationship("Transaction", back_populates="shop")
     items = relationship("Item", back_populates="shop")
 
 
@@ -109,9 +109,7 @@ class Importation(Base):
     )
     shop_id = Column(Integer, ForeignKey("shops.id"))
 
-    importation_details = relationship(
-        "ImportDetail", back_populates="importation", lazy="immediate"
-    )
+    importation_details = relationship("ImportDetail", back_populates="importation")
     shop = relationship("Shop", back_populates="importations")
 
     __mapper_args__ = {"eager_defaults": True}
@@ -128,9 +126,7 @@ class Transaction(Base):
     customer_id = Column(Integer, ForeignKey("customers.id"))
     shop_id = Column(Integer, ForeignKey("shops.id"))
 
-    transaction_details = relationship(
-        "TransactDetail", back_populates="transaction", lazy="immediate"
-    )
+    transaction_details = relationship("TransactDetail", back_populates="transaction")
     customer = relationship("Customer", back_populates="transactions")
     shop = relationship("Shop", back_populates="transactions")
 
