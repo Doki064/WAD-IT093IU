@@ -4,7 +4,7 @@ Example:
     >>> plot = Plot()
     >>> plot.plot()
 """
-
+import io
 from datetime import datetime
 
 import httpx
@@ -59,105 +59,103 @@ class Plot:
         if self.state.plot is None:
             self.state.plot = {}
 
-        if st.button("Get data"):
-            self.df = await _load_df(self.client)
-            self.shop_df = await _load_shop(self.client)
-            self.min_date = self.df["date"].min()
-            self.max_date = self.df["date"].max()
-            self.shop_ids = tuple(self.shop_df["id"].unique())
+        self.df = await _load_df(self.client)
+        self.shop_df = await _load_shop(self.client)
+        self.min_date = self.df["date"].min()
+        self.max_date = self.df["date"].max()
+        self.shop_ids = tuple(self.shop_df["id"].unique())
 
-            with st.beta_container():
-                # Options
-                st.info(
-                    """
-                    Please choose the start date and end date.
-                    Please note that start day should be less than end date.
-                    """
-                )
-                self.state.plot["start_date"] = datetime.fromordinal(
-                    st.date_input(
-                        "Start date",
-                        value=self.min_date,
-                        min_value=self.min_date,
-                        max_value=self.max_date,
-                        key="start"
-                    ).toordinal()
-                )
-                self.state.plot["end_date"] = datetime.fromordinal(
-                    st.date_input(
-                        "End date",
-                        value=self.max_date,
-                        min_value=self.min_date,
-                        max_value=self.max_date,
-                        key="end"
-                    ).toordinal()
-                )
-                self.state.plot["shop_ids"] = st.multiselect(
-                    "Select the SHOP ID: ",
-                    self.shop_ids,
-                    default=self.state.plot.get("shop_ids", None)
-                )
+        with st.beta_container():
+            st.info(
+                """
+                Please choose the start date and end date.
+                Please note that start day should be less than end date.
+                """
+            )
+            self.state.plot["start_date"] = datetime.fromordinal(
+                st.date_input(
+                    "Start date",
+                    value=self.min_date,
+                    min_value=self.min_date,
+                    max_value=self.max_date,
+                    key="start"
+                ).toordinal()
+            )
+            self.state.plot["end_date"] = datetime.fromordinal(
+                st.date_input(
+                    "End date",
+                    value=self.max_date,
+                    min_value=self.min_date,
+                    max_value=self.max_date,
+                    key="end"
+                ).toordinal()
+            )
+            shop_ids = st.multiselect(
+                "Select the SHOP ID: ",
+                self.shop_ids,
+            )
 
-            col1, col2 = st.beta_columns(2)
-            with col1:
-                with st.beta_expander("Show shop"):
-                    st.dataframe(self.shop_df)    # Show the sample DF
+        col1, col2 = st.beta_columns(2)
+        with col1:
+            with st.beta_expander("Show shop"):
+                st.dataframe(self.shop_df)    # Show the sample DF
 
-            try:
-                self.state.plot["start_date"]
-                self.state.plot["end_date"]
-                self.state.plot["shop_ids"]
-            except KeyError:
-                st.stop()
+        try:
+            self.state.plot["start_date"]
+            self.state.plot["end_date"]
+        except KeyError:
+            st.stop()
 
-            # Sanity check start_date and end_date
-            if self.state.plot["start_date"] <= self.state.plot["end_date"]:
-                st.warning("Start date must be before end date.")
-                st.stop()
-            else:
-                # Get days in between
-                days_in_between = self.state.plot["end_date"] - self.state.plot[
-                    "start_date"]
+        # Sanity check start_date and end_date
+        if self.state.plot["start_date"] > self.state.plot["end_date"]:
+            st.warning("Start date must be before end date.")
+            st.stop()
+        else:
+            # Get days in between
+            days_in_between = self.state.plot["end_date"] - self.state.plot["start_date"]
 
-                selected_df = _select_df_in_between(
-                    self.df, self.state.plot["start_date"], self.state.plot["end_date"],
-                    self.state.plot["shop_ids"]
-                )
-                plot_title = " profit of shop {} from {} to {}".format(
-                    self.state.plot["shop_ids"], self.state.plot["start_date"].date(),
-                    self.state.plot["end_date"].date()
-                )
-                with col2:
-                    with st.beta_expander("Show chart"):
-                        if not self.state.plot["shop_ids"]:
-                            st.warning("Please choose at least one shop id first.")
-                            fig = px.line(
-                                title="A beautiful blank chart", template=self.template
-                            )
-                        elif days_in_between.days <= self.num_days_to_plot_week:
-                            st.info("Plotting profit by week")
-                            profit_df = _group_by(selected_df, "W-MON")
-                            st.dataframe(profit_df)
-                            fig = px.line(
-                                profit_df,
-                                x="date",
-                                y="profit",
-                                title="Weekly" + plot_title,
-                                template=self.template
-                            )    # Plotly line chart
-                        else:
-                            st.info("Plotting profit by month")
-                            profit_df = _group_by(selected_df, "M")
-                            fig = px.line(
-                                profit_df,
-                                x="date",
-                                y="profit",
-                                title="Monthly" + plot_title,
-                                template=self.template,
-                                color="shopID"
-                            )    # Plotly
-                        fig.update_layout(title_x=0.5)
-                        st.plotly_chart(fig, use_container_width=True)
+            selected_df = _select_df_in_between(
+                self.df,
+                self.state.plot["start_date"],
+                self.state.plot["end_date"],
+                shop_ids,
+            )
+            plot_title = " profit of shop {} from {} to {}".format(
+                shop_ids,
+                self.state.plot["start_date"].date(),
+                self.state.plot["end_date"].date(),
+            )
+            with col2:
+                with st.beta_expander("Show chart"):
+                    if not shop_ids:
+                        st.warning("Please choose at least one shop id first.")
+                        fig = px.line(
+                            title="A beautiful blank chart", template=self.template
+                        )
+                    elif days_in_between.days <= self.num_days_to_plot_week:
+                        st.info("Plotting profit by week")
+                        profit_df = _group_by(selected_df, "W-MON")
+                        st.dataframe(profit_df)
+                        fig = px.line(
+                            profit_df,
+                            x="date",
+                            y="profit",
+                            title="Weekly" + plot_title,
+                            template=self.template
+                        )    # Plotly line chart
+                    else:
+                        st.info("Plotting profit by month")
+                        profit_df = _group_by(selected_df, "M")
+                        fig = px.line(
+                            profit_df,
+                            x="date",
+                            y="profit",
+                            title="Monthly" + plot_title,
+                            template=self.template,
+                            color="shopID"
+                        )    # Plotly
+                    fig.update_layout(title_x=0.5)
+                    st.plotly_chart(fig, use_container_width=True)
 
 
 async def _load_df(client: httpx.AsyncClient):
@@ -174,14 +172,17 @@ async def _load_df(client: httpx.AsyncClient):
     # df = df[["date", "shop_id", "item_id", "item_price", "item_amount"]]
     # df["date"] = pd.to_datetime(df["date"])
     # return df
-    response = await client.get("/internal/admin/plot", timeout=None)
+    params = {"limit": 2000000}
+    response = await client.get("/internal/admin/plot", params=params, timeout=None)
     try:
         response.raise_for_status()
     except httpx.HTTPStatusError:
         st.error(f"Status code: {response.status_code}")
         st.error(response.json()["detail"])
         st.stop()
-    df = pd.json_normalize(response.json())
+    buffer = io.StringIO(response.text)
+    df = pd.read_csv(buffer)
+    df["date"] = pd.to_datetime(df["date"], format="%Y-%m-%d")
     return df
 
 

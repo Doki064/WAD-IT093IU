@@ -19,6 +19,7 @@ class Management:
         self.state = state
         self.client = client
         self.limit = 1000
+        self.metadata = None
         self.tables = None
         return self
 
@@ -30,8 +31,8 @@ class Management:
             st.error(f"Status code: {response.status_code}")
             st.error(response.json()["detail"])
             st.stop()
-        data = response.json()
-        self.tables = list(data.keys())
+        self.metadata = response.json()
+        self.tables = list(self.metadata.keys())
         try:
             self.tables.remove("users")
             self.tables.remove("importation_details")

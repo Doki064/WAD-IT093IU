@@ -42,7 +42,7 @@ class Table:
         self.client = client
         self.show_df = None
         self.profile_df = None
-        self.limit_rows = 100000
+        self.limit_rows = 200
         self.select_box = st.empty()
         self.dataframe = st.empty()
         self.text = (
@@ -54,48 +54,47 @@ class Table:
     async def show_dataframe(self, minimal=True):
         with st.beta_container():
             # Options
-            if st.button("Get table"):
-                response = await self.client.get("/internal/admin")
-                try:
-                    response.raise_for_status()
-                except httpx.HTTPStatusError:
-                    st.error(f"Status code: {response.status_code}")
-                    st.error(response.json()["detail"])
-                    st.stop()
-                data = response.json()
-                options = tuple(data.keys())
-                table = st.selectbox(self.text, options, index=3)
-                st.info(
-                    f"Note: due to limited output size, the displayed DataFrame is "
-                    f"limited to the first {self.limit_rows} rows only.\n\n"
-                    f"However, the Pandas Profiling Report "
-                    f"calculates on the full DataFrame."
+            response = await self.client.get("/internal/admin")
+            try:
+                response.raise_for_status()
+            except httpx.HTTPStatusError:
+                st.error(f"Status code: {response.status_code}")
+                st.error(response.json()["detail"])
+                st.stop()
+            data = response.json()
+            options = tuple(data.keys())
+            table = st.selectbox(self.text, options, index=3)
+            st.info(
+                f"Note: due to limited output size, the displayed DataFrame is "
+                f"limited to the first {self.limit_rows} rows only.\n\n"
+                f"However, the Pandas Profiling Report "
+                f"calculates on the full DataFrame."
+            )
+
+            col1, col2 = st.beta_columns(2)
+            with col1:
+                response = await self.client.get(f"/{table}", params={"limit": 2000000})
+                if response.raise_for_status() is None:
+                    data = response.json()
+                df = pd.json_normalize(data)
+                self.show_df = df.head(self.limit_rows)    # Only shows limited rows
+                self.profile_df = df
+
+                # Show DataFrame's info
+                buffer = io.StringIO()
+                df.info(buf=buffer)
+                st.text(buffer.getvalue())
+
+                # Show HiPlot
+                xp = hip.Experiment.from_dataframe(self.show_df)
+                xp.display_st(key="hip")
+
+            with col2:
+                # Show Pandas Profile Report
+                self.profile_report = pp.ProfileReport(
+                    self.profile_df, minimal=minimal, progress_bar=False
                 )
-
-                col1, col2 = st.beta_columns(2)
-                with col1:
-                    response = await self.client.get(f"/{table}")
-                    if response.raise_for_status() is None:
-                        data = response.json()
-                    df = pd.json_normalize(data)
-                    self.show_df = df.head(self.limit_rows)    # Only shows limited rows
-                    self.profile_df = df
-
-                    # Show DataFrame's info
-                    buffer = io.StringIO()
-                    df.info(buf=buffer)
-                    st.text(buffer.getvalue())
-
-                    # Show HiPlot
-                    xp = hip.Experiment.from_dataframe(self.show_df)
-                    xp.display_st(key="hip")
-
-                with col2:
-                    # Show Pandas Profile Report
-                    self.profile_report = pp.ProfileReport(
-                        self.profile_df, minimal=minimal, progress_bar=False
+                with st.spinner("Generating profile report..."):
+                    components.html(
+                        self.profile_report.to_html(), height=1500, scrolling=True
                     )
-                    with st.spinner("Generating profile report..."):
-                        components.html(
-                            self.profile_report.to_html(), height=1500, scrolling=True
-                        )
