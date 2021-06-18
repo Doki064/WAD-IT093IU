@@ -45,7 +45,9 @@ FROM python-base as production
 ENV PATH="$VENV_PATH/bin:$PATH"
 ENV PYTHONPATH="$VENV_PATH/lib/python3.8/site-packages:$PYTHONPATH"
 ## For deploy
+ENV MODULE_NAME="backend.main"
 ENV PORT="8080"
+ENV PRE_START_PATH="/app/backend/prestart.sh"
 
 COPY --from=builder-base $PYSETUP_PATH $PYSETUP_PATH
-COPY . /app
+COPY . /app/backend
