@@ -1,9 +1,24 @@
-# SWE_IT076IU
-Software Engineering course project (IT076IU) at IU-VNUHCMC.
+# WAD-IT093IU
 
-## How to run
-Open terminal at path/to/SWE_IT076IU, enter the following command: `streamlit run main.py`
+Web App Development course project (IT093IU) at IU-VNUHCMC.
 
-Temporary app password: `python`
+## Prerequisite
 
-Update: the project is deployed at: https://share.streamlit.io/minhlong94/swe_it076iu/main.py
+    - Linux-based platforms or Windows Subsystem for Linux (WSL)
+    - [Docker Compose](https://docs.docker.com/compose/install/) is installed
+
+## Build the docker image
+
+    - `sh ./build.sh`
+
+## Run the applications
+
+    - `docker-compose up`
+
+## Open app on the browser
+
+    - Streamit: http://localhost
+    - FastAPI: http://localhost:8080/docs
+    - pgAdmin4: http://localhost:5050
+
+> admin is the default username and password
