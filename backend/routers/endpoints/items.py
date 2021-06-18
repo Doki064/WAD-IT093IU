@@ -1,10 +1,7 @@
 """All item route methods."""
-import io
-import pickle
 from typing import List, Union, Optional
 
 from fastapi import HTTPException, Depends    # noqa: F401
-from fastapi.responses import StreamingResponse
 
 from routers.internal import APIRouter
 # from core.security import auth
@@ -31,11 +28,7 @@ async def read_items(item_name: Optional[str] = None, skip: int = 0, limit: int 
                 if db_item is None:
                     raise HTTPException(status_code=404, detail="Item not found")
                 return db_item
-            db_item = await _item.get_all(session, skip=skip, limit=limit)
-            stream = io.BytesIO(pickle.dumps(db_item))
-            return StreamingResponse(
-                iter([stream.getvalue()]), media_type="application/json"
-            )
+            return await _item.get_all(session, skip=skip, limit=limit)
 
 
 @router.get("/{item_id}", response_model=Item)

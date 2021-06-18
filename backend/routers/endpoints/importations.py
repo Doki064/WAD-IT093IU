@@ -21,6 +21,15 @@ router = APIRouter(
 )
 
 
+@router.get("/min-max-dates")
+async def read_min_max_dates():
+    async with async_session() as session:
+        async with session.begin():
+            min_date = await _importation.get_min_date(session)
+            max_date = await _importation.get_max_date(session)
+            return {"min_date": min_date, "max_date": max_date}
+
+
 @router.get("", response_model=List[Importation])
 async def read_importations(skip: int = 0, limit: int = 1000):
     async with async_session() as session:
