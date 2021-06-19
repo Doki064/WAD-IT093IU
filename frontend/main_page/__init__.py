@@ -40,7 +40,7 @@ class MainPage:
             ---\n
             This is a project for Web Application Development course in
             [International University - VNU-HCM](https://hcmiu.edu.vn/en/).\n
-            Source code is available at [GitHub](https://github.com/Doki064/WAD_IT093IU).
+            Source code is available at [GitHub](https://github.com/Doki064/WAD-IT093IU).
         """
         )
 
@@ -51,7 +51,6 @@ class MainPage:
             """
             ---\n
             [International University - VNU-HCM](https://hcmiu.edu.vn/en/)\n
-            [Streamlit](https://www.streamlit.io/)\n
             [GitHub](https://github.com/Doki064/WAD-IT093IU)
         """
         )
@@ -92,7 +91,9 @@ class MainPage:
                 if submitted and username and password:
                     pattern = "^(?=.{8,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$"
                     if re.match(pattern, username) is None:
-                        uname_warn.warning("Username must be between 8 and 20 characters")
+                        uname_warn.warning(
+                            "Username can only contain letters and numbers and must be between 8 and 20 characters"    # noqa: E501
+                        )
                         st.stop()
                     elif len(password) < 8 or len(password) > 30:
                         pwd_warn.warning("Password must be between 8 and 30 characters")
